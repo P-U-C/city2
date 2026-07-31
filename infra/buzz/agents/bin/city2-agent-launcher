@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+require() {
+  local name="$1"
+  [[ -n "${!name:-}" ]] || {
+    echo "buzz-agent-launcher: missing ${name}" >&2
+    exit 1
+  }
+}
+
+for name in \
+  BUZZ_AGENT_WORKDIR \
+  BUZZ_RELAY_URL \
+  BUZZ_PRIVATE_KEY \
+  BUZZ_ACP_AGENT_OWNER \
+  BUZZ_ACP_AGENT_COMMAND \
+  BUZZ_ACP_MCP_COMMAND \
+  BUZZ_AGENT_PROVIDER_SOURCE \
+  BUZZ_AGENT_PROVIDER; do
+  require "${name}"
+done
+
+BIN_DIR="${CITY2_BIN_DIR:-/opt/city2/bin}"
+[[ -x "${BIN_DIR}/buzz-acp" ]] || {
+  echo "buzz-agent-launcher: buzz-acp is unavailable" >&2
+  exit 1
+}
+
+[[ -d "${BUZZ_AGENT_WORKDIR}" ]] || {
+  echo "buzz-agent-launcher: workdir does not exist" >&2
+  exit 1
+}
+
+case "${BUZZ_AGENT_PROVIDER_SOURCE:-environment}" in
+  systemd-credential:openrouter)
+    credential="${CREDENTIALS_DIRECTORY:-}/provider.key"
+    [[ -r "${credential}" ]] || {
+      echo "buzz-agent-launcher: encrypted provider credential is unavailable" >&2
+      exit 1
+    }
+    OPENROUTER_API_KEY="$(cat "${credential}")"
+    [[ -n "${OPENROUTER_API_KEY}" ]] || {
+      echo "buzz-agent-launcher: encrypted provider credential is empty" >&2
+      exit 1
+    }
+    export OPENROUTER_API_KEY
+    unset credential
+    ;;
+  *)
+    echo "buzz-agent-launcher: unsupported provider source" >&2
+    exit 1
+    ;;
+esac
+
+cd "${BUZZ_AGENT_WORKDIR}"
+exec "${BIN_DIR}/buzz-acp"

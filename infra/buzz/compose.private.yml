@@ -1,0 +1,7 @@
+services:
+  relay:
+    # Replace the upstream all-interface publication with exactly one explicit
+    # loopback/Tailscale binding. !reset would clear the list and discard this
+    # replacement value; !override is required here.
+    ports: !override
+      - "${BUZZ_BIND_IP:?set BUZZ_BIND_IP}:${BUZZ_HTTP_PORT:-3000}:3000"

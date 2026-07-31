@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage() {
+  cat <<'EOF'
+Usage: ./city2 <command> [args]
+
+  doctor              Read-only host/project capability report
+  validate            Run static and contract checks
+  agent <request>     Run a PfTerminal turn rooted in this repository
+  review [prompt]     Review uncommitted changes with PfTerminal
+  buzz <command>      Run the explicit Buzz lifecycle wrapper
+  status              Concise Git and relay status
+  version             Print City2 and PfTerminal versions
+EOF
+}
+
+require_pfterminal() {
+  command -v pfterminal >/dev/null 2>&1 || {
+    echo "city2: pfterminal is required" >&2
+    exit 1
+  }
+}
+
+case "${1:-help}" in
+  doctor)
+    exec "${ROOT}/scripts/doctor.sh"
+    ;;
+  validate)
+    exec "${ROOT}/scripts/validate.sh"
+    ;;
+  agent)
+    shift
+    [[ "$#" -gt 0 ]] || {
+      echo 'Usage: ./city2 agent "<request>"' >&2
+      exit 2
+    }
+    require_pfterminal
+    export CODEX_HOME="${CODEX_HOME:-${HOME}/.codex}"
+    exec pfterminal exec -C "${ROOT}" "$*"
+    ;;
+  review)
+    shift
+    require_pfterminal
+    export CODEX_HOME="${CODEX_HOME:-${HOME}/.codex}"
+    if [[ "$#" -gt 0 ]]; then
+      cd "${ROOT}"
+      exec pfterminal review --uncommitted "$*"
+    fi
+    cd "${ROOT}"
+    exec pfterminal review --uncommitted
+    ;;
+  buzz)
+    shift
+    [[ "$#" -gt 0 ]] || {
+      echo "city2: missing Buzz command" >&2
+      exit 2
+    }
+    exec "${ROOT}/infra/buzz/run.sh" "$@"
+    ;;
+  status)
+    printf 'city2=%s\n' "$(cat "${ROOT}/VERSION")"
+    git -C "${ROOT}" status --short --branch
+    if [[ -f "${ROOT}/infra/buzz/.env" ]]; then
+      "${ROOT}/infra/buzz/run.sh" status
+    else
+      echo "buzz=not-configured"
+    fi
+    ;;
+  version)
+    printf 'city2 %s\n' "$(cat "${ROOT}/VERSION")"
+    if command -v pfterminal >/dev/null 2>&1; then
+      pfterminal --version
+    else
+      echo "pfterminal unavailable"
+    fi
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    echo "city2: unknown command: $1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

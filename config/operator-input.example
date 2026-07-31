@@ -1,0 +1,10 @@
+# Public/non-secret activation inputs only. Store a filled copy under .city2/.
+CITY2_PROJECT_NAME=City2
+CITY2_PROJECT_SLUG=city2
+CITY2_PROJECT_PATH=/absolute/path/to/city2
+CITY2_OWNER_PUBLIC_KEY=npub_or_64_character_public_hex
+CITY2_RELAY_MODE=tailscale
+CITY2_FIRST_REQUEST=Inspect the repository and report its current state without changing files.
+CITY2_MODEL_PROVIDER=openrouter
+CITY2_MODEL_ID=choose-reviewed-model-before-activation
+CITY2_PUBLIC_HOSTNAME=

@@ -1,0 +1,60 @@
+# City2
+
+City2 is P-U-C's clean replacement for the OpenClaw-era City workspace.
+
+It keeps the useful City producer/data plane, adds a private
+[Buzz](https://github.com/block/buzz) coordination layer, and makes
+**PfTerminal the operating harness** for planning, implementation, review,
+deployment and incident work.
+
+## Architecture
+
+```text
+Chad / Telegram / Buzz Desktop
+              |
+         PfTerminal harness
+              |
+       City2 repository (clawd)
+       |                    |
+  Buzz coordination     existing data plane
+  relay + agents        worker producers
+       |                SQLite + cron + Git
+       +-------- evidence --------+
+```
+
+Buzz does not replace Git, SQLite, scheduled producers or existing publishing
+gates. OpenClaw is not a dependency and its mutable workspace is not imported.
+
+## Repository
+
+```text
+AGENTS.md                 PfTerminal's project operating contract
+city2                     Single operator command surface
+config/                   Public, non-secret activation contract
+docs/                     Architecture, migration, security and operations
+infra/buzz/               Pinned private Buzz relay and agent integration
+scripts/                  Validation and reproducible tool builds
+tests/                    Offline contract tests
+```
+
+## Start here
+
+```bash
+./city2 doctor             # inspect; changes nothing
+./city2 validate           # static and contract checks
+./city2 agent "<request>"  # run PfTerminal rooted in this repository
+./city2 review             # PfTerminal review of uncommitted changes
+./city2 buzz preflight     # relay checks; requires infra/buzz/.env
+```
+
+The relay and autonomous agent are intentionally separate activation gates.
+See [Migration](docs/MIGRATION.md) and [Operations](docs/OPERATIONS.md).
+
+## Current state
+
+- Repository scaffold: ready.
+- Disposable relay round-trip and destructive restore proof: passed.
+- Production relay: not started.
+- Real owner/agent identities: not generated.
+- Existing City producers: unchanged.
+- OpenClaw: excluded from the new control path.
