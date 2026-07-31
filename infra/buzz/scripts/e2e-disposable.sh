@@ -125,7 +125,10 @@ BUZZ_PRIVATE_KEY="${outsider_secret}" \
 outsider_rc=$?
 set -e
 [[ "${outsider_rc}" -ne 0 ]]
-! grep -Fq "${outsider_secret}" "${TMP_ROOT}/outsider.out" "${TMP_ROOT}/outsider.err"
+if grep -Fq "${outsider_secret}" "${TMP_ROOT}/outsider.out" "${TMP_ROOT}/outsider.err"; then
+  echo "e2e: outsider command leaked its private identity" >&2
+  exit 1
+fi
 rm -f "${TMP_ROOT}/outsider.out" "${TMP_ROOT}/outsider.err"
 
 backup_root="${TMP_ROOT}/backups"
@@ -156,8 +159,9 @@ compose() {
 stage="restore-postgres"
 compose up -d --wait postgres >/dev/null
 
-cat "${backup_dir}/postgres.dump" | compose exec -T postgres \
-  pg_restore -U buzz -d buzz --clean --if-exists --no-owner --no-privileges
+compose exec -T postgres \
+  pg_restore -U buzz -d buzz --clean --if-exists --no-owner --no-privileges \
+  <"${backup_dir}/postgres.dump"
 
 restore_volume() {
   local logical="$1"

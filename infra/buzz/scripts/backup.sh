@@ -73,7 +73,8 @@ archive_volume() {
   local volume="${PROJECT}_${logical}"
   local mountpoint
   mountpoint="$("${DOCKER[@]}" volume inspect -f '{{.Mountpoint}}' "${volume}")"
-  sudo -n tar -C "${mountpoint}" -czf - . >"${dest}/${output}"
+  sudo -n tar -C "${mountpoint}" -czf - . |
+    dd of="${dest}/${output}" status=none
 }
 
 archive_volume buzz-minio-data minio.tar.gz
