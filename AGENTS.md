@@ -20,7 +20,8 @@ Build City2 as a reliable human/agent operating system:
 2. `docs/MIGRATION.md`
 3. `docs/SECURITY.md`
 4. `docs/OPERATIONS.md`
-5. Code and tests in this repository
+5. `config/fleet.json` for the declared City producer fleet
+6. Code and tests in this repository
 
 Host-wide truth still belongs in `/home/ubuntu/RUNBOOK.md`; verify live state
 before changing an external producer or service.
@@ -57,6 +58,8 @@ Never convert failed attempts into a false one-pass success.
 
 - `./city2 doctor` — read-only project and host capability report.
 - `./city2 validate` — offline static/contract checks.
+- `./city2 fleet` — one-SSH, read-only producer and host health probe.
+- `./city2 fleet --offline` — validate the declared fleet without host access.
 - `./city2 agent "..."` — start a PfTerminal headless turn in this repo.
 - `./city2 review` — use PfTerminal to review uncommitted changes.
 - `./city2 buzz <command>` — explicit Buzz relay lifecycle wrapper.

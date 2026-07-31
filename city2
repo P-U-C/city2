@@ -9,6 +9,7 @@ Usage: ./city2 <command> [args]
 
   doctor              Read-only host/project capability report
   validate            Run static and contract checks
+  fleet [options]     Read-only producer inventory/health
   agent <request>     Run a PfTerminal turn rooted in this repository
   review [prompt]     Review uncommitted changes with PfTerminal
   buzz <command>      Run the explicit Buzz lifecycle wrapper
@@ -30,6 +31,10 @@ case "${1:-help}" in
     ;;
   validate)
     exec "${ROOT}/scripts/validate.sh"
+    ;;
+  fleet)
+    shift
+    exec "${ROOT}/scripts/fleet_status.py" "$@"
     ;;
   agent)
     shift

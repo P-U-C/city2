@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "hosts": [
+    {
+      "id": "clawd",
+      "role": "control",
+      "access": {"type": "local"}
+    },
+    {
+      "id": "worker-1",
+      "role": "producer",
+      "access": {"type": "ssh", "alias": "city-worker-peptides"},
+      "minimum_free_gib": 5
+    }
+  ],
+  "producers": [
+    {
+      "id": "ai-infra",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "ai-infra",
+      "runtime_root": "/home/ai-infra/ai-infra-corpus",
+      "database": "/home/ai-infra/ai-infra-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/ai-infra-corpus"},
+      "aggregate_log": "/home/ai-infra/logs/ai-infra-aggregates.log"
+    },
+    {
+      "id": "quantum",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "quantum",
+      "runtime_root": "/home/quantum/quantum-corpus",
+      "database": "/home/quantum/quantum-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/quantum-corpus"},
+      "aggregate_log": "/home/quantum/logs/quantum-aggregates.log"
+    },
+    {
+      "id": "nuclear",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "nuclear",
+      "runtime_root": "/home/nuclear/nuclear-corpus",
+      "database": "/home/nuclear/nuclear-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/nuclear-corpus"},
+      "aggregate_log": "/home/nuclear/logs/nuclear-aggregates.log"
+    },
+    {
+      "id": "robotics",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "robotics",
+      "runtime_root": "/home/robotics/robotics-corpus",
+      "database": "/home/robotics/robotics-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/robotics-corpus"},
+      "aggregate_log": "/home/robotics/logs/robotics-aggregates.log"
+    },
+    {
+      "id": "defense",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "defense",
+      "runtime_root": "/home/defense/defense-corpus",
+      "database": "/home/defense/defense-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/defense-corpus"},
+      "aggregate_log": "/home/defense/logs/defense-aggregates.log"
+    },
+    {
+      "id": "space",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "space",
+      "runtime_root": "/home/space/space-corpus",
+      "database": "/home/space/space-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/space-corpus"},
+      "aggregate_log": "/home/space/logs/space-aggregates.log"
+    },
+    {
+      "id": "bitcoin",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "bitcoin",
+      "runtime_root": "/home/bitcoin/bitcoin-corpus",
+      "database": "/home/bitcoin/bitcoin-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/bitcoin-corpus"},
+      "aggregate_log": "/home/bitcoin/logs/bitcoin-aggregates.log"
+    },
+    {
+      "id": "bci",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "bci",
+      "runtime_root": "/home/bci/bci-corpus",
+      "database": "/home/bci/bci-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/bci-corpus"},
+      "aggregate_log": "/home/bci/logs/bci-aggregates.log"
+    },
+    {
+      "id": "solidstate",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "solidstate",
+      "runtime_root": "/home/solidstate/solidstate-corpus",
+      "database": "/home/solidstate/solidstate-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/solidstate-corpus"},
+      "aggregate_log": "/home/solidstate/logs/solidstate-aggregates.log"
+    },
+    {
+      "id": "synbio",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "synbio",
+      "runtime_root": "/home/synbio/synbio-corpus",
+      "database": "/home/synbio/synbio-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/synbio-corpus"},
+      "aggregate_log": "/home/synbio/logs/synbio-aggregates.log"
+    },
+    {
+      "id": "edgeai",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "edgeai",
+      "runtime_root": "/home/edgeai/edgeai-corpus",
+      "database": "/home/edgeai/edgeai-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/edgeai-corpus"},
+      "aggregate_log": "/home/edgeai/logs/edgeai-aggregates.log"
+    },
+    {
+      "id": "photonic",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "photonic",
+      "runtime_root": "/home/photonic/photonic-corpus",
+      "database": "/home/photonic/photonic-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/photonic-corpus"},
+      "aggregate_log": "/home/photonic/logs/photonic-aggregates.log"
+    },
+    {
+      "id": "longevity",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "longevity",
+      "runtime_root": "/home/longevity/longevity-corpus",
+      "database": "/home/longevity/longevity-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/longevity-corpus"},
+      "aggregate_log": "/home/longevity/logs/longevity-aggregates.log"
+    },
+    {
+      "id": "biomechanics",
+      "kind": "sector",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "biomechanics",
+      "runtime_root": "/home/biomechanics/biomechanics-corpus",
+      "database": "/home/biomechanics/biomechanics-corpus/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "system", "path": "/etc/cron.d/biomechanics-corpus"},
+      "aggregate_log": "/home/biomechanics/logs/biomechanics-aggregates.log"
+    },
+    {
+      "id": "swell-checker",
+      "kind": "consumer-trend",
+      "state": "active",
+      "host": "worker-1",
+      "unix_user": "ubuntu",
+      "runtime_root": "/home/ubuntu/swell-checker",
+      "database": "/home/ubuntu/swell-checker/db.sqlite",
+      "freshness_hours": 30,
+      "cron": {"type": "user", "match": "/home/ubuntu/swell-checker"},
+      "aggregate_log": "/home/ubuntu/swell-checker/run.log"
+    },
+    {
+      "id": "peptide-corpus",
+      "kind": "legacy-corpus",
+      "state": "parked",
+      "host": "worker-1",
+      "unix_user": "ubuntu",
+      "runtime_root": "/home/ubuntu/peptide-corpus",
+      "database": "/home/ubuntu/peptide-corpus/db.sqlite",
+      "note": "No installed cron; last durable output observed 2026-05-15. Preserve as legacy evidence until explicitly revived or retired."
+    }
+  ]
+}

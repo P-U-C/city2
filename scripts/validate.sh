@@ -17,6 +17,9 @@ required=(
   docs/PFTERMINAL.md
   docs/SECURITY.md
   docs/OPERATIONS.md
+  docs/FLEET.md
+  config/fleet.json
+  config/fleet.schema.json
   infra/buzz/SOURCE.md
   infra/buzz/compose.yml
   infra/buzz/compose.private.yml
@@ -32,7 +35,10 @@ for path in "${shell_files[@]}"; do
 done
 
 python3 -m unittest discover -s tests -p 'test_*.py'
-python3 -m py_compile infra/buzz/scripts/normalize-owner-pubkey.py
+python3 -m py_compile \
+  infra/buzz/scripts/normalize-owner-pubkey.py \
+  scripts/fleet_status.py
+./scripts/fleet_status.py --offline >/dev/null
 
 for path in city2 scripts/*.sh infra/buzz/run.sh infra/buzz/scripts/*.sh infra/buzz/agents/bin/*; do
   [[ -x "${path}" ]] || fail "expected executable: ${path}"

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "City2 fleet manifest",
+  "type": "object",
+  "required": ["schema_version", "hosts", "producers"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "hosts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "access"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "role": {"enum": ["control", "producer"]},
+          "access": {"type": "object"},
+          "minimum_free_gib": {"type": "number", "minimum": 0}
+        },
+        "additionalProperties": false
+      }
+    },
+    "producers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "state", "host", "unix_user", "runtime_root", "database"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+          "kind": {"type": "string"},
+          "state": {"enum": ["active", "parked"]},
+          "host": {"type": "string"},
+          "unix_user": {"type": "string"},
+          "runtime_root": {"type": "string", "pattern": "^/"},
+          "database": {"type": "string", "pattern": "^/"},
+          "freshness_hours": {"type": "number", "exclusiveMinimum": 0},
+          "cron": {"type": "object"},
+          "aggregate_log": {"type": "string", "pattern": "^/"},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

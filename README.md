@@ -31,6 +31,7 @@ gates. OpenClaw is not a dependency and its mutable workspace is not imported.
 AGENTS.md                 PfTerminal's project operating contract
 city2                     Single operator command surface
 config/                   Public, non-secret activation contract
+                          and declared producer fleet
 docs/                     Architecture, migration, security and operations
 infra/buzz/               Pinned private Buzz relay and agent integration
 scripts/                  Validation and reproducible tool builds
@@ -42,6 +43,8 @@ tests/                    Offline contract tests
 ```bash
 ./city2 doctor             # inspect; changes nothing
 ./city2 validate           # static and contract checks
+./city2 fleet --offline    # validate the producer inventory
+./city2 fleet              # one-SSH, read-only live fleet check
 ./city2 agent "<request>"  # run PfTerminal rooted in this repository
 ./city2 review             # PfTerminal review of uncommitted changes
 ./city2 buzz preflight     # relay checks; requires infra/buzz/.env
