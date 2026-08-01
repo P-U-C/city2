@@ -66,7 +66,8 @@ In particular, it must:
 
 As of 2026-08-01, the following is live:
 
-- private repository `P-U-C/city2` at `/home/ubuntu/city2`;
+- public source repository `P-U-C/city2` at `/home/ubuntu/city2`, with runtime
+  state, identities, credentials and backups kept private and off-repository;
 - PfTerminal as the project implementation and operational harness;
 - a Tailscale-only Buzz relay with private `control`, `city2` and `ops`
   channels;
