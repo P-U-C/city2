@@ -13,6 +13,7 @@ required=(
   AGENTS.md
   README.md
   docs/ARCHITECTURE.md
+  docs/COMPANY-OS-SPEC.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md

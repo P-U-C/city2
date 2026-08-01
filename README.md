@@ -51,7 +51,11 @@ tests/                    Offline contract tests
 ```
 
 The relay and coordinator are separate activation gates.
-See [Migration](docs/MIGRATION.md) and [Operations](docs/OPERATIONS.md).
+See [Architecture](docs/ARCHITECTURE.md), [Migration](docs/MIGRATION.md) and
+[Operations](docs/OPERATIONS.md). The proposed long-term company operating
+model is the review draft in
+[Company OS design specification](docs/COMPANY-OS-SPEC.md); it is not an
+activation authorization.
 
 ## Current state
 
@@ -62,5 +66,7 @@ See [Migration](docs/MIGRATION.md) and [Operations](docs/OPERATIONS.md).
 - Workspace: private `control`, `city2`, and `ops` channels created.
 - Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
   a read-only repository mount; first owner-authored model proof remains gated.
+- Company OS: target architecture and memory/Walrus design drafted for
+  independent review; no implementation is implied by the draft.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.
