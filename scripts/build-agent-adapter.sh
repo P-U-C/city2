@@ -29,7 +29,7 @@ npm ci \
   --no-fund \
   --silent
 
-version="$(${DEST}/node_modules/.bin/codex-acp --version)"
+version="$("${DEST}/node_modules/.bin/codex-acp" --version)"
 [[ "${version}" == "@agentclientprotocol/codex-acp 1.1.7" ]] || {
   echo "build-agent-adapter: unexpected adapter version" >&2
   exit 1
