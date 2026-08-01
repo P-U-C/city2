@@ -2,6 +2,10 @@
 
 City2 is P-U-C's clean replacement for the OpenClaw-era City workspace.
 
+This source repository is public. Production relay state, channels, identities,
+credentials, backups and host-specific runtime configuration remain private and
+are never committed.
+
 It keeps the useful City producer/data plane, adds a private
 [Buzz](https://github.com/block/buzz) coordination layer, and makes
 **PfTerminal the operating harness** for planning, implementation, review,
@@ -56,6 +60,8 @@ See [Migration](docs/MIGRATION.md) and [Operations](docs/OPERATIONS.md).
 ## Current state
 
 - Repository scaffold: ready.
+- Repository visibility: public; full reachable history passed the repository
+  credential/private-address scan before the 2026-08-01 visibility change.
 - Disposable relay round-trip and destructive restore proof: passed.
 - Production relay: healthy on its Tailscale-only address.
 - Owner identity: connected; private key remains off-host.

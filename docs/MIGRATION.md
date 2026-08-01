@@ -8,7 +8,11 @@ workspace, old OpenClaw-specific templates/harnesses and live producer repos.
 An in-place overhaul would preserve unclear ownership and contaminated runtime
 assumptions.
 
-City2 therefore starts in a new private `P-U-C/city2` repository.
+City2 started in a new private `P-U-C/city2` repository. On 2026-08-01 its full
+reachable history passed the repository credential/private-address scan and the
+source repository became public. Production relay state, identities,
+credentials, backups and host-specific runtime configuration remain private and
+off-repository.
 
 The old workspaces are not deleted or rewritten. They remain read-only evidence
 until each useful contract is either adopted here or deliberately retired.
