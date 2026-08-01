@@ -63,9 +63,10 @@ this repository and prevents the project from depending on an OpenClaw
 workspace prompt or heartbeat.
 
 Buzz ACP agents are subordinate runtime processes. The initial adapter is the
-pinned Buzz ACP stack; its lifecycle, configuration, provider access and code
-changes remain controlled and reviewed through PfTerminal. Buzz is not an
-alternate superuser control path.
+pinned Buzz ACP stack plus pinned Codex ACP adapter, authenticated from the
+existing PfTerminal ChatGPT login through one systemd credential. Its lifecycle,
+configuration and code changes remain controlled and reviewed through
+PfTerminal. Buzz is not an alternate superuser control path.
 
 ## Buzz stack
 

@@ -114,12 +114,6 @@ case "${1:-help}" in
   install-agent-tooling)
     exec ./scripts/install-agent-tooling.sh
     ;;
-  prepare-agent-credential)
-    exec ./scripts/prepare-agent-credential.sh
-    ;;
-  clear-agent-credential)
-    exec ./scripts/clear-agent-credential.sh
-    ;;
   help|-h|--help)
     cat <<'EOF'
 Usage: ./city2 buzz <command>
@@ -139,8 +133,6 @@ Usage: ./city2 buzz <command>
   verify-backup <path>      Verify backup integrity
   e2e                       Run and destroy a disposable relay proof
   install-agent-tooling     Install tools only; never enable/start a service
-  prepare-agent-credential  Vault -> root-only RAM-backed runtime credential
-  clear-agent-credential    Remove the RAM-backed runtime credential
 EOF
     ;;
   *)

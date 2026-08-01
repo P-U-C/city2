@@ -24,6 +24,8 @@ required=(
   infra/buzz/compose.yml
   infra/buzz/compose.private.yml
   infra/buzz/.env.example
+  infra/buzz/agents/codex-acp/package.json
+  infra/buzz/agents/codex-acp/package-lock.json
 )
 for path in "${required[@]}"; do
   [[ -f "${path}" ]] || fail "missing ${path}"
@@ -108,5 +110,25 @@ git diff --check
 if [[ -f build/bin/BINARIES.sha256 ]]; then
   (cd build/bin && sha256sum -c BINARIES.sha256 >/dev/null)
 fi
+
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+root = Path("infra/buzz/agents/codex-acp")
+package = json.loads((root / "package.json").read_text())
+lock = json.loads((root / "package-lock.json").read_text())
+expected = "1.1.7"
+assert package["dependencies"]["@agentclientprotocol/codex-acp"] == expected
+assert lock["packages"]["node_modules/@agentclientprotocol/codex-acp"]["version"] == expected
+PY
+
+if [[ -x build/codex-acp/node_modules/.bin/codex-acp ]]; then
+  build/codex-acp/node_modules/.bin/codex-acp --version | grep -q '1\.1\.7$'
+fi
+
+grep -q '^unset BUZZ_PRIVATE_KEY$' \
+  infra/buzz/agents/bin/city2-codex-acp-launcher ||
+  fail "Codex ACP child must not inherit the Nostr private key"
 
 echo "validate: PASS"

@@ -1,0 +1,8 @@
+{
+  "name": "city2-codex-acp-runtime",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "@agentclientprotocol/codex-acp": "1.1.7"
+  }
+}

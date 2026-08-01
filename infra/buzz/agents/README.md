@@ -7,6 +7,7 @@ configuration and lifecycle are controlled through PfTerminal and this repo.
 
 ```bash
 ./scripts/build-buzz-tools.sh
+./scripts/build-agent-adapter.sh
 ./city2 validate
 ./city2 buzz install-agent-tooling
 ```
@@ -14,22 +15,12 @@ configuration and lifecycle are controlled through PfTerminal and this repo.
 Installation copies pinned local build output to `/opt/city2` and installs the
 `city2-buzz-agent@.service` template. It never enables or starts a service.
 
-Prepare the runtime provider credential from PfTerminal's vault. This creates a
-root-only file under the host's RAM-backed `/run` filesystem and never prints
-the value:
-
-```bash
-infra/buzz/scripts/prepare-agent-credential.sh
-```
-
-This is deliberately separate from installation and requires approval because
-it reads a real provider credential. The file disappears on reboot and should
-be removed after stopping the agent. The service cannot see the PfTerminal vault
-or execute `pfterminal` after startup.
-
-```bash
-./city2 buzz clear-agent-credential
-```
+The service authenticates the bundled Codex runtime with the existing
+PfTerminal ChatGPT login. systemd exposes only `auth.json` as a private runtime
+credential; the launcher creates an ephemeral `CODEX_HOME` under `/run`. The
+service cannot see the PfTerminal vault, configuration, sessions or memory.
+The intermediary ACP launcher strips the agent's Nostr private key before
+starting Codex, so model tools never inherit the signing identity.
 
 ## Identity
 
@@ -43,8 +34,7 @@ infra/buzz/scripts/create-agent-env.sh \
   "City2 Coordinator" \
   <OWNER_PUBLIC_NPUB_OR_HEX> \
   ws://<RELAY_TAILSCALE_HOST>:3000 \
-  /absolute/path/to/city2 \
-  <REVIEWED_MODEL_ID>
+  /srv/city2
 
 infra/buzz/scripts/preflight-agent.sh "$HOME/.config/city2/agent.env"
 ```
@@ -55,12 +45,13 @@ Add the generated public identity without printing it:
 ./city2 buzz add-member "$(cat "$HOME/.config/city2/agent.env.pub")"
 ```
 
-Starting the service incurs provider usage and remains a separate explicit
-approval:
+Starting the service uses the existing ChatGPT plan and remains a separate
+explicit activation:
 
 ```bash
 sudo systemctl enable --now city2-buzz-agent@"$USER".service
 ```
 
-The initial unit bind-mounts `/home/<user>/city2` read-only. Scoped write access
-is a later reviewed systemd drop-in, not a prompt-level permission.
+The initial unit hides the user's home and exposes only
+`/home/<user>/city2` as read-only `/srv/city2`. Scoped write access is a later
+reviewed systemd drop-in, not a prompt-level permission.

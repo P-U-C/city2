@@ -38,16 +38,18 @@ Every PfTerminal session rooted here loads `AGENTS.md`. That contract bans
 OpenClaw dependencies, secret publication and implicit outward actions; it also
 requires an inspect/change/check/review loop.
 
-## Credentials
+## Coordinator authentication
 
-Provider credentials originate in PfTerminal's encrypted vault. Before an
-approved agent activation, a dedicated script transfers only the selected key
-into a root-only RAM-backed systemd credential without printing it. The running
-agent cannot access the PfTerminal vault or execute `pfterminal`.
+The first coordinator uses the host's existing PfTerminal ChatGPT login through
+the pinned `codex-acp` adapter. systemd reads only PfTerminal's `auth.json` and
+materializes it as a private credential under `/run`; the launcher copies that
+credential into an ephemeral, service-private `CODEX_HOME`. The process cannot
+read PfTerminal's vault, configuration, session history or memory store.
 
-The current relay scaffold supports the whitelisted OpenRouter vault label for
-its first measured ACP proof. Supporting another provider requires a reviewed
-launcher/config/unit change, not a pasted key.
+This path uses Chad's existing ChatGPT plan instead of a separately billed API
+key. If a later agent needs a provider API key, it must originate in
+PfTerminal's encrypted vault and move through a separately reviewed RAM-backed
+credential path; never paste one into Buzz or an EnvironmentFile.
 
 ## Responsibility split
 
@@ -59,7 +61,7 @@ launcher/config/unit change, not a pasted key.
 | Host services | Relay and tightly scoped agent processes |
 | Existing producers | Authoritative collection and corpus state |
 
-The first Buzz ACP coordinator uses Buzz's pinned ACP runtime. PfTerminal still
-controls its configuration and lifecycle. A native PfTerminal ACP adapter is
-not claimed or required for Phase 1; it can be added later only if it provides
-measurable value over the reviewed adapter.
+The first Buzz ACP coordinator uses Buzz's pinned ACP runtime plus the pinned
+`@agentclientprotocol/codex-acp` adapter. PfTerminal controls its configuration,
+authentication source and lifecycle; the service remains subordinate to the
+read-only systemd boundary.

@@ -5,8 +5,10 @@
 - Chad's human Buzz/Nostr private key remains on a human-controlled device.
 - The relay has its own server key and closed membership list.
 - Every agent has a unique Nostr key and Unix/service boundary.
-- Provider credentials originate in PfTerminal's encrypted vault and reach a
-  running agent only through a root-only RAM-backed systemd credential.
+- The first coordinator receives only PfTerminal's ChatGPT auth file through a
+  systemd credential and an ephemeral `CODEX_HOME`; it cannot read the vault.
+- Any future provider API key must originate in PfTerminal's encrypted vault
+  and reach a service only through a reviewed RAM-backed credential path.
 - Git, SQLite and existing production services remain independent authorities.
 
 ## Prohibited data
@@ -39,8 +41,14 @@ The first coordinator is:
 - one process;
 - heartbeat disabled;
 - no autonomous publishing or external action;
-- scoped to a reviewed working directory mounted read-only by default;
+- scoped to `/srv/city2`, a read-only bind of the reviewed repository, while
+  the rest of the user's home is inaccessible;
 - unable to access the PfTerminal vault after startup.
+
+The relay signer retains the agent's Nostr key, but the Codex ACP launcher
+removes it from the model-runtime environment before any model or tool process
+starts. The ChatGPT runtime credential remains available only through the
+service-private ephemeral `CODEX_HOME` required by Codex itself.
 
 Channel membership is not a filesystem sandbox. Systemd hardening and Unix
 identity boundaries remain required.
@@ -50,6 +58,7 @@ identity boundaries remain required.
 - Relay image is pinned by immutable digest.
 - Compose is copied from a reviewed upstream commit.
 - Agent tools are built with `cargo --locked` from that commit.
+- The Codex ACP adapter and bundled Codex runtime are pinned by npm lockfile.
 - Generated binaries and checksums are local build output and are not committed.
 - Version bumps require source review, rebuilt tools and the disposable E2E.
 

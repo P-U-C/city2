@@ -50,14 +50,17 @@ tests/                    Offline contract tests
 ./city2 buzz preflight     # relay checks; requires infra/buzz/.env
 ```
 
-The relay and autonomous agent are intentionally separate activation gates.
+The relay and coordinator are separate activation gates.
 See [Migration](docs/MIGRATION.md) and [Operations](docs/OPERATIONS.md).
 
 ## Current state
 
 - Repository scaffold: ready.
 - Disposable relay round-trip and destructive restore proof: passed.
-- Production relay: not started.
-- Real owner/agent identities: not generated.
+- Production relay: healthy on its Tailscale-only address.
+- Owner identity: connected; private key remains off-host.
+- Workspace: private `control`, `city2`, and `ops` channels created.
+- Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
+  a read-only repository mount; first owner-authored model proof remains gated.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.

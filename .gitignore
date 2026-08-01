@@ -4,6 +4,7 @@
 !*.env.example
 .city2/
 build/
+infra/buzz/agents/codex-acp/node_modules/
 backups/
 recovery/
 __pycache__/

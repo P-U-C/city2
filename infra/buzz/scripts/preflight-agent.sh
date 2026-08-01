@@ -35,40 +35,51 @@ private_key="$(value BUZZ_PRIVATE_KEY)"
 owner="$(value BUZZ_ACP_AGENT_OWNER)"
 agent_command="$(value BUZZ_ACP_AGENT_COMMAND)"
 mcp_command="$(value BUZZ_ACP_MCP_COMMAND)"
-provider_source="$(value BUZZ_AGENT_PROVIDER_SOURCE)"
-provider="$(value BUZZ_AGENT_PROVIDER)"
-model="$(value BUZZ_AGENT_MODEL)"
+harness="$(value BUZZ_AGENT_HARNESS)"
+initial_mode="$(value INITIAL_AGENT_MODE)"
 respond_to="$(value BUZZ_ACP_RESPOND_TO)"
 permission_mode="$(value BUZZ_ACP_PERMISSION_MODE)"
 heartbeat="$(value BUZZ_ACP_HEARTBEAT_INTERVAL)"
 agent_count="$(value BUZZ_ACP_AGENTS)"
 
-[[ -d "${workdir}" ]] || fail "workdir does not exist"
+[[ "${workdir}" == "/srv/city2" && -d "${CITY2_ROOT}" ]] ||
+  fail "workdir must be the reviewed /srv/city2 service mount"
 [[ "${relay_url}" =~ ^wss?://[^[:space:]]+$ ]] || fail "relay URL is invalid"
 [[ "${private_key}" =~ ^[0-9a-f]{64}$ ]] || fail "agent private key is invalid"
 [[ "${owner}" =~ ^[0-9a-f]{64}$ ]] || fail "owner public key is invalid"
-[[ "${agent_command}" == "${INSTALL_ROOT}/bin/buzz-agent" ]] ||
+[[ "${agent_command}" == "${INSTALL_ROOT}/bin/city2-codex-acp-launcher" ]] ||
   fail "unexpected agent command"
 [[ "${mcp_command}" == "${INSTALL_ROOT}/bin/buzz-dev-mcp" ]] ||
   fail "unexpected MCP command"
-[[ "${provider_source}" == "systemd-credential:openrouter" ]] ||
-  fail "first proof must use the reviewed encrypted credential source"
-[[ "${provider}" == "openrouter" && -n "${model}" ]] ||
-  fail "provider/model is incomplete"
+[[ "${harness}" == "pfterminal-chatgpt" ]] ||
+  fail "first proof must use the reviewed PfTerminal ChatGPT harness"
+[[ "${initial_mode}" == "read-only" ]] ||
+  fail "first proof must use read-only ACP mode"
 [[ "${respond_to}" == "owner-only" ]] || fail "first proof must be owner-only"
 [[ "${permission_mode}" == "dont-ask" ]] ||
   fail "first proof must not bypass permission requests"
 [[ "${heartbeat}" == "0" ]] || fail "heartbeat must remain disabled"
 [[ "${agent_count}" == "1" ]] || fail "first proof must use one agent process"
 
-! grep -Eq '^(OPENROUTER_API_KEY|ANTHROPIC_API_KEY|OPENAI_COMPAT_API_KEY)=' "${ENV_FILE}" ||
+! grep -Eq '^(OPENROUTER_API_KEY|ANTHROPIC_API_KEY|OPENAI_COMPAT_API_KEY|CODEX_API_KEY|OPENAI_API_KEY)=' "${ENV_FILE}" ||
   fail "provider secret must not be stored in the agent EnvironmentFile"
 command -v systemctl >/dev/null 2>&1 || fail "systemd is unavailable"
+command -v pfterminal >/dev/null 2>&1 || fail "PfTerminal is unavailable"
+pfterminal login status 2>&1 | grep -q 'Logged in using ChatGPT' ||
+  fail "PfTerminal is not logged in with ChatGPT"
+[[ -s "${HOME}/.codex/auth.json" ]] || fail "PfTerminal ChatGPT auth file is unavailable"
+
+adapter="${CITY2_ROOT}/build/codex-acp/node_modules/.bin/codex-acp"
+[[ -x "${adapter}" ]] || fail "pinned codex-acp adapter is not built"
+"${adapter}" --version | grep -q '1\.1\.7$' || fail "unexpected codex-acp version"
+grep -q '^unset BUZZ_PRIVATE_KEY$' \
+  "${ROOT}/agents/bin/city2-codex-acp-launcher" ||
+  fail "Codex ACP launcher does not strip the Nostr private key"
 
 unset private_key
 echo "agent-preflight: PASS"
 echo "  relay=$(printf '%s' "${relay_url}" | sed -E 's#(wss?://[^/:]+).*#\1#')"
 echo "  workdir=${workdir}"
-echo "  provider=${provider} (PfTerminal vault -> RAM-backed systemd credential)"
+echo "  harness=PfTerminal ChatGPT -> pinned codex-acp (systemd credential)"
 echo "  gate=owner-only; agents=1; heartbeat=off"
-echo "No agent, provider request, or container was started."
+echo "No agent, model request, or container was started."

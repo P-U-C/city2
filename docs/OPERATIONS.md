@@ -52,19 +52,19 @@ The backup takes an aligned PostgreSQL dump plus MinIO, Git and Redis volume
 archives. `.env` and human identity keys are intentionally excluded and need a
 separate encrypted backup path.
 
-## Agent runtime credential
+## Coordinator runtime authentication
 
-Only after coordinator activation is approved:
+Only after coordinator activation is approved, install the pinned adapter and
+start the service. systemd reads only the existing PfTerminal ChatGPT auth file
+and materializes it privately under `/run`; the launcher uses an ephemeral
+`CODEX_HOME`. No provider API key is copied or separately billed.
 
 ```bash
-./city2 buzz prepare-agent-credential
-# start and test the agent
-./city2 buzz clear-agent-credential
+./scripts/build-agent-adapter.sh
+./city2 buzz install-agent-tooling
+infra/buzz/scripts/preflight-agent.sh "$HOME/.config/city2/agent.env"
+sudo systemctl enable --now city2-buzz-agent@"$USER".service
 ```
-
-The selected key moves from PfTerminal's vault into a root-only file under
-`/run`; it is never printed or committed, disappears on reboot and is removed
-after the agent stops.
 
 ## Disposable E2E
 

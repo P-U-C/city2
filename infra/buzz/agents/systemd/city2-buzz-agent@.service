@@ -7,11 +7,16 @@ Wants=network-online.target
 Type=simple
 User=%i
 Group=%i
-WorkingDirectory=/home/%i/city2
-Environment=HOME=/home/%i
+WorkingDirectory=/srv/city2
+RuntimeDirectory=city2-agent-%i
+RuntimeDirectoryMode=0700
+Environment=HOME=/run/city2-agent-%i/home
+Environment=CODEX_HOME=/run/city2-agent-%i/codex
+Environment=APP_SERVER_LOGS=/run/city2-agent-%i/logs
+Environment=NO_BROWSER=1
 Environment=PATH=/opt/city2/bin:/usr/bin:/bin
 EnvironmentFile=/home/%i/.config/city2/agent.env
-LoadCredential=provider.key:/run/city2/provider.key
+LoadCredential=codex.auth:/home/%i/.codex/auth.json
 ExecStart=/opt/city2/bin/city2-agent-launcher
 Restart=on-failure
 RestartSec=10s
@@ -24,7 +29,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 PrivateDevices=true
 ProtectSystem=strict
-ProtectHome=tmpfs
+ProtectHome=yes
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectKernelLogs=true
@@ -42,7 +47,7 @@ ProtectProc=invisible
 ProcSubset=pid
 SystemCallArchitectures=native
 NoExecPaths=/home
-BindReadOnlyPaths=/home/%i/city2
+BindReadOnlyPaths=/home/%i/city2:/srv/city2
 
 [Install]
 WantedBy=multi-user.target
