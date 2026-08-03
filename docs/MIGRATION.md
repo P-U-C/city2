@@ -1,5 +1,9 @@
 # Migration from legacy City
 
+This document governs the current migration away from legacy City. The later
+City2 Core, memory, runner-portability and Walrus milestones are proposed in the
+non-normative [Company OS design specification](COMPANY-OS-SPEC.md).
+
 ## Why a new repository
 
 The old City control surface is not one coherent deployable repository. It is

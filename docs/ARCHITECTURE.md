@@ -1,5 +1,9 @@
 # Architecture
 
+This document describes the current deployed architecture. The proposed target
+company operating model, portable contracts and memory design are in the
+non-normative [Company OS design specification](COMPANY-OS-SPEC.md).
+
 ## Decision
 
 City2 is a clean control-plane replacement, not an in-place repair of the

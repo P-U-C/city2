@@ -13,11 +13,13 @@ required=(
   AGENTS.md
   README.md
   docs/ARCHITECTURE.md
+  docs/COMPANY-OS-SPEC.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
   docs/OPERATIONS.md
   docs/FLEET.md
+  scripts/validate_spec.py
   config/fleet.json
   config/fleet.schema.json
   infra/buzz/SOURCE.md
@@ -39,8 +41,10 @@ done
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m py_compile \
   infra/buzz/scripts/normalize-owner-pubkey.py \
-  scripts/fleet_status.py
+  scripts/fleet_status.py \
+  scripts/validate_spec.py
 ./scripts/fleet_status.py --offline >/dev/null
+python3 scripts/validate_spec.py
 
 for path in city2 scripts/*.sh infra/buzz/run.sh infra/buzz/scripts/*.sh infra/buzz/agents/bin/*; do
   [[ -x "${path}" ]] || fail "expected executable: ${path}"
