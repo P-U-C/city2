@@ -51,11 +51,12 @@ if find "${bundle}" -type f \( -name '*.key' -o -name '*.env' -o -name '*.sqlite
   exit 1
 fi
 
+manifest="${stage}/MANIFEST.sha256"
 (
   cd "${bundle}"
-  find . -type f ! -name MANIFEST.sha256 -print0 | sort -z |
-    xargs -0 sha256sum >MANIFEST.sha256
-)
+  find . -type f -print0 | sort -z | xargs -0 sha256sum
+) >"${manifest}"
+mv "${manifest}" "${bundle}/MANIFEST.sha256"
 mkdir -p "${OUTPUT_ROOT}"
 archive="${OUTPUT_ROOT}/city2-producer-observer-ai-infra.tar.gz"
 temporary="${archive}.tmp"
