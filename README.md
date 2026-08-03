@@ -34,6 +34,7 @@ gates. OpenClaw is not a dependency and its mutable workspace is not imported.
 ```text
 AGENTS.md                 PfTerminal's project operating contract
 city2                     Single operator command surface
+city2-core                Repository-local Core CLI
 config/                   Public, non-secret activation contract
                           and declared producer fleet
 contracts/v1/             Portable runner, credential, archive and authority semantics
@@ -41,6 +42,7 @@ docs/                     Architecture, migration, security and operations
 fixtures/contracts/v1/    Valid and adversarial contract examples
 infra/buzz/               Pinned private Buzz relay and agent integration
 schemas/v1/               Canonical Company OS JSON Schemas
+src/city2core/            Single-writer SQLite Core and signed local recovery
 scripts/                  Validation and reproducible tool builds
 tests/                    Offline contract tests
 ```
@@ -54,6 +56,7 @@ tests/                    Offline contract tests
 ./city2 fleet              # one-SSH, read-only live fleet check
 ./city2 agent "<request>"  # run PfTerminal rooted in this repository
 ./city2 review             # PfTerminal review of uncommitted changes
+./city2 core status --db <path> # verify and report a local Core database
 ./city2 buzz preflight     # relay checks; requires infra/buzz/.env
 ```
 
@@ -64,7 +67,8 @@ its explicit milestone gates are in the
 [Company OS design specification](docs/COMPANY-OS-SPEC.md). Its M0 contract
 implementation includes the [portable interfaces](contracts/v1/README.md),
 [canonical schemas](schemas/v1/) and [threat model](docs/THREAT-MODEL.md).
-Design acceptance is not deployment authorization.
+M1 adds the [Core ledger and local recovery implementation](docs/CORE.md).
+Design acceptance and implementation are not deployment authorization.
 
 ## Current state
 
@@ -77,8 +81,8 @@ Design acceptance is not deployment authorization.
 - Workspace: private `control`, `city2`, and `ops` channels created.
 - Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
   a read-only repository mount; first owner-authored model proof remains gated.
-- Company OS: version 0.2.0 accepted after independent review; M0 schemas,
-  interfaces, policy vocabulary, threat model and executable fixtures are
-  implemented. No Core runtime, memory service or archive deployment exists.
+- Company OS: specification version 0.2.0 is accepted after independent review;
+  M0 contracts and the version 0.3.0 M1 Core ledger are implemented. The Core
+  is not deployed, and no memory service or off-host archive exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.

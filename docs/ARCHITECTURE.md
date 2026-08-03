@@ -120,10 +120,9 @@ and traffic justify them.
 | Backups | Host backup store | Backup ID and verification result |
 | Releases | Existing deployment/publication system | Hash, URL, result and rollback pointer |
 
-## Accepted Company OS boundary
+## Company OS implementation boundary
 
-M0 adds no daemon or authority. It freezes the portable boundary before runtime
-work:
+M0 adds no daemon or authority. It freezes the portable boundary:
 
 - canonical schemas live in `schemas/v1/`;
 - runner, CredentialBroker, archive and authority semantics live in
@@ -132,10 +131,18 @@ work:
 - valid/adversarial examples live in `fixtures/contracts/v1/`; and
 - `scripts/validate_contracts.py` proves schema coverage and JSON round trips.
 
-M1 may add the single-writer SQLite Core only after its transaction,
-fault-injection and restore gates pass. Until then, the current diagram and data
-authorities above remain unchanged. Buzz/Telegram remain interfaces, PfTerminal
-remains the first runner, and no interface or runner becomes authoritative.
+M1 implements an undeployed, single-writer SQLite Core under `src/city2core/`.
+It owns objective/task lifecycle, immutable event chains, current projections,
+leases, action/outbox reconciliation and signed local backup proof. The Core CLI
+is `./city2 core`; its contract and recovery procedure are in
+[`CORE.md`](CORE.md). Process-kill fixtures prove transaction rollback or
+idempotent committed replay at every M1 boundary.
+
+This implementation does not change the deployed diagram or data authorities
+above. Buzz/Telegram remain interfaces, PfTerminal remains the project harness,
+and no interface or runner becomes authoritative. A Core database is not a
+replacement for Git or producer databases, and no service activation occurs in
+M1.
 
 ## Safety gates
 

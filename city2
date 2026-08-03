@@ -12,6 +12,7 @@ Usage: ./city2 <command> [args]
   fleet [options]     Read-only producer inventory/health
   agent <request>     Run a PfTerminal turn rooted in this repository
   review [prompt]     Review uncommitted changes with PfTerminal
+  core <command>      Operate the local Company OS Core ledger
   buzz <command>      Run the explicit Buzz lifecycle wrapper
   status              Concise Git and relay status
   version             Print City2 and PfTerminal versions
@@ -56,6 +57,10 @@ case "${1:-help}" in
     fi
     cd "${ROOT}"
     exec pfterminal review --uncommitted
+    ;;
+  core)
+    shift
+    exec "${ROOT}/city2-core" "$@"
     ;;
   buzz)
     shift
