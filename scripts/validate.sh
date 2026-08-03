@@ -21,6 +21,7 @@ required=(
   docs/ARCHIVE.md
   docs/PRODUCER.md
   docs/PRODUCER-REHEARSAL.md
+  docs/PRODUCER-INSTALL-EVIDENCE.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
