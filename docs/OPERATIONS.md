@@ -10,6 +10,45 @@ All commands run from the repository root through `./city2` unless noted.
 ./city2 status
 ```
 
+## Core ledger proof
+
+M1 is repository-local and undeployed. These commands operate only on the path
+explicitly supplied by the operator:
+
+```bash
+./city2 core init --db /approved/private/path/core.sqlite
+./city2 core status --db /approved/private/path/core.sqlite
+./city2 core export --db /approved/private/path/core.sqlite \
+  --output /approved/private/path/events.jsonl
+```
+
+`status` performs SQLite, migration, event-chain, immutable-record and
+projection verification before reporting. A mutation refuses non-WAL mode,
+anything other than `synchronous=FULL`, a foreign writer identity or any
+integrity mismatch.
+
+For a synthetic local recovery proof, generate a disposable checkpoint key
+outside the repository, create the archive and restore it into an empty
+directory:
+
+```bash
+./city2 core keygen --private-key /private/path/checkpoint.key \
+  --public-key /private/path/checkpoint.pub
+./city2 core backup --db /private/path/core.sqlite \
+  --output /private/path/archive-1 \
+  --signing-key /private/path/checkpoint.key --key-version local-test-v1
+./city2 core verify-backup --archive /private/path/archive-1 \
+  --trusted-key /private/path/checkpoint.pub
+./city2 core restore --archive /private/path/archive-1 \
+  --output-dir /empty/private/path/restored \
+  --trusted-key /private/path/checkpoint.pub
+```
+
+The M1 bundle is deliberately marked `local-plaintext-m1-test-only`. Never
+upload or treat it as an off-host archive. Encryption, independent recovery
+keys and archive backends remain gated on M5. Never commit databases, exports,
+archives or checkpoint keys.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.
@@ -48,7 +87,8 @@ for normal stops.
 ./city2 buzz verify-backup <backup-directory>
 ```
 
-The backup takes an aligned PostgreSQL dump plus MinIO, Git and Redis volume
+This is the independent Buzz relay backup, not the Core proof above. It takes an
+aligned PostgreSQL dump plus MinIO, Git and Redis volume
 archives. `.env` and human identity keys are intentionally excluded and need a
 separate encrypted backup path.
 
