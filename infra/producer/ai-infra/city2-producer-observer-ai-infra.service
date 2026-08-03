@@ -1,0 +1,47 @@
+[Unit]
+Description=City2 read-only observer for ai-infra
+After=local-fs.target
+ConditionPathExists=/etc/city2/producer/ai-infra.contract.json
+ConditionPathExists=/etc/city2/producer/ai-infra.agent.json
+
+[Service]
+Type=oneshot
+User=ai-infra
+Group=ai-infra
+RuntimeDirectory=city2-producer-observer-ai-infra
+RuntimeDirectoryMode=0700
+StateDirectory=city2-producer-observer-ai-infra
+StateDirectoryMode=0700
+UMask=0077
+Environment=PYTHONPATH=/opt/city2/lib/city2/src
+Environment=PATH=/usr/bin:/bin
+LoadCredential=observer.signing-key:/etc/city2/producer/observer-signing.key
+ExecStart=/usr/bin/python3 /opt/city2/lib/city2/scripts/observe_producer.py --contract /etc/city2/producer/ai-infra.contract.json --agent /etc/city2/producer/ai-infra.agent.json --source /run/city2-producer-observer-ai-infra/source.json --output /var/lib/city2-producer-observer-ai-infra/observation.json --signer-key-version ai-infra-shadow-1
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+PrivateNetwork=true
+PrivateMounts=true
+ProtectSystem=strict
+ProtectHome=tmpfs
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+ProtectProc=invisible
+ProcSubset=pid
+SystemCallArchitectures=native
+NoExecPaths=/home /run/city2-producer-observer-ai-infra /var/lib/city2-producer-observer-ai-infra
+BindReadOnlyPaths=/home/ai-infra/ai-infra-corpus/out/ai-infrastructure-aggregates.json:/run/city2-producer-observer-ai-infra/source.json
+ReadOnlyPaths=/run/city2-producer-observer-ai-infra
+ReadWritePaths=/var/lib/city2-producer-observer-ai-infra

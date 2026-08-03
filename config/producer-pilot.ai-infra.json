@@ -8,6 +8,7 @@
   "agent_id": "agt_019fc5f4-641b-7263-8b4e-79451c99dcfe",
   "source": {
     "uri": "file:///home/ai-infra/ai-infra-corpus/out/ai-infrastructure-aggregates.json",
+    "runtime_uri": "file:///run/city2-producer-observer-ai-infra/source.json",
     "media_type": "application/json",
     "access": "read-only",
     "max_bytes": 16777216

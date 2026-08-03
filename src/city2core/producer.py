@@ -22,10 +22,6 @@ class ProducerError(StoreError):
     pass
 
 
-def _file_uri(path: Path) -> str:
-    return path.resolve().as_uri()
-
-
 def _uri_path(uri: str) -> Path:
     parsed = urlparse(uri)
     if parsed.scheme != "file" or parsed.netloc or parsed.query or parsed.fragment:
@@ -43,6 +39,10 @@ def _timestamp(value: float) -> str:
 
 def _candidate_scope(scope: str) -> str:
     return f"candidate:{scope}"
+
+
+def _runtime_uri(contract: dict[str, Any]) -> str:
+    return str(contract["source"].get("runtime_uri", contract["source"]["uri"]))
 
 
 def _hash_fd(fd: int, maximum: int) -> tuple[str, int]:
@@ -85,7 +85,7 @@ class ProducerObserver:
             "network_policy": "deny",
             "credential_handles": [],
             "memory_write_scopes": [_candidate_scope(contract["memory_scope"])],
-            "filesystem_scopes": ["read:" + contract["source"]["uri"]],
+            "filesystem_scopes": ["read:" + _runtime_uri(contract)],
             "allowed_task_types": ["observe-producer-output"],
             "review_policy": "deterministic",
             "concurrency": 1,
@@ -121,7 +121,7 @@ class ProducerObserver:
             raise ProducerError("producer observer is disabled")
         observed_time = parse_time(observed_at)
         path = Path(source)
-        expected = _uri_path(self.contract["source"]["uri"])
+        expected = _uri_path(_runtime_uri(self.contract))
         if path.is_symlink() or path.resolve() != expected.resolve():
             raise ProducerError("producer source does not match the contract")
         lowered = path.name.casefold()
@@ -167,7 +167,7 @@ class ProducerObserver:
             "contract_version": self.contract["contract_version"],
             "producer_id": self.contract["producer_id"],
             "agent_id": self.agent["agent_id"],
-            "source_uri": _file_uri(path),
+            "source_uri": self.contract["source"]["uri"],
             "source_sha256": digest,
             "byte_length": total,
             "source_modified_at": _timestamp(before.st_mtime),

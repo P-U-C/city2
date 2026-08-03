@@ -22,6 +22,7 @@
       "required": ["uri", "media_type", "access", "max_bytes"],
       "properties": {
         "uri": {"$ref": "common.schema.json#/$defs/uri"},
+        "runtime_uri": {"$ref": "common.schema.json#/$defs/uri"},
         "media_type": {"type": "string", "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+$"},
         "access": {"const": "read-only"},
         "max_bytes": {"type": "integer", "minimum": 1, "maximum": 1073741824}

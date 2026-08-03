@@ -80,6 +80,11 @@ The selected `ai-infra` manifests are also disabled. Activation requires a
 systemd read-only bind namespace that makes the producer's original tree
 inaccessible; file mode or an A0 manifest alone is not a write boundary.
 
+The reviewed namespace source is
+`infra/producer/ai-infra/city2-producer-observer-ai-infra.service`. Repository
+validation checks its syntax and a synthetic credential-backed observation.
+It is deliberately not installed, enabled or started by any repository command.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.

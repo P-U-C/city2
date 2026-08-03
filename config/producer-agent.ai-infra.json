@@ -3,7 +3,7 @@
   "agent_id": "agt_019fc5f4-641b-7263-8b4e-79451c99dcfe",
   "aggregate_version": 1,
   "manifest_version": 1,
-  "manifest_sha256": "89cd2cebaa2993b5f0e61bc22031d8bdb9f47974c9664120b9f1e068ced43da0",
+  "manifest_sha256": "23a01aea52fd84d9412c33726d41672ebe0304df467074cad7f2a539a580d257",
   "name": "m6-ai-infra-observer",
   "role": "producer-observer",
   "department": "operations",
@@ -22,7 +22,7 @@
     "read-output"
   ],
   "filesystem_scopes": [
-    "read:file:///home/ai-infra/ai-infra-corpus/out/ai-infrastructure-aggregates.json"
+    "read:file:///run/city2-producer-observer-ai-infra/source.json"
   ],
   "network_policy": "deny",
   "credential_handles": [],
