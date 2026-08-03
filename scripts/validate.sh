@@ -20,6 +20,7 @@ required=(
   docs/REVIEW.md
   docs/ARCHIVE.md
   docs/PRODUCER.md
+  docs/PRODUCER-REHEARSAL.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
