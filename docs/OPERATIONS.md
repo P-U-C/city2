@@ -10,6 +10,11 @@ All commands run from the repository root through `./city2` unless noted.
 ./city2 status
 ```
 
+`doctor` and `status` distinguish a present Tailscale binary from an actual
+connection and read the coordinator's system unit (not the unrelated user
+manager). `tailscale=logged-out` blocks live fleet/relay activation even when
+the local relay containers and coordinator process are otherwise healthy.
+
 ## Core ledger proof
 
 M1 is repository-local and undeployed. These commands operate only on the path

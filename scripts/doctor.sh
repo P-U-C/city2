@@ -23,10 +23,10 @@ else
 fi
 probe git git
 probe docker docker
-probe tailscale tailscale
 probe jq jq
 probe rustc rustc
 probe node node
+"${ROOT}/scripts/runtime_status.py" --format doctor
 
 if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
   printf '%-18s %s\n' "docker-compose" "available"

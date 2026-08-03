@@ -42,6 +42,7 @@ required=(
   schemas/v1/result.schema.json
   scripts/validate_spec.py
   scripts/validate_contracts.py
+  scripts/runtime_status.py
   config/fleet.json
   config/fleet.schema.json
   infra/buzz/SOURCE.md
@@ -68,6 +69,7 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m py_compile \
   infra/buzz/scripts/normalize-owner-pubkey.py \
   scripts/fleet_status.py \
+  scripts/runtime_status.py \
   scripts/validate_contracts.py \
   scripts/validate_spec.py \
   city2-core \
