@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/task-record.schema.json",
+  "title": "City2 Core-owned task record v1",
+  "type": "object",
+  "required": [
+    "schema_version", "task_id", "task_revision", "task_envelope_sha256",
+    "objective_id", "objective_revision", "objective_sha256", "aggregate_version",
+    "state", "attempt_count", "max_attempts", "created_at", "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.task-record/v1"},
+    "task_id": {"$ref": "common.schema.json#/$defs/task_id"},
+    "task_revision": {"type": "integer", "minimum": 1},
+    "task_envelope_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "objective_id": {"$ref": "common.schema.json#/$defs/objective_id"},
+    "objective_revision": {"type": "integer", "minimum": 1},
+    "objective_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "aggregate_version": {"type": "integer", "minimum": 1},
+    "state": {
+      "enum": [
+        "proposed", "awaiting_approval", "ready", "leased", "running", "review",
+        "changes_requested", "accepted", "rejected", "cancellation_requested",
+        "cancelled", "expired", "needs_reconciliation", "failed_terminal"
+      ]
+    },
+    "attempt_count": {"type": "integer", "minimum": 0},
+    "max_attempts": {"type": "integer", "minimum": 1},
+    "lease": {
+      "type": "object",
+      "required": ["owner", "fencing_token", "expires_at", "attempt_number", "expected_task_version"],
+      "properties": {
+        "owner": {"$ref": "common.schema.json#/$defs/actor"},
+        "fencing_token": {"type": "string", "minLength": 16, "maxLength": 256},
+        "expires_at": {"$ref": "common.schema.json#/$defs/date_time"},
+        "attempt_number": {"type": "integer", "minimum": 1},
+        "expected_task_version": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "current_run_id": {"$ref": "common.schema.json#/$defs/run_id"},
+    "review_id": {"$ref": "common.schema.json#/$defs/review_id"},
+    "action_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/action_id"}},
+    "created_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "updated_at": {"$ref": "common.schema.json#/$defs/date_time"}
+  },
+  "additionalProperties": false
+}

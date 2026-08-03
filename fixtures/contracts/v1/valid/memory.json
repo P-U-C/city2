@@ -1,0 +1,42 @@
+{
+  "aggregate_version": 1,
+  "asserted_by": "human:chad",
+  "confidence": 1.0,
+  "created_at": "2026-08-03T00:00:00Z",
+  "created_by": "human:chad",
+  "evidence_refs": [
+    {
+      "authoritative_owner": "P-U-C/city2",
+      "content_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "excerpt_locator": {
+        "heading": "1. Executive decision"
+      },
+      "git_commit_sha1": "0123456789abcdef0123456789abcdef01234567",
+      "observed_at": "2026-08-03T00:00:00Z",
+      "path": "docs/COMPANY-OS-SPEC.md",
+      "relationship": "observed_from",
+      "retrieval_method": "git_show",
+      "revocation_checked_at": "2026-08-03T00:00:00Z",
+      "source_type": "git_blob",
+      "uri": "git+https://github.com/P-U-C/city2.git",
+      "validity_status": "current"
+    }
+  ],
+  "fact_class": "architecture_decision",
+  "labels": [
+    "architecture",
+    "portability"
+  ],
+  "memory_id": "mem_01980000-0000-7000-8000-000000000006",
+  "owner": "human:chad",
+  "revalidate_at": "2027-08-03T00:00:00Z",
+  "revalidation_policy": "on_source_revision",
+  "review_state": "accepted",
+  "schema_version": "city2.memory/v1",
+  "scope": "project:city2",
+  "sensitivity": "internal",
+  "statement": "Model sessions are disposable; City2 owns durable state.",
+  "supersedes": [],
+  "type": "decision",
+  "valid_from": "2026-08-03T00:00:00Z"
+}

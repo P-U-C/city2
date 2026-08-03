@@ -17,11 +17,12 @@ Build City2 as a reliable human/agent operating system:
 ## Source of truth
 
 1. `docs/ARCHITECTURE.md`
-2. `docs/MIGRATION.md`
-3. `docs/SECURITY.md`
-4. `docs/OPERATIONS.md`
-5. `config/fleet.json` for the declared City producer fleet
-6. Code and tests in this repository
+2. `docs/COMPANY-OS-SPEC.md` for the accepted target and milestone gates
+3. `docs/MIGRATION.md`
+4. `docs/SECURITY.md`
+5. `docs/OPERATIONS.md`
+6. `config/fleet.json` for the declared City producer fleet
+7. Code and tests in this repository
 
 Host-wide truth still belongs in `/home/ubuntu/RUNBOOK.md`; verify live state
 before changing an external producer or service.

@@ -1,0 +1,81 @@
+{
+  "schema_version": "city2.authority-policy/v1",
+  "policy_version": "1.0.0",
+  "default_effect": "deny",
+  "combining_algorithm": "deny_overrides_intersection",
+  "required_dimensions": [
+    "task",
+    "manifest",
+    "runner",
+    "tool",
+    "filesystem",
+    "network",
+    "credential",
+    "authority",
+    "approval"
+  ],
+  "classes": {
+    "A0": {
+      "description": "Read and report within declared scopes.",
+      "operation_families": ["read", "report"],
+      "approval": "policy"
+    },
+    "A1": {
+      "description": "Reversible internal write such as a branch or draft.",
+      "operation_families": ["internal_write", "draft"],
+      "approval": "policy_and_independent_review"
+    },
+    "A2": {
+      "description": "Controlled production change with a tested rollback.",
+      "operation_families": ["production_change"],
+      "approval": "human"
+    },
+    "A3": {
+      "description": "Publish, submit or message an external party.",
+      "operation_families": ["publish", "submit", "external_message"],
+      "approval": "human_at_action_time"
+    },
+    "A4": {
+      "description": "Financial, wallet, credential, destructive or irreversible action.",
+      "operation_families": ["financial", "wallet", "credential", "destructive", "irreversible"],
+      "approval": "hardened_operator"
+    }
+  },
+  "approval_binding": {
+    "exact_operation": true,
+    "atomic_consumption": true,
+    "invalidate_on_change": [
+      "parameters",
+      "target",
+      "artifact",
+      "task_revision",
+      "policy_version",
+      "expiry",
+      "revocation",
+      "execution_limit"
+    ]
+  },
+  "separation_of_duties": {
+    "required_from": "A1",
+    "maker_may_self_review": false,
+    "reviewer_may_execute": false
+  },
+  "reason_codes": [
+    "allowed_by_all_dimensions",
+    "approval_exhausted",
+    "approval_expired",
+    "approval_missing",
+    "approval_mismatch",
+    "approval_revoked",
+    "capability_degraded",
+    "capability_missing",
+    "credential_denied",
+    "explicit_deny",
+    "input_conflict",
+    "input_invalid",
+    "input_missing",
+    "input_stale",
+    "review_not_independent",
+    "scope_denied"
+  ]
+}

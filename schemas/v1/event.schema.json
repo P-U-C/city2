@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/event.schema.json",
+  "title": "City2 immutable event envelope v1",
+  "type": "object",
+  "required": [
+    "schema_version", "event_id", "aggregate_type", "aggregate_id", "event_type",
+    "aggregate_version", "aggregate_sequence", "writer_id", "writer_sequence",
+    "database_sequence", "actor", "occurred_at", "recorded_at", "idempotency_key",
+    "prior_event_sha256", "payload_sha256", "payload", "sensitivity"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.event/v1"},
+    "event_id": {"$ref": "common.schema.json#/$defs/event_id"},
+    "aggregate_type": {"enum": ["agent", "objective", "task", "run", "memory", "approval", "action", "deletion", "archive"]},
+    "aggregate_id": {
+      "oneOf": [
+        {"$ref": "common.schema.json#/$defs/agent_id"},
+        {"$ref": "common.schema.json#/$defs/objective_id"},
+        {"$ref": "common.schema.json#/$defs/task_id"},
+        {"$ref": "common.schema.json#/$defs/run_id"},
+        {"$ref": "common.schema.json#/$defs/memory_id"},
+        {"$ref": "common.schema.json#/$defs/approval_id"},
+        {"$ref": "common.schema.json#/$defs/action_id"},
+        {"$ref": "common.schema.json#/$defs/deletion_id"},
+        {"$ref": "common.schema.json#/$defs/archive_id"}
+      ]
+    },
+    "event_type": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "aggregate_version": {"type": "integer", "minimum": 1},
+    "aggregate_sequence": {"type": "integer", "minimum": 1},
+    "writer_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "writer_sequence": {"type": "integer", "minimum": 1},
+    "database_sequence": {"type": "integer", "minimum": 1},
+    "actor": {"$ref": "common.schema.json#/$defs/actor"},
+    "occurred_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "recorded_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "idempotency_key": {"$ref": "common.schema.json#/$defs/idempotency_key"},
+    "prior_event_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "payload_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "payload": {"$ref": "common.schema.json#/$defs/json_value"},
+    "sensitivity": {"$ref": "common.schema.json#/$defs/sensitivity"}
+  },
+  "additionalProperties": false
+}

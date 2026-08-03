@@ -1,0 +1,13 @@
+{
+  "archive_id": "arc_01980000-0000-7000-8000-000000000010",
+  "backend": "local-encrypted",
+  "backend_object_id": "archive-42.age",
+  "checkpoint_key_version": "checkpoint-1",
+  "ciphertext_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "schema_version": "city2.archive-receipt/v1",
+  "signature": "short",
+  "signature_algorithm": "ed25519",
+  "snapshot_sequence": 42,
+  "stored_at": "2026-08-03T00:00:00Z",
+  "verified_at": "2026-08-03T00:00:00Z"
+}

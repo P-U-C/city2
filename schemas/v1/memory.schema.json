@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/memory.schema.json",
+  "title": "City2 evidence-backed memory v1",
+  "type": "object",
+  "required": [
+    "schema_version", "memory_id", "aggregate_version", "scope", "type", "statement", "evidence_refs",
+    "asserted_by", "owner", "created_by", "created_at", "valid_from", "fact_class",
+    "revalidation_policy", "revalidate_at", "confidence", "sensitivity",
+    "review_state", "supersedes", "labels"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.memory/v1"},
+    "memory_id": {"$ref": "common.schema.json#/$defs/memory_id"},
+    "aggregate_version": {"type": "integer", "minimum": 1},
+    "scope": {"$ref": "common.schema.json#/$defs/scope"},
+    "type": {"enum": ["fact", "decision", "procedure", "feedback", "outcome", "hypothesis", "reference", "preference"]},
+    "statement": {"type": "string", "minLength": 1, "maxLength": 20000},
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "relationship", "source_type", "authoritative_owner", "uri",
+          "retrieval_method", "content_sha256", "observed_at", "validity_status",
+          "revocation_checked_at"
+        ],
+        "properties": {
+          "relationship": {"enum": ["asserted_by", "observed_from", "derived_from"]},
+          "source_type": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+          "authoritative_owner": {"type": "string", "minLength": 1, "maxLength": 256},
+          "uri": {"$ref": "common.schema.json#/$defs/uri"},
+          "git_commit_sha1": {"$ref": "common.schema.json#/$defs/git_sha1"},
+          "source_revision": {"type": "string", "minLength": 1, "maxLength": 256},
+          "path": {"type": "string", "minLength": 1, "maxLength": 1024},
+          "excerpt_locator": {"type": "object"},
+          "retrieval_method": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+          "derivation_method": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+          "derivation_version": {"type": "string", "minLength": 1, "maxLength": 64},
+          "content_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+          "observed_at": {"$ref": "common.schema.json#/$defs/date_time"},
+          "validity_status": {"enum": ["current", "stale", "revoked", "unknown"]},
+          "revocation_checked_at": {"$ref": "common.schema.json#/$defs/date_time"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "asserted_by": {"$ref": "common.schema.json#/$defs/actor"},
+    "owner": {"$ref": "common.schema.json#/$defs/actor"},
+    "created_by": {"$ref": "common.schema.json#/$defs/actor"},
+    "created_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "valid_from": {"$ref": "common.schema.json#/$defs/date_time"},
+    "valid_until": {"$ref": "common.schema.json#/$defs/date_time"},
+    "fact_class": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "revalidation_policy": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "revalidate_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "sensitivity": {"$ref": "common.schema.json#/$defs/sensitivity"},
+    "review_state": {"enum": ["candidate", "accepted", "rejected", "stale", "superseded", "quarantined"]},
+    "supersedes": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/memory_id"}},
+    "labels": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}}
+  },
+  "additionalProperties": false
+}

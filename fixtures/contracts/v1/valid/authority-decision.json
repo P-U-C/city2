@@ -1,0 +1,57 @@
+{
+  "authority_class": "A0",
+  "checks": [
+    {
+      "dimension": "task",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "manifest",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "runner",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "tool",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "filesystem",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "network",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "credential",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "authority",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    },
+    {
+      "dimension": "approval",
+      "reason_code": "allowed_by_all_dimensions",
+      "result": "allow"
+    }
+  ],
+  "decision": "allow",
+  "evaluated_at": "2026-08-03T00:00:00Z",
+  "operation_idempotency_key": "fixture:operation:0001",
+  "policy_versions": [
+    "1.0.0"
+  ],
+  "schema_version": "city2.authority-decision/v1"
+}

@@ -1,0 +1,76 @@
+{
+  "agent_manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "agent_manifest_version": 1,
+  "approvals_requested": [],
+  "artifacts": [
+    {
+      "artifact_id": "art_01980000-0000-7000-8000-00000000000a",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "checks": [
+    {
+      "checked_at": "2026-08-03T00:00:00Z",
+      "criterion_id": "ac_rollback",
+      "provenance": [],
+      "result": "pass",
+      "schema_version": "city2.evidence/v1",
+      "subject_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "validator": {
+        "id": "rollback-check",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "context_pack_ref": {
+    "artifact_id": "art_01980000-0000-7000-8000-00000000000b",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "errors": [],
+  "evidence": [
+    {
+      "checked_at": "2026-08-03T00:00:00Z",
+      "criterion_id": "ac_contracts",
+      "provenance": [
+        {
+          "content_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "git_commit_sha1": "0123456789abcdef0123456789abcdef01234567",
+          "retrieved_at": "2026-08-03T00:00:00Z",
+          "uri": "git+https://github.com/P-U-C/city2.git"
+        }
+      ],
+      "result": "pass",
+      "schema_version": "city2.evidence/v1",
+      "subject_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "validator": {
+        "id": "schema-validator",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "expected_task_version": 7,
+  "lease_fencing_token": "fixture-fence-0001",
+  "memory_candidates": [],
+  "model": {
+    "capability_profile": "profile-v1",
+    "model": "model-reference",
+    "provider": "provider-reference"
+  },
+  "outcome": "The contract set validates.",
+  "run_id": "run_01980000-0000-7000-8000-000000000005",
+  "run_status": "completed",
+  "runner": {
+    "capability_manifest_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "id": "runner-reference",
+    "version": "1.0.0"
+  },
+  "schema_version": "city2.result/v1",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "task_revision": 1,
+  "usage": {
+    "billable_usd": "0.10",
+    "input_tokens": 1200,
+    "output_tokens": 400,
+    "wall_seconds": 12.5
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-08-03T00:00:00Z",
+  "criterion_id": "ac_contracts",
+  "provenance": [
+    {
+      "content_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "git_commit_sha1": "0123456789abcdef0123456789abcdef01234567",
+      "retrieved_at": "2026-08-03T00:00:00Z",
+      "uri": "git+https://github.com/P-U-C/city2.git"
+    }
+  ],
+  "result": "pass",
+  "schema_version": "city2.evidence/v1",
+  "subject_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "validator": {
+    "id": "schema-validator",
+    "version": "1.0.0"
+  }
+}

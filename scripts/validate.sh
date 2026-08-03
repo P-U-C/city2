@@ -19,7 +19,20 @@ required=(
   docs/SECURITY.md
   docs/OPERATIONS.md
   docs/FLEET.md
+  docs/THREAT-MODEL.md
+  contracts/v1/README.md
+  contracts/v1/RUNNER.md
+  contracts/v1/CREDENTIAL-BROKER.md
+  contracts/v1/ARCHIVE-BACKEND.md
+  contracts/v1/AUTHORITY.md
+  config/authority-policy.v1.json
+  fixtures/contracts/v1/manifest.json
+  schemas/v1/common.schema.json
+  schemas/v1/agent.schema.json
+  schemas/v1/task-envelope.schema.json
+  schemas/v1/result.schema.json
   scripts/validate_spec.py
+  scripts/validate_contracts.py
   config/fleet.json
   config/fleet.schema.json
   infra/buzz/SOURCE.md
@@ -42,9 +55,11 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m py_compile \
   infra/buzz/scripts/normalize-owner-pubkey.py \
   scripts/fleet_status.py \
+  scripts/validate_contracts.py \
   scripts/validate_spec.py
 ./scripts/fleet_status.py --offline >/dev/null
 python3 scripts/validate_spec.py
+python3 scripts/validate_contracts.py
 
 for path in city2 scripts/*.sh infra/buzz/run.sh infra/buzz/scripts/*.sh infra/buzz/agents/bin/*; do
   [[ -x "${path}" ]] || fail "expected executable: ${path}"

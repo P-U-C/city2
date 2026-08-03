@@ -1,8 +1,9 @@
 # Architecture
 
-This document describes the current deployed architecture. The proposed target
+This document describes the current deployed architecture. The accepted target
 company operating model, portable contracts and memory design are in the
-non-normative [Company OS design specification](COMPANY-OS-SPEC.md).
+[Company OS design specification](COMPANY-OS-SPEC.md). Acceptance defines the
+destination and gates; it does not make an undeployed component current state.
 
 ## Decision
 
@@ -119,6 +120,23 @@ and traffic justify them.
 | Backups | Host backup store | Backup ID and verification result |
 | Releases | Existing deployment/publication system | Hash, URL, result and rollback pointer |
 
+## Accepted Company OS boundary
+
+M0 adds no daemon or authority. It freezes the portable boundary before runtime
+work:
+
+- canonical schemas live in `schemas/v1/`;
+- runner, CredentialBroker, archive and authority semantics live in
+  `contracts/v1/`;
+- the deny-by-default vocabulary is `config/authority-policy.v1.json`;
+- valid/adversarial examples live in `fixtures/contracts/v1/`; and
+- `scripts/validate_contracts.py` proves schema coverage and JSON round trips.
+
+M1 may add the single-writer SQLite Core only after its transaction,
+fault-injection and restore gates pass. Until then, the current diagram and data
+authorities above remain unchanged. Buzz/Telegram remain interfaces, PfTerminal
+remains the first runner, and no interface or runner becomes authoritative.
+
 ## Safety gates
 
 1. **Repository:** validation and review pass.
@@ -127,3 +145,7 @@ and traffic justify them.
 4. **Scoped write:** filesystem boundary and rollback tested.
 5. **Producer:** one worker identity and one existing producer at a time.
 6. **Outward action:** separate operator identity and explicit owner approval.
+
+The Company OS milestones add stronger gates; they never weaken these current
+deployment gates. In particular, A1+ acceptance requires the independent-review
+boundary before an agent-driven scoped write is activated.

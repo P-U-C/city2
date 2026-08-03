@@ -1,0 +1,51 @@
+{
+  "agent_id": "agt_01980000-0000-7000-8000-000000000001",
+  "aggregate_version": 1,
+  "allowed_task_types": [
+    "research_review"
+  ],
+  "authority_class": "A0",
+  "concurrency": 1,
+  "context_profile": "reviewer-default",
+  "cost_budget": {
+    "max_billable_usd": "1.00",
+    "max_input_tokens": 30000,
+    "max_output_tokens": 8000
+  },
+  "credential_handles": [],
+  "department": "intelligence",
+  "enabled": false,
+  "filesystem_scopes": [
+    "repository:read"
+  ],
+  "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "manifest_version": 1,
+  "memory_read_scopes": [
+    "company",
+    "department:intelligence",
+    "agent:self"
+  ],
+  "memory_write_scopes": [
+    "candidate:agent:self",
+    "candidate:department:intelligence"
+  ],
+  "model_policy": "quality-default",
+  "name": "research-reviewer",
+  "network_policy": "research-readonly",
+  "reports_to": "agt_01980000-0000-7000-8000-000000000002",
+  "required_capabilities": [
+    "structured_output",
+    "tool_calls",
+    "cancellation",
+    "usage_accounting"
+  ],
+  "review_policy": "independent",
+  "role": "reviewer",
+  "runner_policy": "coding-default",
+  "schema_version": "city2.agent/v1",
+  "time_budget_seconds": 1800,
+  "tools": [
+    "corpus_read",
+    "web_read"
+  ]
+}

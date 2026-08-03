@@ -1,0 +1,22 @@
+{
+  "actor": "service:city2-core",
+  "aggregate_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "aggregate_sequence": 7,
+  "aggregate_type": "task",
+  "aggregate_version": 7,
+  "database_sequence": 42,
+  "event_id": "evt_01980000-0000-7000-8000-000000000007",
+  "event_type": "task_leased",
+  "idempotency_key": "fixture:event:0042",
+  "occurred_at": "2026-08-03T00:00:00Z",
+  "payload": {
+    "expected_task_version": 7
+  },
+  "payload_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "prior_event_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "recorded_at": "2026-08-03T00:00:00Z",
+  "schema_version": "city2.event/v1",
+  "sensitivity": "internal",
+  "writer_id": "city2-core",
+  "writer_sequence": 42
+}

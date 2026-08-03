@@ -1,0 +1,23 @@
+{
+  "capabilities": {
+    "artifact_hashing": "sha256",
+    "budget_enforcement": "hard",
+    "cancellation": "hard",
+    "model_controls": "enforced",
+    "sandboxing": "process",
+    "structured_output": "enforced",
+    "tool_schema_fidelity": "enforced",
+    "usage_accounting": "unsupported"
+  },
+  "contract_versions": [
+    "city2.task/v1",
+    "city2.result/v1"
+  ],
+  "degraded": [],
+  "generated_at": "2026-08-03T00:00:00Z",
+  "manifest_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "runner_id": "runner-reference",
+  "runner_version": "1.0.0",
+  "schema_version": "city2.runner-capability/v1",
+  "unsupported": []
+}

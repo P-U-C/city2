@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/agent.schema.json",
+  "title": "City2 agent manifest v1",
+  "type": "object",
+  "required": [
+    "schema_version", "agent_id", "aggregate_version", "manifest_version", "manifest_sha256",
+    "name", "role", "department", "runner_policy", "required_capabilities",
+    "model_policy", "authority_class", "allowed_task_types", "tools",
+    "filesystem_scopes", "network_policy", "credential_handles",
+    "memory_read_scopes", "memory_write_scopes", "context_profile",
+    "time_budget_seconds", "cost_budget", "concurrency", "review_policy", "enabled"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.agent/v1"},
+    "agent_id": {"$ref": "common.schema.json#/$defs/agent_id"},
+    "aggregate_version": {"type": "integer", "minimum": 1},
+    "manifest_version": {"type": "integer", "minimum": 1},
+    "manifest_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "name": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "role": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "department": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "reports_to": {"$ref": "common.schema.json#/$defs/agent_id"},
+    "runner_policy": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "required_capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}
+    },
+    "model_policy": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "authority_class": {"$ref": "common.schema.json#/$defs/authority_class"},
+    "allowed_task_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}
+    },
+    "tools": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}},
+    "filesystem_scopes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+    "network_policy": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "credential_handles": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/credential_handle"}},
+    "memory_read_scopes": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/scope"}},
+    "memory_write_scopes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^candidate:(company|agent:[a-z0-9._-]+|department:[a-z0-9._-]+|project:[a-z0-9._-]+)$"}
+    },
+    "context_profile": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "time_budget_seconds": {"type": "integer", "minimum": 1},
+    "cost_budget": {"$ref": "common.schema.json#/$defs/budget"},
+    "concurrency": {"type": "integer", "minimum": 1},
+    "review_policy": {"enum": ["none", "deterministic", "independent"]},
+    "enabled": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

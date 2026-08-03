@@ -1,0 +1,21 @@
+{
+  "action_id": "act_01980000-0000-7000-8000-000000000008",
+  "aggregate_version": 1,
+  "approval_id": "apr_01980000-0000-7000-8000-000000000009",
+  "approval_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+  "canonical_parameters": {
+    "branch": "codex/company-os-m0"
+  },
+  "capability": "git_push_branch",
+  "operation_idempotency_key": "fixture:operation:0001",
+  "parameters_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+  "prepared_at": "2026-08-03T00:00:00Z",
+  "provider": "git-host-reference",
+  "run_id": "run_01980000-0000-7000-8000-000000000005",
+  "schema_version": "city2.action/v1",
+  "state": "prepared",
+  "target": "repository:P-U-C/city2",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "task_revision": 1,
+  "updated_at": "2026-08-03T00:00:00Z"
+}

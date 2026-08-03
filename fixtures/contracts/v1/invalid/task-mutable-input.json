@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": [
+    {
+      "criterion_id": "ac_contracts",
+      "mandatory": true,
+      "requirement": "Cites the current contracts"
+    },
+    {
+      "criterion_id": "ac_rollback",
+      "mandatory": true,
+      "requirement": "Names rollback"
+    }
+  ],
+  "attempt_number": 1,
+  "authority_class": "A0",
+  "constraints": [
+    "read_only",
+    "no_external_action"
+  ],
+  "created_by": "human:chad",
+  "expected_task_version": 7,
+  "inputs": [
+    {
+      "uri": "file:/mutable/report.md"
+    }
+  ],
+  "intent": "Find contract gaps without making external changes.",
+  "lease_fencing_token": "fixture-fence-0001",
+  "max_attempts": 2,
+  "memory_scopes": [
+    "company",
+    "project:city2"
+  ],
+  "objective_id": "obj_01980000-0000-7000-8000-000000000003",
+  "objective_revision": 1,
+  "objective_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "requested_role": "research-reviewer",
+  "resolved_agent_id": "agt_01980000-0000-7000-8000-000000000001",
+  "resolved_manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "resolved_manifest_version": 1,
+  "schema_version": "city2.task/v1",
+  "task_dedupe_key": "fixture:task:0001",
+  "task_envelope_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "task_revision": 1,
+  "task_type": "repository_analysis",
+  "time_budget_seconds": 1800,
+  "title": "Review the M0 contract set"
+}
