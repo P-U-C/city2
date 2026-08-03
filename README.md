@@ -100,6 +100,7 @@ Design acceptance and implementation are not deployment authorization.
   manifests remain disabled, the live coordinator remains outside Core and no
   off-host archive exists. M7 admission conformance is implemented, but the
   first A0 Core/coordinator candidate remains disabled and deferred pending the
-  M2/M3 live criteria, coordinator demotion and three recovery drills.
+  M2/M3 live criteria and three recovery drills. The coordinator is now Bot in
+  all three bootstrap channels and the human identity is their sole Owner.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.

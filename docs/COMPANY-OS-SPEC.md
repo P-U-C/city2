@@ -65,7 +65,7 @@ In particular, it must:
 
 ## 3. Current baseline
 
-As of 2026-08-02, the following is live:
+As of 2026-08-03, the following is live:
 
 - a public source repository, with runtime state, identities, credentials,
   backups and host-specific configuration kept private and off-repository;
@@ -80,9 +80,10 @@ As of 2026-08-02, the following is live:
 
 The coordinator currently has no durable City2 memory. There is no typed task
 ledger, context assembler, policy engine, agent registry, independent reviewer
-or producer agent. Chad and the coordinator also currently both hold Owner role
-in the three bootstrap channels; coordinator demotion to Bot/Member and the
-first owner-authored read-only model proof remain human gates.
+or producer agent. On 2026-08-03 the coordinator reduced its role from Owner to
+Bot in all three bootstrap channels through signed events explicitly directed
+by Chad; Chad's human identity is now their sole Owner. The first owner-authored
+read-only model proof remains a human gate.
 
 ## 4. Goals
 

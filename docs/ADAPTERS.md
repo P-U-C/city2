@@ -44,5 +44,6 @@ conversation/provider-session absence and semantic equivalence across two
 fixture providers.
 
 This offline proof does not satisfy M3's live-routing criterion. Activation
-remains open until the coordinator is demoted from Owner, reviewed, backed up
-and explicitly switched to Core with a tested rollback.
+remains open. The coordinator is now Bot in each bootstrap channel, but it must
+still be reviewed, backed up and explicitly switched to Core with a tested
+rollback.

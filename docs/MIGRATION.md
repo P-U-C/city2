@@ -100,8 +100,8 @@ documentation or schema exists.
 - Keep publishing, financial and third-party actions separately gated.
 
 The first candidate is the existing coordinator routed through Core at A0. Its
-decision is deferred until M2/M3 live criteria, coordinator demotion and three
-recovery drills pass; see `docs/EXPANSION.md`.
+decision is deferred until the M2/M3 live criteria and three recovery drills
+pass. Coordinator demotion is complete; see `docs/EXPANSION.md`.
 
 ## Rollback
 

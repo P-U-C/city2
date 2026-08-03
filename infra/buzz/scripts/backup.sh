@@ -14,6 +14,36 @@ PROJECT="${BUZZ_COMPOSE_PROJECT:-city2-buzz}"
   exit 1
 }
 
+# A stopped relay cannot be recreated when Docker cannot bind its configured
+# host address. Check this before touching any container so a logged-out VPN or
+# removed interface fails closed instead of turning a backup into an outage.
+if [[ -v BUZZ_BIND_IP ]]; then
+  # Compose gives the caller environment precedence over --env-file, including
+  # an explicitly empty value. Validate the same value it will render.
+  bind_ip="${BUZZ_BIND_IP}"
+else
+  bind_ip="$(sed -n 's/^BUZZ_BIND_IP=//p' "${ROOT}/.env")"
+fi
+[[ -n "${bind_ip}" ]] || {
+  echo "backup: BUZZ_BIND_IP is empty" >&2
+  exit 1
+}
+command -v ip >/dev/null 2>&1 || {
+  echo "backup: iproute2 is unavailable" >&2
+  exit 1
+}
+ip -o addr show | awk -v bind_ip="${bind_ip}" '
+  {
+    address = $4
+    sub(/\/.*/, "", address)
+    if (address == bind_ip) found = 1
+  }
+  END { exit(found ? 0 : 1) }
+' || {
+  echo "backup: BUZZ_BIND_IP is not assigned; refusing to stop the relay" >&2
+  exit 1
+}
+
 if docker info >/dev/null 2>&1; then
   DOCKER=(docker)
 elif sudo -n docker info >/dev/null 2>&1; then
@@ -45,15 +75,23 @@ install -d -m 0700 "${dest}"
 
 restart_required=false
 restart_services() {
+  local status=$?
+  local restart_failed=false
+  trap - EXIT
   if [[ "${restart_required}" == "true" ]]; then
-    compose up -d --wait redis minio >/dev/null 2>&1 || true
-    compose up -d --wait relay >/dev/null 2>&1 || true
+    compose up -d --wait redis minio >/dev/null 2>&1 || restart_failed=true
+    compose up -d --wait relay >/dev/null 2>&1 || restart_failed=true
   fi
+  if [[ "${restart_failed}" == "true" ]]; then
+    echo "backup: CRITICAL: service restart failed; run ./city2 buzz start" >&2
+    status=1
+  fi
+  exit "${status}"
 }
 trap restart_services EXIT
 
-compose stop relay >/dev/null
 restart_required=true
+compose stop relay >/dev/null
 
 postgres_user="$(sed -n 's/^POSTGRES_USER=//p' "${ROOT}/.env")"
 postgres_db="$(sed -n 's/^POSTGRES_DB=//p' "${ROOT}/.env")"
