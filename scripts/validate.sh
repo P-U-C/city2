@@ -39,6 +39,8 @@ required=(
   config/producer-agent.ai-infra.json
   scripts/observe_producer.py
   infra/producer/ai-infra/city2-producer-observer-ai-infra.service
+  infra/producer/ai-infra/REMOVAL.md
+  scripts/build-producer-observer-bundle.sh
   fixtures/contracts/v1/manifest.json
   schemas/v1/common.schema.json
   schemas/v1/agent.schema.json

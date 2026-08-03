@@ -1,4 +1,4 @@
-.PHONY: doctor validate agent review buzz-preflight buzz-e2e build-buzz-tools build-archive-tools
+.PHONY: doctor validate agent review buzz-preflight buzz-e2e build-buzz-tools build-archive-tools build-producer-observer-bundle
 
 doctor:
 	./city2 doctor
@@ -24,3 +24,6 @@ build-buzz-tools:
 
 build-archive-tools:
 	./scripts/build-archive-tools.sh
+
+build-producer-observer-bundle:
+	./scripts/build-producer-observer-bundle.sh
