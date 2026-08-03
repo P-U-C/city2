@@ -63,6 +63,7 @@ Never convert failed attempts into a false one-pass success.
 - `./city2 fleet --offline` — validate the declared fleet without host access.
 - `./city2 agent "..."` — start a PfTerminal headless turn in this repo.
 - `./city2 review` — use PfTerminal to review uncommitted changes.
+- `./city2 core <command>` — operate an explicitly selected local Core ledger.
 - `./city2 buzz <command>` — explicit Buzz relay lifecycle wrapper.
 - `./scripts/build-buzz-tools.sh` — reproduce pinned local tools.
 

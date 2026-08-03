@@ -10,4 +10,9 @@ recovery/
 __pycache__/
 *.pyc
 *.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+__pycache__/
+*.py[cod]
 .DS_Store

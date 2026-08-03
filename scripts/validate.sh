@@ -14,6 +14,7 @@ required=(
   README.md
   docs/ARCHITECTURE.md
   docs/COMPANY-OS-SPEC.md
+  docs/CORE.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
@@ -56,12 +57,14 @@ python3 -m py_compile \
   infra/buzz/scripts/normalize-owner-pubkey.py \
   scripts/fleet_status.py \
   scripts/validate_contracts.py \
-  scripts/validate_spec.py
+  scripts/validate_spec.py \
+  city2-core \
+  src/city2core/*.py
 ./scripts/fleet_status.py --offline >/dev/null
 python3 scripts/validate_spec.py
 python3 scripts/validate_contracts.py
 
-for path in city2 scripts/*.sh infra/buzz/run.sh infra/buzz/scripts/*.sh infra/buzz/agents/bin/*; do
+for path in city2 city2-core scripts/*.sh infra/buzz/run.sh infra/buzz/scripts/*.sh infra/buzz/agents/bin/*; do
   [[ -x "${path}" ]] || fail "expected executable: ${path}"
 done
 
