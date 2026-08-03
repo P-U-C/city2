@@ -1,0 +1,27 @@
+{
+  "schema_version": "city2.producer-observation/v1",
+  "contract_id": "m6-synthetic",
+  "contract_version": 1,
+  "producer_id": "synthetic-sector",
+  "agent_id": "agt_01980000-0000-7000-8000-000000000006",
+  "source_uri": "file:///synthetic/output.json",
+  "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "byte_length": 128,
+  "source_modified_at": "2026-08-03T00:00:00Z",
+  "observed_at": "2026-08-03T00:01:00Z",
+  "freshness_seconds": 60,
+  "freshness_state": "current",
+  "authority_touch": {
+    "schedule": false,
+    "database": false,
+    "source_write": false
+  },
+  "value": {
+    "provenance_checks": 4,
+    "freshness_detected": true,
+    "source_content_copied": false
+  },
+  "signer_key_version": "producer-observer-1",
+  "signature_algorithm": "ed25519",
+  "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+}

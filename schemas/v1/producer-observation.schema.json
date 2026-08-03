@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/producer-observation.schema.json",
+  "title": "City2 signed producer observation v1",
+  "type": "object",
+  "required": [
+    "schema_version", "contract_id", "contract_version", "producer_id",
+    "agent_id", "source_uri", "source_sha256", "byte_length",
+    "source_modified_at", "observed_at", "freshness_seconds",
+    "freshness_state", "authority_touch", "value", "signer_key_version",
+    "signature_algorithm", "signature"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.producer-observation/v1"},
+    "contract_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "contract_version": {"type": "integer", "minimum": 1},
+    "producer_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "agent_id": {"$ref": "common.schema.json#/$defs/agent_id"},
+    "source_uri": {"$ref": "common.schema.json#/$defs/uri"},
+    "source_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "byte_length": {"type": "integer", "minimum": 0},
+    "source_modified_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "observed_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "freshness_seconds": {"type": "integer", "minimum": 0},
+    "freshness_state": {"enum": ["current", "stale"]},
+    "authority_touch": {
+      "type": "object",
+      "required": ["schedule", "database", "source_write"],
+      "properties": {
+        "schedule": {"const": false},
+        "database": {"const": false},
+        "source_write": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "value": {
+      "type": "object",
+      "required": ["provenance_checks", "freshness_detected", "source_content_copied"],
+      "properties": {
+        "provenance_checks": {"type": "integer", "minimum": 4},
+        "freshness_detected": {"const": true},
+        "source_content_copied": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "signer_key_version": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"},
+    "signature_algorithm": {"const": "ed25519"},
+    "signature": {"type": "string", "pattern": "^[A-Za-z0-9_-]{80,128}$"}
+  },
+  "additionalProperties": false
+}

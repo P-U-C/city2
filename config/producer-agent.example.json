@@ -1,0 +1,43 @@
+{
+  "schema_version": "city2.agent/v1",
+  "agent_id": "agt_01980000-0000-7000-8000-000000000006",
+  "aggregate_version": 1,
+  "manifest_version": 1,
+  "manifest_sha256": "675f996bf7c8255d9b7f1b96415cc3376394e912842d59d27f497d1a545bfa0f",
+  "name": "m6-producer-observer",
+  "role": "producer-observer",
+  "department": "operations",
+  "runner_policy": "deterministic-local",
+  "required_capabilities": [
+    "filesystem_read",
+    "artifact_hashing"
+  ],
+  "model_policy": "none",
+  "authority_class": "A0",
+  "allowed_task_types": [
+    "observe-producer-output"
+  ],
+  "tools": [
+    "hash-output",
+    "read-output"
+  ],
+  "filesystem_scopes": [
+    "read:file:///replace-before-enable/output.json"
+  ],
+  "network_policy": "deny",
+  "credential_handles": [],
+  "memory_read_scopes": [],
+  "memory_write_scopes": [
+    "candidate:project:city2"
+  ],
+  "context_profile": "m6-producer-observer",
+  "time_budget_seconds": 300,
+  "cost_budget": {
+    "max_billable_usd": "0",
+    "max_input_tokens": 0,
+    "max_output_tokens": 0
+  },
+  "concurrency": 1,
+  "review_policy": "deterministic",
+  "enabled": false
+}

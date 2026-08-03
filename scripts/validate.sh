@@ -19,6 +19,7 @@ required=(
   docs/ADAPTERS.md
   docs/REVIEW.md
   docs/ARCHIVE.md
+  docs/PRODUCER.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
@@ -32,6 +33,8 @@ required=(
   contracts/v1/AUTHORITY.md
   config/authority-policy.v1.json
   config/coordinator-core.example.json
+  config/producer-contract.example.json
+  config/producer-agent.example.json
   fixtures/contracts/v1/manifest.json
   schemas/v1/common.schema.json
   schemas/v1/agent.schema.json

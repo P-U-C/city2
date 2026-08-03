@@ -1,0 +1,29 @@
+{
+  "schema_version": "city2.producer-contract/v1",
+  "contract_id": "m6-invalid",
+  "contract_version": 1,
+  "producer_id": "synthetic-sector",
+  "host_id": "synthetic-host",
+  "unix_user": "synthetic-sector",
+  "agent_id": "agt_01980000-0000-7000-8000-000000000006",
+  "source": {
+    "uri": "file:///synthetic/output.json",
+    "media_type": "application/json",
+    "access": "read-write",
+    "max_bytes": 1024
+  },
+  "authorities": {
+    "schedule": "external-unchanged",
+    "database": "external-unchanged",
+    "source_write": "denied"
+  },
+  "memory_scope": "project:city2",
+  "sensitivity": "internal",
+  "freshness_slo_seconds": 3600,
+  "value_metrics": ["signed_provenance", "freshness_detection"],
+  "rollback": {
+    "disable_action": "remove-observer",
+    "downstream_dependencies": []
+  },
+  "enabled": false
+}
