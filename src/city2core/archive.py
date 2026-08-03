@@ -13,7 +13,7 @@ import tempfile
 from typing import Any
 import uuid
 
-from .model import canonical_json, sha256_bytes, sha256_json, utc_now
+from .model import canonical_json, new_id, sha256_bytes, sha256_json, utc_now
 from .store import IntegrityError, Store, StoreError
 
 
@@ -171,7 +171,7 @@ def create_backup(
             barrier_id = str(uuid.uuid4())
             manifest = {
                 "schema_version": "city2.local-backup-manifest/v1",
-                "archive_id": "local-" + barrier_id,
+                "archive_id": new_id("archive"),
                 "backup_barrier_id": barrier_id,
                 "created_at": created_at,
                 "database_id": integrity["database_id"],

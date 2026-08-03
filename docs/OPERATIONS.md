@@ -50,6 +50,16 @@ upload or treat it as an off-host archive. Encryption, independent recovery
 keys and archive backends remain gated on M5. Never commit databases, exports,
 archives or checkpoint keys.
 
+M5 real local encryption proof requires the pinned ignored tool build:
+
+```bash
+./scripts/build-archive-tools.sh
+CITY2_AGE_BIN="$PWD/build/archive-tools" ./city2 validate
+```
+
+This makes no Walrus call. Testnet activation requires separate operator review;
+Mainnet remains prohibited.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.

@@ -71,6 +71,7 @@ M1 adds the [Core ledger and local recovery implementation](docs/CORE.md); M2
 adds [evidence-backed memory and deterministic context](docs/MEMORY.md); M3
 adds the undeployed [Buzz/PfTerminal adapter boundary](docs/ADAPTERS.md).
 M4 adds undeployed [independent review enforcement](docs/REVIEW.md).
+M5 adds the undeployed [encrypted archive pilot boundary](docs/ARCHIVE.md).
 Design acceptance and implementation are not deployment authorization.
 
 ## Current state
@@ -86,7 +87,8 @@ Design acceptance and implementation are not deployment authorization.
   a read-only repository mount; first owner-authored model proof remains gated.
 - Company OS: specification version 0.2.0 is accepted after independent review;
   M0 contracts, M1 ledger, M2 memory/context and the version 0.5.0 M3 offline
-  adapters and version 0.6.0 M4 independent review are implemented. Core is not deployed; the live coordinator remains
-  outside Core and no off-host archive exists.
+  adapters, M4 independent review and the version 0.7.0 M5 encrypted
+  local/Testnet archive boundary are implemented. Core is not deployed; the
+  live coordinator remains outside Core and no off-host archive exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.
