@@ -37,6 +37,8 @@ required=(
   config/producer-agent.example.json
   config/producer-pilot.ai-infra.json
   config/producer-agent.ai-infra.json
+  scripts/observe_producer.py
+  infra/producer/ai-infra/city2-producer-observer-ai-infra.service
   fixtures/contracts/v1/manifest.json
   schemas/v1/common.schema.json
   schemas/v1/agent.schema.json
@@ -72,6 +74,7 @@ python3 -m py_compile \
   infra/buzz/scripts/normalize-owner-pubkey.py \
   scripts/fleet_status.py \
   scripts/runtime_status.py \
+  scripts/observe_producer.py \
   scripts/validate_contracts.py \
   scripts/validate_spec.py \
   city2-core \
@@ -79,6 +82,11 @@ python3 -m py_compile \
 ./scripts/fleet_status.py --offline >/dev/null
 python3 scripts/validate_spec.py
 python3 scripts/validate_contracts.py
+
+if command -v systemd-analyze >/dev/null 2>&1; then
+  SYSTEMD_UNIT_PATH="${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
+    systemd-analyze verify city2-producer-observer-ai-infra.service
+fi
 
 for path in city2 city2-core scripts/*.sh infra/buzz/run.sh infra/buzz/scripts/*.sh infra/buzz/agents/bin/*; do
   [[ -x "${path}" ]] || fail "expected executable: ${path}"

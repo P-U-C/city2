@@ -18,6 +18,14 @@ The selected `producer-pilot.ai-infra.json` and
 remain disabled. The logical agent has A0, no model, network or credentials and
 only read/hash tools.
 
+The undeployed
+`infra/producer/ai-infra/city2-producer-observer-ai-infra.service` hides the
+producer home with `ProtectHome=tmpfs`, bind-mounts only that aggregate into a
+transient runtime path read-only, denies networking/capabilities and permits
+writes only to a locked evidence `StateDirectory`. Its signing key is a systemd
+credential read by deterministic code, never an agent/model credential. The
+unit has no `[Install]` section and the selected manifests remain disabled.
+
 `ProducerObserver` accepts only that declared regular output file. It rejects
 symlinks, database/journal suffixes, undeclared paths, oversized files,
 non-read-only tools, network access, credentials, model execution and any source
@@ -59,15 +67,15 @@ consumers remain authoritative and have no dependency on observer evidence.
 
 This host's Tailscale client remains logged out, but the documented LAN fallback
 verified the fleet and candidate. M6 exit criteria are still not claimed because
-the read-only namespace, distinct Buzz identity, signed shadow evidence and
-removal proof have not been activated.
+the reviewed read-only namespace is undeployed and the distinct Buzz identity,
+signed shadow evidence and removal proof do not exist.
 
 Before activation:
 
 1. restore operator-approved Tailscale connectivity for remote relay access;
 2. keep the selected manifests disabled through independent review;
-3. create a systemd filesystem namespace that hides the original producer tree
-   and exposes only the exact source at a read-only bind path;
+3. independently review, install and manually start the undeployed systemd
+   namespace; do not enable it as a schedule;
 4. create a distinct narrow Buzz identity/channel membership;
 5. run a read-only shadow observation and independently verify its signature,
    value and source invariance;
