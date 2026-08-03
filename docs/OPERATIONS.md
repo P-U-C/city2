@@ -76,16 +76,17 @@ PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_producer.py' -v
 Do not enable them by editing placeholders. Follow `docs/PRODUCER.md`; live
 selection first requires a healthy read-only fleet probe and separate review.
 
-The selected `ai-infra` manifests are also disabled. Activation requires a
-systemd read-only bind namespace that makes the producer's original tree
-inaccessible; file mode or an A0 manifest alone is not a write boundary.
+The selected `ai-infra` manifests are disabled. Its one-time M6 shadow used a
+systemd read-only bind namespace that made the producer's original tree
+inaccessible; file mode or an A0 manifest alone was not treated as a write
+boundary. The observer and keys were removed after proof.
 
 The reviewed namespace source is
 `infra/producer/ai-infra/city2-producer-observer-ai-infra.service`. Repository
 validation checks its syntax and a synthetic credential-backed observation.
-It is installed static/inactive with disabled manifests; no repository command
-enables or starts it. The one-time signer is separately bound by public
-fingerprint and remains root-only on worker-1.
+It remains a reviewed source template with disabled manifests; no repository
+command enables or starts it. A future run must provision a new signer, bind
+its public fingerprint and keep it root-only on worker-1.
 
 Build and inspect the credential-free deployment artifact without changing the
 host or worker:

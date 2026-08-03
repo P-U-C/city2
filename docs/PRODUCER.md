@@ -1,9 +1,9 @@
 # Read-only producer observer — M6
 
-M6 source/conformance adds a removable observer around one declared producer
-output. `ai-infra` is the selected disabled candidate; no observer is activated.
-This does not change a schedule, open a producer database, create a Buzz
-identity or route the live coordinator through Core.
+M6 adds a removable observer around one declared producer output. `ai-infra`
+completed one signed read-only shadow transaction on 2026-08-03; the observer,
+worker key and temporary Buzz identity were then removed. This did not change a
+schedule, open a producer database or route the live coordinator through Core.
 
 ## Contract
 
@@ -38,6 +38,8 @@ The persistent disabled-only install is recorded in
 [`PRODUCER-INSTALL-EVIDENCE.md`](PRODUCER-INSTALL-EVIDENCE.md).
 The one-time trusted signer is recorded in
 [`PRODUCER-KEY-EVIDENCE.md`](PRODUCER-KEY-EVIDENCE.md).
+The signed shadow, Buzz attestation and complete removal proof are recorded in
+[`PRODUCER-SHADOW-EVIDENCE.md`](PRODUCER-SHADOW-EVIDENCE.md).
 
 `ProducerObserver` accepts only that declared regular output file. It rejects
 symlinks, database/journal suffixes, undeclared paths, oversized files,
@@ -76,23 +78,25 @@ SHA-256 of `1df93c43ab1223489b8cbf1a7e70949913f02ca988dd3f9725b91ed724c70a7d`.
 No source content entered City2 or model context. Existing Git/editorial
 consumers remain authoritative and have no dependency on observer evidence.
 
-## Live activation gate
+## Acceptance and current state
 
-This host's Tailscale client remains logged out, but the documented LAN fallback
-verified the fleet and candidate. The namespace is installed static/inactive and
-the one-time signer exists, but manifests remain disabled. M6 exit criteria are
-still not claimed because the distinct Buzz identity, signed shadow evidence and
-removal proof do not exist.
+M6 exit criteria passed on 2026-08-03:
 
-Before activation:
+1. the source aggregate hash was identical before and after the signed run;
+2. signed provenance and freshness evidence added independently verifiable
+   measurements without retaining source content;
+3. a distinct member-only Buzz identity posted the evidence summary to a narrow
+   private channel, and the coordinator independently recovered it;
+4. that identity's channel/relay access and private key were removed, while the
+   evidence channel was archived;
+5. the observer unit, runtime, manifests, signing key and evidence state were
+   removed from the worker; and
+6. all 15 active producer contracts remained healthy through the existing LAN
+   fallback, with no downstream dependency on observer output.
 
-1. restore operator-approved Tailscale connectivity for remote relay access;
-2. independently review the bound signer and exact one-run transaction;
-3. enable only the installed manifest copies and manually start the static unit
-   once; never enable it as a schedule;
-4. create a distinct narrow Buzz identity/channel membership;
-5. run a read-only shadow observation and independently verify its signature,
-   value and source invariance;
-6. remove the observer and prove producer/downstream operation is unchanged.
-
-Only that evidence can satisfy M6 and support any M7 expansion.
+The worker therefore has no City2 observer service, key or evidence state. The
+selected source manifests remain disabled examples in Git. M6 acceptance permits
+M7 evaluation; it does **not** authorize another producer, persistent observer,
+write authority, Core deployment or outward action. Every such expansion still
+requires its own manifest, measurable need, review, budget, incident boundary,
+rollback proof and one-unit-at-a-time approval.
