@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 import json
+from pathlib import Path, PurePosixPath
 import re
+import subprocess
 import sys
-from pathlib import Path
 from typing import Any
 
 
@@ -71,6 +73,32 @@ from city2core.schema import (  # noqa: E402
     load_json,
     validate_instance,
 )
+from city2core.expansion import (  # noqa: E402
+    ExpansionAdmissionError,
+    validate_expansion_admission,
+)
+from city2core.model import digest_profile, sha256_bytes  # noqa: E402
+
+
+def forbidden_canonical_terms(document: Any) -> list[str]:
+    text = json.dumps(document, sort_keys=True)
+    found: list[str] = []
+    for term in FORBIDDEN_CANONICAL_TERMS:
+        for match in re.finditer(re.escape(term), text, re.IGNORECASE):
+            before = text[match.start() - 1] if match.start() else ""
+            after = text[match.end()] if match.end() < len(text) else ""
+            starts_camel_token = (
+                bool(before)
+                and before.isalnum()
+                and text[match.start()].isupper()
+                and before.islower()
+            )
+            left_boundary = not before or not before.isalnum() or starts_camel_token
+            right_boundary = not after or not after.isalnum() or after.isupper()
+            if left_boundary and right_boundary:
+                found.append(term)
+                break
+    return found
 
 
 def lint_schema(
@@ -178,6 +206,160 @@ def validate_semantics(instance: dict[str, Any]) -> None:
             check["result"] != "allow" for check in instance["checks"]
         ):
             raise ValidationError("authority: allow requires every dimension to allow")
+    elif version == "city2.expansion-admission/v1":
+        try:
+            validate_expansion_admission(instance)
+        except ExpansionAdmissionError as error:
+            raise ValidationError(str(error)) from error
+
+
+def _git_reference_bytes(uri: str) -> bytes | None:
+    if not uri.startswith("git:"):
+        return None
+    locator = uri.removeprefix("git:")
+    relative, separator, revision = locator.rpartition("@")
+    if not separator:
+        relative, revision = locator, ""
+    elif not re.fullmatch(r"[0-9a-f]{40}", revision):
+        raise ValidationError("expansion: Git revision must be a full commit SHA")
+    if not re.fullmatch(r"[A-Za-z0-9._/-]+", relative):
+        raise ValidationError("expansion: invalid Git repository path")
+    repository_path = PurePosixPath(relative)
+    if repository_path.is_absolute() or ".." in repository_path.parts:
+        raise ValidationError("expansion: Git reference escapes repository")
+
+    if revision:
+        commit = subprocess.run(
+            ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        if commit.returncode:
+            raise ValidationError("expansion: Git evidence commit is unavailable")
+        content = subprocess.run(
+            ["git", "show", f"{revision}:{relative}"],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+        if content.returncode:
+            raise ValidationError("expansion: missing file at Git evidence commit")
+        return content.stdout
+
+    dirty = subprocess.run(
+        ["git", "diff", "--quiet", "--no-ext-diff", "--no-textconv", "--", relative],
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    if dirty.returncode:
+        raise ValidationError(
+            f"expansion: unpinned Git reference has unstaged changes {relative!r}"
+        )
+    content = subprocess.run(
+        ["git", "show", f":{relative}"],
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    if content.returncode:
+        raise ValidationError(
+            f"expansion: missing tracked Git index reference {relative!r}"
+        )
+    return content.stdout
+
+
+def _git_blob_reference_bytes(uri: str) -> bytes | None:
+    if not uri.startswith("git-blob:"):
+        return None
+    blob_sha = uri.removeprefix("git-blob:")
+    if not re.fullmatch(r"[0-9a-f]{40}", blob_sha):
+        raise ValidationError("expansion: Git blob reference must use a full SHA")
+    exists = subprocess.run(
+        ["git", "cat-file", "-e", f"{blob_sha}^{{blob}}"],
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    if exists.returncode:
+        raise ValidationError("expansion: Git evidence blob is unavailable")
+    content = subprocess.run(
+        ["git", "cat-file", "blob", blob_sha],
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    if content.returncode:
+        raise ValidationError("expansion: Git evidence blob is unreadable")
+    return content.stdout
+
+
+def validate_repository_bindings(
+    instance: dict[str, Any], store: SchemaStore
+) -> None:
+    if instance.get("schema_version") != "city2.expansion-admission/v1":
+        return
+
+    candidate = instance["candidate"]
+    manifest_bytes = _git_reference_bytes(candidate["manifest_uri"])
+    if manifest_bytes is None:
+        raise ValidationError(
+            "expansion: candidate manifest must use a resolvable Git reference"
+        )
+    try:
+        manifest = json.loads(manifest_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValidationError(
+            "expansion: bound agent manifest is invalid JSON"
+        ) from error
+    agent_schema = store.documents["agent.schema.json"]
+    validate_instance(manifest, agent_schema, store, "agent.schema.json")
+    expected = digest_profile(manifest, {"aggregate_version", "manifest_sha256"})
+    if manifest["manifest_sha256"] != expected:
+        raise ValidationError("expansion: bound agent manifest digest mismatch")
+    if candidate["manifest_sha256"] != expected:
+        raise ValidationError("expansion: admission binds the wrong agent manifest")
+    if candidate["agent_id"] != manifest["agent_id"]:
+        raise ValidationError("expansion: admission and agent IDs disagree")
+    if candidate["target_authority"] != manifest["authority_class"]:
+        raise ValidationError(
+            "expansion: admission and manifest authority classes disagree"
+        )
+    budget = instance["budget"]
+    if manifest["time_budget_seconds"] > budget["max_runtime_seconds"]:
+        raise ValidationError("expansion: manifest runtime exceeds admission budget")
+    if manifest["concurrency"] > budget["max_concurrency"]:
+        raise ValidationError("expansion: manifest concurrency exceeds admission budget")
+    if Decimal(manifest["cost_budget"]["max_billable_usd"]) > Decimal(
+        budget["max_pilot_cost_usd"]
+    ):
+        raise ValidationError("expansion: manifest billable cost exceeds admission budget")
+    if manifest["enabled"]:
+        raise ValidationError("expansion: candidate manifest must remain disabled")
+
+    references = list(instance["measurement"]["evidence_refs"])
+    for criterion in instance["evaluation"]["criteria"]:
+        references.extend(criterion["evidence_refs"])
+    for reference in references:
+        uri = reference["uri"]
+        if uri.startswith("git:") and not re.search(r"@[0-9a-f]{40}$", uri):
+            raise ValidationError(
+                "expansion: Git evidence must use a full commit SHA"
+            )
+        content = _git_blob_reference_bytes(uri)
+        if content is None:
+            content = _git_reference_bytes(uri)
+        if content is not None and reference["content_sha256"] != sha256_bytes(
+            content
+        ):
+            raise ValidationError("expansion: Git evidence digest mismatch")
 
 
 def _standard_validate(
@@ -216,8 +398,7 @@ def validate_repository() -> dict[str, int]:
         ids.add(schema_id)
         if not schema_id.endswith("/" + name):
             raise ValidationError(f"{name}: $id does not end with filename")
-        lowered = json.dumps(schema, sort_keys=True).lower()
-        found = [term for term in FORBIDDEN_CANONICAL_TERMS if term in lowered]
+        found = forbidden_canonical_terms(schema)
         if found:
             raise ValidationError(
                 f"{name}: provider/interface-specific canonical term: {found}"
@@ -253,6 +434,7 @@ def validate_repository() -> dict[str, int]:
         instance = load_json(instance_path)
         validate_instance(instance, schema, store, item["schema"])
         validate_semantics(instance)
+        validate_repository_bindings(instance, store)
         _standard_validate(instance, schema, store)
         round_trip = json.loads(
             json.dumps(instance, sort_keys=True, separators=(",", ":"))

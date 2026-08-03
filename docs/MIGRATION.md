@@ -92,10 +92,16 @@ documentation or schema exists.
 
 ### Phase 5 — measured expansion
 
+- Require a versioned expansion-admission decision that keeps the candidate
+  disabled until a separate reviewed activation.
 - Add roles only when the prior role has measurable throughput or reliability
   value.
 - Migrate producer contracts one at a time.
 - Keep publishing, financial and third-party actions separately gated.
+
+The first candidate is the existing coordinator routed through Core at A0. Its
+decision is deferred until M2/M3 live criteria, coordinator demotion and three
+recovery drills pass; see `docs/EXPANSION.md`.
 
 ## Rollback
 

@@ -74,6 +74,9 @@ M4 adds undeployed [independent review enforcement](docs/REVIEW.md).
 M5 adds the undeployed [encrypted archive pilot boundary](docs/ARCHIVE.md).
 M6 adds the accepted, removed-after-proof
 [read-only producer observer boundary](docs/PRODUCER.md).
+M7 starts with a disabled, fail-closed
+[measured-expansion admission gate](docs/EXPANSION.md); its first decision is
+`defer`, not another agent or authority grant.
 Design acceptance and implementation are not deployment authorization.
 
 ## Current state
@@ -95,6 +98,8 @@ Design acceptance and implementation are not deployment authorization.
   signed shadow observation, narrow Buzz attestation and complete removal proof;
   its observer, keys and identity are now absent. Core is not deployed, selected
   manifests remain disabled, the live coordinator remains outside Core and no
-  off-host archive exists.
+  off-host archive exists. M7 admission conformance is implemented, but the
+  first A0 Core/coordinator candidate remains disabled and deferred pending the
+  M2/M3 live criteria, coordinator demotion and three recovery drills.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.

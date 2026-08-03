@@ -100,6 +100,19 @@ The archive is ignored, reproducible and includes `MANIFEST.sha256` plus
 `REMOVAL.md`; it intentionally contains no signing key, environment file,
 database, producer output or Buzz identity.
 
+M7 expansion remains fail-closed:
+
+```bash
+python3 scripts/validate_contracts.py
+jq '{decision,candidate,measurement,evaluation}' \
+  config/expansion-admission.m7.json
+```
+
+The checked-in decision is `defer` and its bound agent manifest is disabled.
+Do not change either to admitted/enabled in place. Follow `docs/EXPANSION.md`,
+create a new immutable decision revision and keep activation as a separate
+reviewed transaction.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.

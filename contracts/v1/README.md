@@ -28,6 +28,7 @@ documents here define semantics that JSON Schema cannot express.
 | `order_sha256` (`city2.deletion-order/v1`) | `order_sha256`, `aggregate_version`, `state`, `targets`, `proof_sha256`, `completed_at` |
 | `manifest_sha256` (`city2.runner-capability/v1`) | `manifest_sha256` |
 | `pack_sha256` (`city2.context-pack/v1`) | `pack_sha256` |
+| `decision_sha256` (`city2.expansion-admission/v1`) | `decision_sha256`, `aggregate_version` |
 
 Excluded mutable fields remain protected by optimistic concurrency and the
 event payload/hash chain. Every other top-level field is included, whether
@@ -63,3 +64,11 @@ M6 producer boundaries are canonicalized by
 `producer-contract.schema.json` and `producer-observation.schema.json`. The
 contract grants no schedule/database/source-write authority; observations bind
 exact source bytes and remain optional to every downstream system.
+
+M7 expansion is canonicalized by `expansion-admission.schema.json`. A role must
+remain at its current authority class; a write-authority candidate can move only
+one class. Admission supports numeric or explicit thresholds and requires
+measured evaluation evidence, accountable approval, a bounded budget and an
+exact removal plan. The bound manifest cannot exceed the admission runtime,
+concurrency or billable-cost ceiling. The admission record itself always keeps
+the candidate disabled.

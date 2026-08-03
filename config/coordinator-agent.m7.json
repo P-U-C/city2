@@ -1,0 +1,45 @@
+{
+  "agent_id": "agt_019fc61a-0000-7000-8000-000000000001",
+  "aggregate_version": 1,
+  "allowed_task_types": [
+    "read-only-status"
+  ],
+  "authority_class": "A0",
+  "concurrency": 1,
+  "context_profile": "m7-read-only-status",
+  "cost_budget": {
+    "max_billable_usd": "0",
+    "max_input_tokens": 20000,
+    "max_output_tokens": 4000
+  },
+  "credential_handles": [],
+  "department": "operations",
+  "enabled": false,
+  "filesystem_scopes": [
+    "read:repository"
+  ],
+  "manifest_sha256": "0e397bee0311afab9244b357db6b732f2895cfabf3b77da7b931fe56cdff91e6",
+  "manifest_version": 1,
+  "memory_read_scopes": [
+    "company",
+    "project:city2"
+  ],
+  "memory_write_scopes": [],
+  "model_policy": "provider-substitutable-quality",
+  "name": "m7-core-coordinator-pilot",
+  "network_policy": "private-relay-only",
+  "required_capabilities": [
+    "artifact_hashing",
+    "sandboxing",
+    "structured_output"
+  ],
+  "review_policy": "independent",
+  "role": "coordinator",
+  "runner_policy": "pfterminal-headless-v1",
+  "schema_version": "city2.agent/v1",
+  "time_budget_seconds": 900,
+  "tools": [
+    "core-ceo-projection",
+    "repository-read"
+  ]
+}

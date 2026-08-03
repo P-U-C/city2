@@ -1,0 +1,108 @@
+{
+  "accountable_approver": {
+    "actor": "human:ceo",
+    "status": "pending"
+  },
+  "aggregate_version": 1,
+  "budget": {
+    "expected_monthly_cost_usd": "0",
+    "max_concurrency": 1,
+    "max_pilot_cost_usd": "0",
+    "max_runtime_seconds": 900
+  },
+  "candidate": {
+    "activation_state": "disabled",
+    "agent_id": "agt_019fc61a-0000-7000-8000-000000000001",
+    "current_authority": "A0",
+    "kind": "role",
+    "manifest_sha256": "0e397bee0311afab9244b357db6b732f2895cfabf3b77da7b931fe56cdff91e6",
+    "manifest_uri": "git:config/coordinator-agent.m7.json",
+    "target_authority": "A0",
+    "unit_id": "core-coordinator-pilot"
+  },
+  "created_at": "2026-08-03T05:41:18Z",
+  "decision": "defer",
+  "decision_id": "m7-core-coordinator-pilot-1",
+  "decision_sha256": "e0427f719dfc2ed5dd6c31fe93bd35f75f53c9b20b085fe9d16b7c594ec15199",
+  "decision_version": 1,
+  "evaluation": {
+    "criteria": [
+      {
+        "criterion": "m6-accepted",
+        "evidence_refs": [
+          {
+            "content_sha256": "00bc7b0a4b99ddf9782598162f79f6e1b9dbec41a09bb8bb4679cef5abbdb4d8",
+            "observed_at": "2026-08-03T05:41:18Z",
+            "uri": "git-blob:03925a2e363e6655c4b2179b64b5b48f70e6b67f"
+          }
+        ],
+        "state": "pass"
+      },
+      {
+        "criterion": "m2-fresh-session-live",
+        "evidence_refs": [],
+        "state": "pending"
+      },
+      {
+        "criterion": "m3-core-routing-live",
+        "evidence_refs": [],
+        "state": "pending"
+      },
+      {
+        "criterion": "coordinator-demoted",
+        "evidence_refs": [],
+        "state": "pending"
+      }
+    ],
+    "status": "not-run",
+    "suite": "m7-coordinator-readonly",
+    "version": "1.0.0"
+  },
+  "incident_boundary": {
+    "authority_ceiling": "A0",
+    "escalation_owner": "human:ceo",
+    "max_consecutive_failures": 1,
+    "outward_actions": "denied",
+    "stop_conditions": [
+      "capability-degradation",
+      "evidence-mismatch",
+      "relay-loss",
+      "scope-violation"
+    ]
+  },
+  "measurement": {
+    "admission_threshold": 3,
+    "baseline_value": 0,
+    "direction": "increase",
+    "evaluation_version": "m7-coordinator-readonly-v1",
+    "evidence_refs": [],
+    "metric": "core-routed-recovery-proofs",
+    "sample_count": 0,
+    "target_value": 3,
+    "threshold_mode": "numeric",
+    "unit": "successful-drills",
+    "window_end": "2026-08-03T05:41:18Z",
+    "window_start": "2026-08-03T05:41:18Z"
+  },
+  "reason_codes": [
+    "coordinator-demotion-required",
+    "live-baseline-missing",
+    "m2-m3-live-exit-open"
+  ],
+  "removal": {
+    "recovery_slo_seconds": 300,
+    "required_final_state": "current-read-only-coordinator",
+    "steps": [
+      "disable-core-routing",
+      "restore-current-coordinator",
+      "verify-read-only-boundary"
+    ],
+    "triggers": [
+      "failed-recovery-drill",
+      "scope-violation",
+      "unauthorized-side-effect"
+    ]
+  },
+  "review_at": "2026-08-10T05:41:18Z",
+  "schema_version": "city2.expansion-admission/v1"
+}

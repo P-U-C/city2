@@ -24,6 +24,7 @@ required=(
   docs/PRODUCER-INSTALL-EVIDENCE.md
   docs/PRODUCER-KEY-EVIDENCE.md
   docs/PRODUCER-SHADOW-EVIDENCE.md
+  docs/EXPANSION.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
@@ -37,6 +38,8 @@ required=(
   contracts/v1/AUTHORITY.md
   config/authority-policy.v1.json
   config/coordinator-core.example.json
+  config/coordinator-agent.m7.json
+  config/expansion-admission.m7.json
   config/producer-contract.example.json
   config/producer-agent.example.json
   config/producer-pilot.ai-infra.json
@@ -49,6 +52,7 @@ required=(
   fixtures/contracts/v1/manifest.json
   schemas/v1/common.schema.json
   schemas/v1/agent.schema.json
+  schemas/v1/expansion-admission.schema.json
   schemas/v1/task-envelope.schema.json
   schemas/v1/result.schema.json
   scripts/validate_spec.py

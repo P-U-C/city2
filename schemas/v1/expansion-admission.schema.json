@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/expansion-admission.schema.json",
+  "title": "City2 measured expansion admission v1",
+  "type": "object",
+  "required": [
+    "schema_version", "decision_id", "aggregate_version", "decision_version",
+    "decision_sha256", "candidate", "measurement", "evaluation", "budget",
+    "incident_boundary", "removal", "accountable_approver", "decision",
+    "reason_codes", "created_at", "review_at"
+  ],
+  "$defs": {
+    "evidence_ref": {
+      "type": "object",
+      "required": ["uri", "content_sha256", "observed_at"],
+      "properties": {
+        "uri": {"$ref": "common.schema.json#/$defs/uri"},
+        "content_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+        "observed_at": {"$ref": "common.schema.json#/$defs/date_time"}
+      },
+      "additionalProperties": false
+    },
+    "measurement_value": {
+      "oneOf": [
+        {"type": "number", "minimum": 0},
+        {"$ref": "common.schema.json#/$defs/non_secret_name"}
+      ]
+    }
+  },
+  "properties": {
+    "schema_version": {"const": "city2.expansion-admission/v1"},
+    "decision_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "aggregate_version": {"type": "integer", "minimum": 1},
+    "decision_version": {"type": "integer", "minimum": 1},
+    "decision_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "candidate": {
+      "type": "object",
+      "required": [
+        "kind", "unit_id", "agent_id", "manifest_uri", "manifest_sha256",
+        "current_authority", "target_authority", "activation_state"
+      ],
+      "properties": {
+        "kind": {"enum": ["role", "write-authority"]},
+        "unit_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+        "agent_id": {"$ref": "common.schema.json#/$defs/agent_id"},
+        "manifest_uri": {"$ref": "common.schema.json#/$defs/uri"},
+        "manifest_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+        "current_authority": {"$ref": "common.schema.json#/$defs/authority_class"},
+        "target_authority": {"$ref": "common.schema.json#/$defs/authority_class"},
+        "activation_state": {"const": "disabled"}
+      },
+      "additionalProperties": false
+    },
+    "measurement": {
+      "type": "object",
+      "required": [
+        "metric", "unit", "evaluation_version", "window_start", "window_end",
+        "sample_count", "threshold_mode", "baseline_value",
+        "admission_threshold", "target_value", "direction", "evidence_refs"
+      ],
+      "properties": {
+        "metric": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+        "unit": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+        "evaluation_version": {"type": "string", "minLength": 1, "maxLength": 64},
+        "window_start": {"$ref": "common.schema.json#/$defs/date_time"},
+        "window_end": {"$ref": "common.schema.json#/$defs/date_time"},
+        "sample_count": {"type": "integer", "minimum": 0},
+        "threshold_mode": {"enum": ["numeric", "explicit"]},
+        "baseline_value": {"$ref": "#/$defs/measurement_value"},
+        "admission_threshold": {"$ref": "#/$defs/measurement_value"},
+        "target_value": {"$ref": "#/$defs/measurement_value"},
+        "direction": {"enum": ["increase", "decrease", "match"]},
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/evidence_ref"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["suite", "version", "status", "criteria"],
+      "properties": {
+        "suite": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+        "version": {"type": "string", "minLength": 1, "maxLength": 64},
+        "status": {"enum": ["not-run", "pass", "fail"]},
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "required": ["criterion", "state", "evidence_refs"],
+            "properties": {
+              "criterion": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+              "state": {"enum": ["pending", "pass", "fail"]},
+              "evidence_refs": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {"$ref": "#/$defs/evidence_ref"}
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "required": [
+        "max_pilot_cost_usd", "expected_monthly_cost_usd",
+        "max_runtime_seconds", "max_concurrency"
+      ],
+      "properties": {
+        "max_pilot_cost_usd": {"$ref": "common.schema.json#/$defs/money"},
+        "expected_monthly_cost_usd": {"$ref": "common.schema.json#/$defs/money"},
+        "max_runtime_seconds": {"type": "integer", "minimum": 1},
+        "max_concurrency": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "incident_boundary": {
+      "type": "object",
+      "required": [
+        "authority_ceiling", "outward_actions", "max_consecutive_failures",
+        "stop_conditions", "escalation_owner"
+      ],
+      "properties": {
+        "authority_ceiling": {"$ref": "common.schema.json#/$defs/authority_class"},
+        "outward_actions": {"enum": ["denied", "human-at-action-time", "hardened-operator"]},
+        "max_consecutive_failures": {"type": "integer", "minimum": 1},
+        "stop_conditions": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}
+        },
+        "escalation_owner": {"$ref": "common.schema.json#/$defs/actor"}
+      },
+      "additionalProperties": false
+    },
+    "removal": {
+      "type": "object",
+      "required": ["triggers", "steps", "recovery_slo_seconds", "required_final_state"],
+      "properties": {
+        "triggers": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}
+        },
+        "steps": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}
+        },
+        "recovery_slo_seconds": {"type": "integer", "minimum": 1},
+        "required_final_state": {"$ref": "common.schema.json#/$defs/non_secret_name"}
+      },
+      "additionalProperties": false
+    },
+    "accountable_approver": {
+      "type": "object",
+      "required": ["actor", "status"],
+      "properties": {
+        "actor": {
+          "type": "string",
+          "pattern": "^human:[a-z0-9][a-z0-9._-]{0,127}$"
+        },
+        "status": {"enum": ["pending", "approved", "rejected"]},
+        "reviewed_at": {"$ref": "common.schema.json#/$defs/date_time"}
+      },
+      "additionalProperties": false
+    },
+    "decision": {"enum": ["defer", "admit", "reject"]},
+    "reason_codes": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"$ref": "common.schema.json#/$defs/non_secret_name"}
+    },
+    "created_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "review_at": {"$ref": "common.schema.json#/$defs/date_time"}
+  },
+  "additionalProperties": false
+}
