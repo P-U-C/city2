@@ -16,6 +16,7 @@ required=(
   docs/COMPANY-OS-SPEC.md
   docs/CORE.md
   docs/MEMORY.md
+  docs/ADAPTERS.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
@@ -28,6 +29,7 @@ required=(
   contracts/v1/ARCHIVE-BACKEND.md
   contracts/v1/AUTHORITY.md
   config/authority-policy.v1.json
+  config/coordinator-core.example.json
   fixtures/contracts/v1/manifest.json
   schemas/v1/common.schema.json
   schemas/v1/agent.schema.json

@@ -1,0 +1,10 @@
+{
+  "schema_version": "city2.coordinator-activation/v1",
+  "enabled": false,
+  "authority_class": "A0",
+  "owner_public_key": "PUBLIC_HEX_ONLY",
+  "allowed_channel_names": ["control", "city2"],
+  "core_database": "/private/runtime/path/core.sqlite",
+  "runner": "pfterminal-headless",
+  "conversation_persistence": false
+}

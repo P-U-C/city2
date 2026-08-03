@@ -23,7 +23,7 @@ from .model import (
 from .schema import SchemaStore, ValidationError, validate_named
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 WRITER_ID = "city2-core-v1"
 FaultHook = Callable[[str], None]
 
@@ -811,6 +811,24 @@ class Store:
                 or manifest.get("task_id") != row["task_id"]
             ):
                 raise IntegrityError(f"context pack mismatch: {row['context_id']}")
+
+        for row in self.conn.execute("SELECT * FROM interface_messages"):
+            if (
+                self.conn.execute(
+                    "SELECT 1 FROM tasks WHERE task_id = ?", (row["task_id"],)
+                ).fetchone()
+                is None
+            ):
+                raise IntegrityError("interface message points to missing task")
+
+        for row in self.conn.execute("SELECT * FROM runner_dispatches"):
+            if (
+                self.conn.execute(
+                    "SELECT 1 FROM runs WHERE run_id = ?", (row["run_id"],)
+                ).fetchone()
+                is None
+            ):
+                raise IntegrityError("runner dispatch points to missing run")
 
         return {
             "database_id": self.meta("database_id"),
