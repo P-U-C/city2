@@ -32,6 +32,9 @@ checksums and removal plan at their reviewed destination paths. The builder
 rejects key, environment and database files. It never installs the archive and
 the signing key/Buzz identity are deliberately absent.
 
+The disposable worker staging/removal proof is recorded in
+[`PRODUCER-REHEARSAL.md`](PRODUCER-REHEARSAL.md).
+
 `ProducerObserver` accepts only that declared regular output file. It rejects
 symlinks, database/journal suffixes, undeclared paths, oversized files,
 non-read-only tools, network access, credentials, model execution and any source
