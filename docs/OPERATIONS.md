@@ -85,6 +85,18 @@ The reviewed namespace source is
 validation checks its syntax and a synthetic credential-backed observation.
 It is deliberately not installed, enabled or started by any repository command.
 
+Build and inspect the credential-free deployment artifact without changing the
+host or worker:
+
+```bash
+make build-producer-observer-bundle
+tar -tzf build/producer-observer/city2-producer-observer-ai-infra.tar.gz
+```
+
+The archive is ignored, reproducible and includes `MANIFEST.sha256` plus
+`REMOVAL.md`; it intentionally contains no signing key, environment file,
+database, producer output or Buzz identity.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.

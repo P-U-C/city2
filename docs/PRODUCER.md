@@ -26,6 +26,12 @@ writes only to a locked evidence `StateDirectory`. Its signing key is a systemd
 credential read by deterministic code, never an agent/model credential. The
 unit has no `[Install]` section and the selected manifests remain disabled.
 
+`make build-producer-observer-bundle` creates a deterministic ignored archive
+containing exactly the disabled manifests, unit, runtime code, schemas,
+checksums and removal plan at their reviewed destination paths. The builder
+rejects key, environment and database files. It never installs the archive and
+the signing key/Buzz identity are deliberately absent.
+
 `ProducerObserver` accepts only that declared regular output file. It rejects
 symlinks, database/journal suffixes, undeclared paths, oversized files,
 non-read-only tools, network access, credentials, model execution and any source
