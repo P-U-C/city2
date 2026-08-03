@@ -23,6 +23,7 @@ required=(
   docs/PRODUCER-REHEARSAL.md
   docs/PRODUCER-INSTALL-EVIDENCE.md
   docs/PRODUCER-KEY-EVIDENCE.md
+  docs/PRODUCER-SHADOW-EVIDENCE.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md

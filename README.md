@@ -72,7 +72,8 @@ adds [evidence-backed memory and deterministic context](docs/MEMORY.md); M3
 adds the undeployed [Buzz/PfTerminal adapter boundary](docs/ADAPTERS.md).
 M4 adds undeployed [independent review enforcement](docs/REVIEW.md).
 M5 adds the undeployed [encrypted archive pilot boundary](docs/ARCHIVE.md).
-M6 adds the disabled [read-only producer observer boundary](docs/PRODUCER.md).
+M6 adds the accepted, removed-after-proof
+[read-only producer observer boundary](docs/PRODUCER.md).
 Design acceptance and implementation are not deployment authorization.
 
 ## Current state
@@ -90,10 +91,10 @@ Design acceptance and implementation are not deployment authorization.
 - Company OS: specification version 0.2.0 is accepted after independent review;
   M0 contracts, M1 ledger, M2 memory/context and the version 0.5.0 M3 offline
   adapters, M4 independent review, M5 encrypted local/Testnet archive boundary
-  and the version 0.8.0 M6 offline producer-observer conformance layer are
-  implemented. Core is not deployed; `ai-infra` is selected only in disabled
-  manifests with an installed static/inactive observer unit and a bound one-time
-  signer; manifests remain disabled, the live coordinator remains outside Core
-  and no off-host archive exists.
+  and the M6 producer-observer layer are implemented. `ai-infra` passed one
+  signed shadow observation, narrow Buzz attestation and complete removal proof;
+  its observer, keys and identity are now absent. Core is not deployed, selected
+  manifests remain disabled, the live coordinator remains outside Core and no
+  off-host archive exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.

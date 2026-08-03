@@ -456,7 +456,7 @@ class MemoryFixture(unittest.TestCase):
         conn.close()
         with Store.migrate(old_db) as migrated:
             self.assertEqual(migrated.meta("schema_version"), "4")
-            self.assertEqual(migrated.meta("application_version"), "0.8.7")
+            self.assertEqual(migrated.meta("application_version"), "0.8.8")
             self.assertEqual(migrated.verify_integrity()["event_high_water"], 0)
 
 
