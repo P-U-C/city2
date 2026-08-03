@@ -155,6 +155,11 @@ The adapter is owner/channel/A0 constrained and runner capability negotiation
 fails closed. The live coordinator is deliberately not routed through Core by
 this source change; see [`ADAPTERS.md`](ADAPTERS.md) for the activation gate.
 
+M6 adds a disabled read-only producer observer. It hashes one exact declared
+output and emits signed provenance plus candidate memory without reading a
+producer database or becoming a downstream dependency. No live producer is
+selected by source alone; see [`PRODUCER.md`](PRODUCER.md).
+
 ## Safety gates
 
 1. **Repository:** validation and review pass.

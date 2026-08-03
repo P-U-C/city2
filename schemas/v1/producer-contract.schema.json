@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/producer-contract.schema.json",
+  "title": "City2 read-only producer observer contract v1",
+  "type": "object",
+  "required": [
+    "schema_version", "contract_id", "contract_version", "producer_id",
+    "host_id", "unix_user", "agent_id", "source", "authorities",
+    "memory_scope", "sensitivity", "freshness_slo_seconds", "value_metrics",
+    "rollback", "enabled"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.producer-contract/v1"},
+    "contract_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "contract_version": {"type": "integer", "minimum": 1},
+    "producer_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "host_id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "unix_user": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "agent_id": {"$ref": "common.schema.json#/$defs/agent_id"},
+    "source": {
+      "type": "object",
+      "required": ["uri", "media_type", "access", "max_bytes"],
+      "properties": {
+        "uri": {"$ref": "common.schema.json#/$defs/uri"},
+        "media_type": {"type": "string", "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+$"},
+        "access": {"const": "read-only"},
+        "max_bytes": {"type": "integer", "minimum": 1, "maximum": 1073741824}
+      },
+      "additionalProperties": false
+    },
+    "authorities": {
+      "type": "object",
+      "required": ["schedule", "database", "source_write"],
+      "properties": {
+        "schedule": {"const": "external-unchanged"},
+        "database": {"const": "external-unchanged"},
+        "source_write": {"const": "denied"}
+      },
+      "additionalProperties": false
+    },
+    "memory_scope": {"$ref": "common.schema.json#/$defs/scope"},
+    "sensitivity": {"$ref": "common.schema.json#/$defs/sensitivity"},
+    "freshness_slo_seconds": {"type": "integer", "minimum": 60, "maximum": 604800},
+    "value_metrics": {
+      "type": "array", "minItems": 2, "uniqueItems": true,
+      "items": {"enum": ["signed_provenance", "freshness_detection"]}
+    },
+    "rollback": {
+      "type": "object",
+      "required": ["disable_action", "downstream_dependencies"],
+      "properties": {
+        "disable_action": {"const": "remove-observer"},
+        "downstream_dependencies": {"type": "array", "maxItems": 0}
+      },
+      "additionalProperties": false
+    },
+    "enabled": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

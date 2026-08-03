@@ -58,3 +58,8 @@ Interfaces:
 - [CredentialBroker](CREDENTIAL-BROKER.md)
 - [Archive backend](ARCHIVE-BACKEND.md)
 - [Authority evaluator](AUTHORITY.md)
+
+M6 producer boundaries are canonicalized by
+`producer-contract.schema.json` and `producer-observation.schema.json`. The
+contract grants no schedule/database/source-write authority; observations bind
+exact source bytes and remain optional to every downstream system.

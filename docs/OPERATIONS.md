@@ -60,6 +60,17 @@ CITY2_AGE_BIN="$PWD/build/archive-tools" ./city2 validate
 This makes no Walrus call. Testnet activation requires separate operator review;
 Mainnet remains prohibited.
 
+M6 examples are intentionally disabled:
+
+```bash
+cat config/producer-contract.example.json
+cat config/producer-agent.example.json
+PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_producer.py' -v
+```
+
+Do not enable them by editing placeholders. Follow `docs/PRODUCER.md`; live
+selection first requires a healthy read-only fleet probe and separate review.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.

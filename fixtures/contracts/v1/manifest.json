@@ -89,6 +89,12 @@
       "instance": "invalid/task-mutable-input.json",
       "schema": "task-envelope.schema.json",
       "validation": "schema"
+    },
+    {
+      "error": "producer observers cannot receive write access",
+      "instance": "invalid/producer-write-authority.json",
+      "schema": "producer-contract.schema.json",
+      "validation": "schema"
     }
   ],
   "schema_version": "city2.contract-fixtures/v1",
@@ -164,6 +170,14 @@
     {
       "instance": "../../../config/authority-policy.v1.json",
       "schema": "authority-policy.schema.json"
+    },
+    {
+      "instance": "../../../config/producer-contract.example.json",
+      "schema": "producer-contract.schema.json"
+    },
+    {
+      "instance": "valid/producer-observation.json",
+      "schema": "producer-observation.schema.json"
     }
   ]
 }
