@@ -73,6 +73,7 @@ case "${1:-help}" in
   status)
     printf 'city2=%s\n' "$(cat "${ROOT}/VERSION")"
     git -C "${ROOT}" status --short --branch
+    "${ROOT}/scripts/runtime_status.py" --format status
     if [[ -f "${ROOT}/infra/buzz/.env" ]]; then
       "${ROOT}/infra/buzz/run.sh" status
     else
