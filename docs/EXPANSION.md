@@ -40,8 +40,23 @@ disabled A0 coordinator pilot routed through Core. It is deliberately deferred:
 - M6 is accepted;
 - the M2 fresh-session criterion has not run in the live path;
 - the M3 live Core-routing/restart criterion has not run;
-- the deployed coordinator still has Owner role and must be demoted first; and
+- the checked-in decision predates the coordinator's completed demotion; and
 - there are zero successful live recovery drills versus a threshold of three.
+
+The decision is immutable evidence of what was known when it was created. On
+2026-08-03 the coordinator subsequently signed its own reduction from Owner to
+Bot in all three bootstrap channels after explicit owner direction. The human
+identity is now the sole Owner. The first self-targeted event attempt failed
+closed because the pinned upstream CLI removed its own `p` tag; no role changed.
+A disposable patched signer preserved the explicit self tag, its focused unit
+test passed and the relay accepted exactly three signed role events. The binary
+was not installed or committed. Public, content-free evidence is in
+`docs/M7-DEMOTION-EVIDENCE.md`; complete signed evidence remains private and
+off-repository.
+
+This completed precondition does not convert the old decision to `admit` and
+does not authorize Core routing. M2/M3 live evidence and three recovery drills
+remain absent.
 
 The bound `config/coordinator-agent.m7.json` grants no credential, write,
 publication or outward-action authority. No Core database, service, identity,
@@ -49,8 +64,8 @@ channel, model call or deployment is created by this decision.
 
 ## Promotion procedure
 
-1. Demote the live coordinator from Owner to Bot or Member in its existing
-   private channels and preserve a verified identity/relay backup.
+1. Completed 2026-08-03: demote the live coordinator to Bot and preserve a
+   verified identity/relay backup.
 2. Run the reviewed A0 status path through Core with fresh sessions and no
    conversation dependence.
 3. Prove restart/relay-loss recovery three times and attach immutable evidence.

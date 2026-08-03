@@ -113,6 +113,11 @@ Do not change either to admitted/enabled in place. Follow `docs/EXPANSION.md`,
 create a new immutable decision revision and keep activation as a separate
 reviewed transaction.
 
+The coordinator's signed Owner-to-Bot reduction completed on 2026-08-03; the
+human identity is now the sole Owner in each bootstrap channel. This satisfies
+only the demotion precondition. The M2/M3 live criteria and three successful
+recovery drills remain open. See `docs/M7-DEMOTION-EVIDENCE.md`.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.
@@ -155,6 +160,12 @@ This is the independent Buzz relay backup, not the Core proof above. It takes an
 aligned PostgreSQL dump plus MinIO, Git and Redis volume
 archives. `.env` and human identity keys are intentionally excluded and need a
 separate encrypted backup path.
+
+Backup stops the relay briefly to align the stores. Before stopping anything it
+now requires the configured `BUZZ_BIND_IP` to be assigned locally; otherwise it
+fails closed and leaves every service running. This prevents a logged-out
+overlay network from turning a backup into an unrestartable relay. Run
+`./city2 buzz preflight` first when network state is uncertain.
 
 ## Coordinator runtime authentication
 

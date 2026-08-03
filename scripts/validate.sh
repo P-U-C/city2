@@ -25,6 +25,7 @@ required=(
   docs/PRODUCER-KEY-EVIDENCE.md
   docs/PRODUCER-SHADOW-EVIDENCE.md
   docs/EXPANSION.md
+  docs/M7-DEMOTION-EVIDENCE.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
