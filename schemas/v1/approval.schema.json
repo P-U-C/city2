@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/approval.schema.json",
+  "title": "City2 exact operation approval v1",
+  "type": "object",
+  "required": [
+    "schema_version", "approval_id", "aggregate_version", "approval_sha256",
+    "policy_version", "capability", "tool",
+    "target_resource", "canonical_parameters", "parameters_sha256", "input_hashes",
+    "task_id", "task_revision", "run_id", "requester", "approver",
+    "operation_idempotency_key", "issued_at", "expires_at", "maximum_executions",
+    "executions_consumed", "revocation_state"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.approval/v1"},
+    "approval_id": {"$ref": "common.schema.json#/$defs/approval_id"},
+    "aggregate_version": {"type": "integer", "minimum": 1},
+    "approval_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "policy_version": {"type": "string", "minLength": 1, "maxLength": 128},
+    "capability": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "tool": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "target_resource": {"type": "string", "minLength": 1, "maxLength": 2048},
+    "canonical_parameters": {"$ref": "common.schema.json#/$defs/canonical_parameters"},
+    "parameters_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "input_hashes": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/sha256"}},
+    "task_id": {"$ref": "common.schema.json#/$defs/task_id"},
+    "task_revision": {"type": "integer", "minimum": 1},
+    "run_id": {"$ref": "common.schema.json#/$defs/run_id"},
+    "requester": {"$ref": "common.schema.json#/$defs/actor"},
+    "approver": {"$ref": "common.schema.json#/$defs/actor"},
+    "operation_idempotency_key": {"$ref": "common.schema.json#/$defs/idempotency_key"},
+    "issued_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "expires_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "maximum_executions": {"type": "integer", "minimum": 1},
+    "executions_consumed": {"type": "integer", "minimum": 0},
+    "recurring_budget": {
+      "type": "object",
+      "required": ["max_billable_usd", "valid_from", "valid_until"],
+      "properties": {
+        "max_billable_usd": {"$ref": "common.schema.json#/$defs/money"},
+        "valid_from": {"$ref": "common.schema.json#/$defs/date_time"},
+        "valid_until": {"$ref": "common.schema.json#/$defs/date_time"}
+      },
+      "additionalProperties": false
+    },
+    "revocation_state": {"enum": ["active", "revoked", "expired", "exhausted"]},
+    "revoked_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "revoked_by": {"$ref": "common.schema.json#/$defs/actor"}
+  },
+  "additionalProperties": false
+}

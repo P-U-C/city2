@@ -1,0 +1,63 @@
+{
+  "assembler": {
+    "id": "context-builder",
+    "version": "1.0.0"
+  },
+  "candidate_memory_ids": [
+    "mem_01980000-0000-7000-8000-000000000006"
+  ],
+  "context_id": "ctx_01980000-0000-7000-8000-00000000000e",
+  "created_at": "2026-08-03T00:00:00Z",
+  "excluded": [],
+  "filters": [
+    "scope_allowed",
+    "current_only"
+  ],
+  "normalized_query": "review m0 contracts",
+  "pack_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "ranked_candidates": [
+    {
+      "memory_id": "mem_01980000-0000-7000-8000-000000000006",
+      "rank": 1,
+      "score": "0.95000000"
+    }
+  ],
+  "retrieval_policy": {
+    "id": "scoped-fts",
+    "version": "1.0.0"
+  },
+  "schema_version": "city2.context-pack/v1",
+  "sections": [
+    {
+      "name": "project_decisions",
+      "token_budget": 500,
+      "token_count": 18,
+      "truncated": false
+    }
+  ],
+  "selected": [
+    {
+      "excerpt": "Model sessions are disposable; City2 owns durable state.",
+      "excerpt_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "memory_id": "mem_01980000-0000-7000-8000-000000000006",
+      "section": "project_decisions",
+      "token_count": 18
+    }
+  ],
+  "sensitivity": "internal",
+  "source_snapshot": {
+    "event_high_water": 42,
+    "memory_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "task_envelope_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "tie_break": [
+    "score_desc",
+    "memory_id_asc"
+  ],
+  "tokenizer": {
+    "id": "tokenizer-reference",
+    "version": "1.0.0"
+  },
+  "total_tokens": 18
+}

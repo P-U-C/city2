@@ -1,0 +1,169 @@
+{
+  "invalid": [
+    {
+      "error": "unknown side effects cannot be blindly retried",
+      "instance": "invalid/action-invalid-state.json",
+      "schema": "action.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "unknown secret-bearing fields are rejected",
+      "instance": "invalid/agent-secret-field.json",
+      "schema": "agent.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "consumption cannot exceed the grant",
+      "instance": "invalid/approval-overconsumed.json",
+      "schema": "approval.schema.json",
+      "validation": "semantic"
+    },
+    {
+      "error": "canonical operation parameters use credential handles, never secret-shaped keys",
+      "instance": "invalid/approval-secret-parameter.json",
+      "schema": "approval.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "an approval must have a positive execution limit",
+      "instance": "invalid/approval-unbounded.json",
+      "schema": "approval.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "archive receipts require a signature",
+      "instance": "invalid/archive-bad-signature.json",
+      "schema": "archive-receipt.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "allow requires every dimension to allow",
+      "instance": "invalid/authority-allow-with-deny.json",
+      "schema": "authority-decision.schema.json",
+      "validation": "semantic"
+    },
+    {
+      "error": "deletion proofs retain only content-free selectors",
+      "instance": "invalid/deletion-raw-subject.json",
+      "schema": "deletion-order.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "events reject interface-specific hidden state",
+      "instance": "invalid/event-unknown-field.json",
+      "schema": "event.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "a fact needs source evidence",
+      "instance": "invalid/memory-fact-without-evidence.json",
+      "schema": "memory.schema.json",
+      "validation": "semantic"
+    },
+    {
+      "error": "a missing or null budget cannot mean unlimited",
+      "instance": "invalid/objective-null-budget.json",
+      "schema": "objective.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "a result must bind the lease fence",
+      "instance": "invalid/result-missing-fence.json",
+      "schema": "result.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "unsupported capabilities must be declared",
+      "instance": "invalid/runner-silent-degradation.json",
+      "schema": "runner-capability.schema.json",
+      "validation": "semantic"
+    },
+    {
+      "error": "a task needs acceptance criteria",
+      "instance": "invalid/task-missing-criteria.json",
+      "schema": "task-envelope.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "an input requires an immutable content or Git hash",
+      "instance": "invalid/task-mutable-input.json",
+      "schema": "task-envelope.schema.json",
+      "validation": "schema"
+    }
+  ],
+  "schema_version": "city2.contract-fixtures/v1",
+  "valid": [
+    {
+      "instance": "valid/agent.json",
+      "schema": "agent.schema.json"
+    },
+    {
+      "instance": "valid/objective.json",
+      "schema": "objective.schema.json"
+    },
+    {
+      "instance": "valid/task-envelope.json",
+      "schema": "task-envelope.schema.json"
+    },
+    {
+      "instance": "valid/task-record.json",
+      "schema": "task-record.schema.json"
+    },
+    {
+      "instance": "valid/evidence.json",
+      "schema": "evidence.schema.json"
+    },
+    {
+      "instance": "valid/result.json",
+      "schema": "result.schema.json"
+    },
+    {
+      "instance": "valid/event.json",
+      "schema": "event.schema.json"
+    },
+    {
+      "instance": "valid/artifact.json",
+      "schema": "artifact.schema.json"
+    },
+    {
+      "instance": "valid/memory.json",
+      "schema": "memory.schema.json"
+    },
+    {
+      "instance": "valid/context-pack.json",
+      "schema": "context-pack.schema.json"
+    },
+    {
+      "instance": "valid/approval.json",
+      "schema": "approval.schema.json"
+    },
+    {
+      "instance": "valid/action.json",
+      "schema": "action.schema.json"
+    },
+    {
+      "instance": "valid/deletion-order.json",
+      "schema": "deletion-order.schema.json"
+    },
+    {
+      "instance": "valid/archive-envelope.json",
+      "schema": "archive-envelope.schema.json"
+    },
+    {
+      "instance": "valid/archive-receipt.json",
+      "schema": "archive-receipt.schema.json"
+    },
+    {
+      "instance": "valid/runner-capability.json",
+      "schema": "runner-capability.schema.json"
+    },
+    {
+      "instance": "valid/authority-decision.json",
+      "schema": "authority-decision.schema.json"
+    },
+    {
+      "instance": "../../../config/authority-policy.v1.json",
+      "schema": "authority-policy.schema.json"
+    }
+  ]
+}

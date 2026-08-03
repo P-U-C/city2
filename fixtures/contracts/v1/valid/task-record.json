@@ -1,0 +1,24 @@
+{
+  "action_ids": [],
+  "aggregate_version": 7,
+  "attempt_count": 1,
+  "created_at": "2026-08-03T00:00:00Z",
+  "current_run_id": "run_01980000-0000-7000-8000-000000000005",
+  "lease": {
+    "attempt_number": 1,
+    "expected_task_version": 7,
+    "expires_at": "2026-08-03T00:30:00Z",
+    "fencing_token": "fixture-fence-0001",
+    "owner": "service:runner-1"
+  },
+  "max_attempts": 2,
+  "objective_id": "obj_01980000-0000-7000-8000-000000000003",
+  "objective_revision": 1,
+  "objective_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "schema_version": "city2.task-record/v1",
+  "state": "running",
+  "task_envelope_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "task_revision": 1,
+  "updated_at": "2026-08-03T00:00:00Z"
+}

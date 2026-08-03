@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/common.schema.json",
+  "title": "City2 v1 common definitions",
+  "$defs": {
+    "actor": {
+      "type": "string",
+      "pattern": "^(human|agent|service):[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "authority_class": {
+      "enum": ["A0", "A1", "A2", "A3", "A4"]
+    },
+    "canonical_parameters": {
+      "$ref": "#/$defs/canonical_object"
+    },
+    "canonical_object": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "pattern": "(?i)(^|[._-])(api[_-]?key|access[_-]?token|password|private[_-]?key|secret|seed|mnemonic|recovery[_-]?phrase)([._-]|$)"
+        }
+      },
+      "additionalProperties": {"$ref": "#/$defs/canonical_value"}
+    },
+    "canonical_value": {
+      "anyOf": [
+        {"type": ["string", "number", "boolean", "null"]},
+        {"type": "array", "items": {"$ref": "#/$defs/canonical_value"}},
+        {"$ref": "#/$defs/canonical_object"}
+      ]
+    },
+    "credential_handle": {
+      "type": "string",
+      "pattern": "^credential:[a-z0-9][a-z0-9._/-]{0,127}$"
+    },
+    "date_time": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+    },
+    "git_sha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:/-]{7,255}$"
+    },
+    "json_value": {
+      "type": ["object", "array", "string", "number", "integer", "boolean", "null"]
+    },
+    "money": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+    },
+    "non_secret_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._/-]{0,127}$"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^(company|agent:[a-z0-9._-]+|department:[a-z0-9._-]+|project:[a-z0-9._-]+|task:tsk_[0-9a-f-]+)$"
+    },
+    "sensitivity": {
+      "enum": ["public", "internal", "confidential", "restricted"]
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uri": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9+.-]*:.+$"
+    },
+    "uuidv7": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "agent_id": {
+      "type": "string",
+      "pattern": "^agt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "objective_id": {
+      "type": "string",
+      "pattern": "^obj_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^tsk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^run_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "memory_id": {
+      "type": "string",
+      "pattern": "^mem_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "action_id": {
+      "type": "string",
+      "pattern": "^act_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "approval_id": {
+      "type": "string",
+      "pattern": "^apr_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^art_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "review_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "finding_id": {
+      "type": "string",
+      "pattern": "^fnd_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "context_id": {
+      "type": "string",
+      "pattern": "^ctx_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "deletion_id": {
+      "type": "string",
+      "pattern": "^del_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "archive_id": {
+      "type": "string",
+      "pattern": "^arc_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "artifact_ref": {
+      "type": "object",
+      "required": ["artifact_id", "sha256"],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/artifact_id"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "required": ["max_billable_usd", "max_input_tokens", "max_output_tokens"],
+      "properties": {
+        "max_billable_usd": {"$ref": "#/$defs/money"},
+        "max_input_tokens": {"type": "integer", "minimum": 0},
+        "max_output_tokens": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "validator": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": {"$ref": "#/$defs/non_secret_name"},
+        "version": {"type": "string", "minLength": 1, "maxLength": 64}
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,8 +1,9 @@
 # Migration from legacy City
 
-This document governs the current migration away from legacy City. The later
-City2 Core, memory, runner-portability and Walrus milestones are proposed in the
-non-normative [Company OS design specification](COMPANY-OS-SPEC.md).
+This document governs the current migration away from legacy City. The accepted
+City2 Core, memory, runner-portability and archive milestones and their proof
+gates are defined in the
+[Company OS design specification](COMPANY-OS-SPEC.md).
 
 ## Why a new repository
 
@@ -43,6 +44,13 @@ retirement requires separate verification and approval.
 
 ## Phases
 
+The deployment phases below describe widening the live Buzz/agent path. Company
+OS milestones `M0`-`M7` describe building the durable control system. They are
+separate tracks and both gates apply. M0 is contract-only. Deployment Phase 3
+is deferred until the relevant M1-M4 Core, runner and independent-review gates
+pass; deployment Phase 4 maps to M6. Neither track advances merely because its
+documentation or schema exists.
+
 ### Phase 0 — repository foundation (this release)
 
 - New repo and project contract.
@@ -69,12 +77,14 @@ retirement requires separate verification and approval.
 
 ### Phase 3 — scoped writes
 
+- Require the M1-M4 ledger, runner and independent-review proof gates.
 - Add an explicit project filesystem boundary.
 - Complete one reversible change through PfTerminal.
 - Verify Git diff, review, rollback and agent identity rotation.
 
 ### Phase 4 — one producer
 
+- Require M6 acceptance and retain its rollback/value measurement.
 - Select one noncritical producer.
 - Keep its Unix identity, schedule and database intact.
 - Add a distinct Buzz identity and narrow channel membership.

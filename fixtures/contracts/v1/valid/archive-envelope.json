@@ -1,0 +1,16 @@
+{
+  "archive_id": "arc_01980000-0000-7000-8000-000000000010",
+  "checkpoint_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+  "cipher_profile": "age-v1-x25519",
+  "ciphertext_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "created_at": "2026-08-03T00:00:00Z",
+  "inner_manifest_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+  "key_versions": [
+    "recovery-1"
+  ],
+  "recipient_fingerprints": [
+    "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  ],
+  "schema_version": "city2.archive-envelope/v1",
+  "snapshot_sequence": 42
+}

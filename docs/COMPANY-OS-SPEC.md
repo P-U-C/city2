@@ -2,17 +2,18 @@
 
 | Field | Value |
 |---|---|
-| Status | Draft for independent agent review |
+| Status | Accepted design contract; M0 contract implementation |
 | Version | 0.2.0 |
-| Date | 2026-08-02 |
+| Date | 2026-08-03 |
 | Owner | Chad (`0xzoz`) |
 | Scope | Target operating model, contracts, memory and staged implementation |
-| Current implementation | City2 Phase 2: private relay plus one read-only coordinator |
+| Current implementation | City2 Phase 2 plus M0 schemas/interfaces; no Core runtime |
 
-This document is intentionally non-normative until Chad accepts it after
-review. It specifies the desired end state and the smallest path from the live
-City2 system to that state. It does not authorize deployment, producer changes,
-new credentials, wallet activity or external publication.
+This document is the accepted design contract. It specifies the desired end
+state and the smallest path from the live City2 system to that state. Acceptance
+does not authorize deployment, producer changes, new credentials, wallet
+activity or external publication; every later milestone retains its stated
+activation gate.
 
 The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT** and **MAY** are
 used as requirement levels for review.
@@ -247,28 +248,27 @@ An agent is a stable organizational identity and contract, not a model session.
 
 ```json
 {
-  "schema_version": "city2.agent/v1",
-  "agent_id": "agt_<uuidv7>",
-  "manifest_version": 1,
-  "manifest_sha256": "<sha256>",
-  "name": "research-reviewer",
-  "role": "reviewer",
-  "department": "intelligence",
-  "reports_to": "agt_<uuidv7>",
-  "runner_policy": "coding-default",
-  "required_capabilities": [
-    "structured_output",
-    "tool_calls",
-    "cancellation",
-    "usage_accounting"
+  "agent_id": "agt_01980000-0000-7000-8000-000000000001",
+  "aggregate_version": 1,
+  "allowed_task_types": [
+    "research_review"
   ],
-  "model_policy": "quality-default",
   "authority_class": "A0",
-  "allowed_task_types": ["research_review"],
-  "tools": ["corpus_read", "web_read"],
-  "filesystem_scopes": ["repository:read"],
-  "network_policy": "research-readonly",
+  "concurrency": 1,
+  "context_profile": "reviewer-default",
+  "cost_budget": {
+    "max_billable_usd": "1.00",
+    "max_input_tokens": 30000,
+    "max_output_tokens": 8000
+  },
   "credential_handles": [],
+  "department": "intelligence",
+  "enabled": false,
+  "filesystem_scopes": [
+    "repository:read"
+  ],
+  "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "manifest_version": 1,
   "memory_read_scopes": [
     "company",
     "department:intelligence",
@@ -278,16 +278,25 @@ An agent is a stable organizational identity and contract, not a model session.
     "candidate:agent:self",
     "candidate:department:intelligence"
   ],
-  "context_profile": "reviewer-default",
-  "time_budget_seconds": 1800,
-  "cost_budget": {
-    "max_billable_usd": "0.00",
-    "max_input_tokens": 30000,
-    "max_output_tokens": 8000
-  },
-  "concurrency": 1,
+  "model_policy": "quality-default",
+  "name": "research-reviewer",
+  "network_policy": "research-readonly",
+  "reports_to": "agt_01980000-0000-7000-8000-000000000002",
+  "required_capabilities": [
+    "structured_output",
+    "tool_calls",
+    "cancellation",
+    "usage_accounting"
+  ],
   "review_policy": "independent",
-  "enabled": false
+  "role": "reviewer",
+  "runner_policy": "coding-default",
+  "schema_version": "city2.agent/v1",
+  "time_budget_seconds": 1800,
+  "tools": [
+    "corpus_read",
+    "web_read"
+  ]
 }
 ```
 
@@ -304,7 +313,8 @@ review date and status. It MUST NOT be represented only by a chat message.
 
 Required fields:
 
-- `objective_id`, immutable `objective_revision`, `objective_sha256`,
+- `objective_id`, `aggregate_version`, immutable `objective_revision`,
+  `objective_sha256`,
   `schema_version`, `title`, `intent`;
 - `created_by`, `accountable_owner`, `created_at`, `review_at`;
 - measurable outcomes and stop conditions;
@@ -323,41 +333,54 @@ runner and deliberately excludes Core-owned lifecycle state.
 
 ```json
 {
-  "schema_version": "city2.task/v1",
-  "task_id": "tsk_<uuidv7>",
-  "task_revision": 2,
-  "task_envelope_sha256": "<sha256>",
-  "objective_id": "obj_<uuidv7>",
-  "objective_revision": 1,
-  "objective_sha256": "<sha256>",
-  "task_type": "repository_analysis",
-  "title": "Assess the first producer integration",
-  "intent": "Produce a no-change recommendation with evidence",
-  "created_by": "human:chad",
-  "requested_role": "city2-coordinator",
-  "resolved_agent_id": "agt_<uuidv7>",
-  "resolved_manifest_version": 3,
-  "resolved_manifest_sha256": "<sha256>",
-  "attempt_number": 1,
-  "expected_task_version": 7,
-  "lease_fencing_token": "<opaque-random-token>",
-  "authority_class": "A0",
-  "inputs": [{
-    "uri": "git+https://github.com/P-U-C/city2.git",
-    "git_commit_sha1": "<40-lowercase-hex>"
-  }],
-  "constraints": ["read_only", "no_external_action"],
   "acceptance_criteria": [
-    {"criterion_id": "ac_1", "requirement": "cites current contracts"},
-    {"criterion_id": "ac_2", "requirement": "names rollback"}
+    {
+      "criterion_id": "ac_contracts",
+      "mandatory": true,
+      "requirement": "Cites the current contracts"
+    },
+    {
+      "criterion_id": "ac_rollback",
+      "mandatory": true,
+      "requirement": "Names rollback"
+    }
   ],
-  "memory_scopes": ["company", "project:city2"],
-  "time_budget_seconds": 1800,
+  "attempt_number": 1,
+  "authority_class": "A0",
+  "constraints": [
+    "read_only",
+    "no_external_action"
+  ],
+  "created_by": "human:chad",
+  "expected_task_version": 7,
+  "inputs": [
+    {
+      "git_commit_sha1": "0123456789abcdef0123456789abcdef01234567",
+      "uri": "git+https://github.com/P-U-C/city2.git"
+    }
+  ],
+  "intent": "Find contract gaps without making external changes.",
+  "lease_fencing_token": "fixture-fence-0001",
   "max_attempts": 2,
-  "task_dedupe_key": "<namespaced-request-key>",
-  "supersedes_run_id": "run_<uuidv7>",
-  "review_id": "rev_<uuidv7>",
-  "unresolved_finding_ids": ["fnd_<uuidv7>"]
+  "memory_scopes": [
+    "company",
+    "project:city2"
+  ],
+  "objective_id": "obj_01980000-0000-7000-8000-000000000003",
+  "objective_revision": 1,
+  "objective_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "requested_role": "research-reviewer",
+  "resolved_agent_id": "agt_01980000-0000-7000-8000-000000000001",
+  "resolved_manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "resolved_manifest_version": 1,
+  "schema_version": "city2.task/v1",
+  "task_dedupe_key": "fixture:task:0001",
+  "task_envelope_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "task_revision": 1,
+  "task_type": "repository_analysis",
+  "time_budget_seconds": 1800,
+  "title": "Review the M0 contract set"
 }
 ```
 
@@ -375,46 +398,80 @@ Every run returns a provider-neutral result:
 
 ```json
 {
-  "schema_version": "city2.result/v1",
-  "task_id": "tsk_<uuidv7>",
-  "task_revision": 2,
-  "run_id": "run_<uuidv7>",
-  "expected_task_version": 7,
-  "lease_fencing_token": "<opaque-random-token>",
-  "run_status": "completed",
-  "runner": {"id": "pfterminal", "version": "<version>"},
-  "model": {
-    "provider": "<provider>",
-    "model": "<model>",
-    "capability_profile": "<profile-version>"
-  },
-  "agent_manifest_version": 3,
-  "agent_manifest_sha256": "<sha256>",
-  "context_pack_ref": {
-    "artifact_id": "art_<uuidv7>",
-    "sha256": "<sha256>"
-  },
-  "outcome": "...",
-  "artifacts": [],
-  "evidence": [{
-    "criterion_id": "ac_1",
-    "validator": {"id": "source-check", "version": "1"},
-    "subject_sha256": "<sha256>",
-    "result": "pass",
-    "checked_at": "2026-08-02T00:00:00Z",
-    "provenance": [{"uri": "git+https://github.com/P-U-C/city2.git", "git_commit_sha1": "<40-lowercase-hex>"}]
-  }],
-  "checks": [{
-    "criterion_id": "ac_2",
-    "validator": {"id": "review-check", "version": "1"},
-    "subject_sha256": "<sha256>",
-    "result": "pass",
-    "checked_at": "2026-08-02T00:00:00Z"
-  }],
-  "memory_candidates": [],
+  "agent_manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "agent_manifest_version": 1,
   "approvals_requested": [],
-  "usage": {"wall_seconds": 0, "input_tokens": 0, "output_tokens": 0},
-  "errors": []
+  "artifacts": [
+    {
+      "artifact_id": "art_01980000-0000-7000-8000-00000000000a",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "checks": [
+    {
+      "checked_at": "2026-08-03T00:00:00Z",
+      "criterion_id": "ac_rollback",
+      "provenance": [],
+      "result": "pass",
+      "schema_version": "city2.evidence/v1",
+      "subject_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "validator": {
+        "id": "rollback-check",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "context_pack_ref": {
+    "artifact_id": "art_01980000-0000-7000-8000-00000000000b",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "errors": [],
+  "evidence": [
+    {
+      "checked_at": "2026-08-03T00:00:00Z",
+      "criterion_id": "ac_contracts",
+      "provenance": [
+        {
+          "content_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "git_commit_sha1": "0123456789abcdef0123456789abcdef01234567",
+          "retrieved_at": "2026-08-03T00:00:00Z",
+          "uri": "git+https://github.com/P-U-C/city2.git"
+        }
+      ],
+      "result": "pass",
+      "schema_version": "city2.evidence/v1",
+      "subject_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "validator": {
+        "id": "schema-validator",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "expected_task_version": 7,
+  "lease_fencing_token": "fixture-fence-0001",
+  "memory_candidates": [],
+  "model": {
+    "capability_profile": "profile-v1",
+    "model": "model-reference",
+    "provider": "provider-reference"
+  },
+  "outcome": "The contract set validates.",
+  "run_id": "run_01980000-0000-7000-8000-000000000005",
+  "run_status": "completed",
+  "runner": {
+    "capability_manifest_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "id": "runner-reference",
+    "version": "1.0.0"
+  },
+  "schema_version": "city2.result/v1",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "task_revision": 1,
+  "usage": {
+    "billable_usd": "0.10",
+    "input_tokens": 1200,
+    "output_tokens": 400,
+    "wall_seconds": 12.5
+  }
 }
 ```
 
@@ -475,7 +532,7 @@ content.
 An approval is a versioned, immutable capability grant, not an authority-class
 label. It binds:
 
-- approval ID/schema and policy version;
+- approval ID/schema, aggregate version, immutable grant hash and policy version;
 - exact capability/tool and target resource;
 - canonical parameters plus input/artifact hashes;
 - task revision, run, requester and approver;
@@ -644,38 +701,46 @@ separate Core record, not accepted memory.
 
 ```json
 {
-  "schema_version": "city2.memory/v1",
-  "memory_id": "mem_<uuidv7>",
-  "scope": "project:city2",
-  "type": "decision",
-  "statement": "Model sessions are disposable; City2 owns durable state.",
-  "evidence_refs": [{
-    "relationship": "observed_from",
-    "source_type": "git_blob",
-    "authoritative_owner": "P-U-C/city2",
-    "uri": "git+https://github.com/P-U-C/city2.git",
-    "git_commit_sha1": "<40-lowercase-hex>",
-    "path": "docs/COMPANY-OS-SPEC.md",
-    "excerpt_locator": {"heading": "1. Executive decision"},
-    "retrieval_method": "git_show",
-    "content_sha256": "<sha256>",
-    "observed_at": "2026-08-02T00:00:00Z",
-    "validity_status": "current",
-    "revocation_checked_at": "2026-08-02T00:00:00Z"
-  }],
+  "aggregate_version": 1,
   "asserted_by": "human:chad",
-  "owner": "human:chad",
-  "created_by": "human:chad",
-  "created_at": "2026-08-02T00:00:00Z",
-  "valid_from": "2026-08-02T00:00:00Z",
-  "fact_class": "architecture_decision",
-  "revalidation_policy": "on_source_revision",
-  "revalidate_at": "2027-08-02T00:00:00Z",
   "confidence": 1.0,
-  "sensitivity": "internal",
+  "created_at": "2026-08-03T00:00:00Z",
+  "created_by": "human:chad",
+  "evidence_refs": [
+    {
+      "authoritative_owner": "P-U-C/city2",
+      "content_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "excerpt_locator": {
+        "heading": "1. Executive decision"
+      },
+      "git_commit_sha1": "0123456789abcdef0123456789abcdef01234567",
+      "observed_at": "2026-08-03T00:00:00Z",
+      "path": "docs/COMPANY-OS-SPEC.md",
+      "relationship": "observed_from",
+      "retrieval_method": "git_show",
+      "revocation_checked_at": "2026-08-03T00:00:00Z",
+      "source_type": "git_blob",
+      "uri": "git+https://github.com/P-U-C/city2.git",
+      "validity_status": "current"
+    }
+  ],
+  "fact_class": "architecture_decision",
+  "labels": [
+    "architecture",
+    "portability"
+  ],
+  "memory_id": "mem_01980000-0000-7000-8000-000000000006",
+  "owner": "human:chad",
+  "revalidate_at": "2027-08-03T00:00:00Z",
+  "revalidation_policy": "on_source_revision",
   "review_state": "accepted",
+  "schema_version": "city2.memory/v1",
+  "scope": "project:city2",
+  "sensitivity": "internal",
+  "statement": "Model sessions are disposable; City2 owns durable state.",
   "supersedes": [],
-  "labels": ["architecture", "portability"]
+  "type": "decision",
+  "valid_from": "2026-08-03T00:00:00Z"
 }
 ```
 
@@ -1300,7 +1365,8 @@ Deliver:
 
 Exit criteria:
 
-- independent reviews resolved;
+- actionable independent-review findings are dispositioned in the accepted
+  text; duplicate or outdated review UI threads need not be manually closed;
 - no secret or provider-specific state in a canonical schema;
 - sample exports validate and round-trip.
 
@@ -1532,12 +1598,13 @@ These references inform the design; none is adopted wholesale:
 
 ## 24. Acceptance record
 
-This draft becomes normative only when:
+Chad accepted this design for phased implementation on 2026-08-03 after the
+independent reviews on pull request 1. All actionable findings were incorporated
+or explicitly superseded in version 0.2.0; the final follow-up review reported no
+remaining architectural blocker. Duplicate and outdated GitHub UI threads were
+left as review history rather than converted into false unresolved design work.
 
-1. independent reviews are recorded and resolved;
-2. Chad decides all open product/risk questions;
-3. the accepted text receives a Git commit and version;
-4. `docs/ARCHITECTURE.md`, `docs/MIGRATION.md` and the implementation plan are
-   reconciled with it;
-5. no deployment or authority change is bundled into the documentation-only
-   acceptance commit.
+The accepted text was merged as commit `cec7131`. This M0 change reconciles
+`docs/ARCHITECTURE.md`, `docs/MIGRATION.md` and the executable implementation
+plan with that contract. No deployment, credential, producer, authority, wallet
+or external-publishing change is part of acceptance or M0.

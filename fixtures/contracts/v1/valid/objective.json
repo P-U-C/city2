@@ -1,0 +1,30 @@
+{
+  "accountable_owner": "human:chad",
+  "aggregate_version": 1,
+  "authority_ceiling": "A1",
+  "budget": {
+    "max_billable_usd": "25.00",
+    "max_input_tokens": 500000,
+    "max_output_tokens": 100000
+  },
+  "created_at": "2026-08-03T00:00:00Z",
+  "created_by": "human:chad",
+  "intent": "Establish portable, reviewable boundaries before runtime implementation.",
+  "measurable_outcomes": [
+    {
+      "measure": "Valid contract fixtures",
+      "outcome_id": "oc_contracts",
+      "target": "All committed valid fixtures pass"
+    }
+  ],
+  "objective_id": "obj_01980000-0000-7000-8000-000000000003",
+  "objective_revision": 1,
+  "objective_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "review_at": "2026-09-03T00:00:00Z",
+  "schema_version": "city2.objective/v1",
+  "status": "active",
+  "stop_conditions": [
+    "A canonical schema requires a provider session"
+  ],
+  "title": "Prove the M0 contracts"
+}

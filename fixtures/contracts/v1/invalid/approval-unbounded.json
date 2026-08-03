@@ -1,0 +1,28 @@
+{
+  "aggregate_version": 1,
+  "approval_id": "apr_01980000-0000-7000-8000-000000000009",
+  "approval_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+  "approver": "human:chad",
+  "canonical_parameters": {
+    "branch": "codex/company-os-m0"
+  },
+  "capability": "git_push_branch",
+  "executions_consumed": 0,
+  "expires_at": "2026-08-04T00:00:00Z",
+  "input_hashes": [
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  ],
+  "issued_at": "2026-08-03T00:00:00Z",
+  "maximum_executions": 0,
+  "operation_idempotency_key": "fixture:operation:0001",
+  "parameters_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+  "policy_version": "1.0.0",
+  "requester": "agent:research-reviewer",
+  "revocation_state": "active",
+  "run_id": "run_01980000-0000-7000-8000-000000000005",
+  "schema_version": "city2.approval/v1",
+  "target_resource": "repository:P-U-C/city2",
+  "task_id": "tsk_01980000-0000-7000-8000-000000000004",
+  "task_revision": 1,
+  "tool": "git"
+}

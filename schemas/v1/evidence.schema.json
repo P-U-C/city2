@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/evidence.schema.json",
+  "title": "City2 acceptance evidence v1",
+  "type": "object",
+  "required": ["schema_version", "criterion_id", "validator", "subject_sha256", "result", "checked_at", "provenance"],
+  "properties": {
+    "schema_version": {"const": "city2.evidence/v1"},
+    "criterion_id": {"type": "string", "pattern": "^ac_[a-z0-9._-]+$"},
+    "validator": {"$ref": "common.schema.json#/$defs/validator"},
+    "subject_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "result": {"enum": ["pass", "fail", "indeterminate"]},
+    "checked_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uri", "content_sha256", "retrieved_at"],
+        "properties": {
+          "uri": {"$ref": "common.schema.json#/$defs/uri"},
+          "content_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+          "git_commit_sha1": {"$ref": "common.schema.json#/$defs/git_sha1"},
+          "retrieved_at": {"$ref": "common.schema.json#/$defs/date_time"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "details_artifact": {"$ref": "common.schema.json#/$defs/artifact_ref"}
+  },
+  "additionalProperties": false
+}

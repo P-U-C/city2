@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/action.schema.json",
+  "title": "City2 durable side-effect action/outbox record v1",
+  "type": "object",
+  "required": [
+    "schema_version", "action_id", "aggregate_version", "task_id", "task_revision",
+    "run_id", "capability", "target", "provider", "canonical_parameters",
+    "parameters_sha256", "approval_id", "approval_sha256",
+    "operation_idempotency_key", "state",
+    "prepared_at", "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.action/v1"},
+    "action_id": {"$ref": "common.schema.json#/$defs/action_id"},
+    "aggregate_version": {"type": "integer", "minimum": 1},
+    "task_id": {"$ref": "common.schema.json#/$defs/task_id"},
+    "task_revision": {"type": "integer", "minimum": 1},
+    "run_id": {"$ref": "common.schema.json#/$defs/run_id"},
+    "capability": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "target": {"type": "string", "minLength": 1, "maxLength": 2048},
+    "provider": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+    "canonical_parameters": {"$ref": "common.schema.json#/$defs/canonical_parameters"},
+    "parameters_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "approval_id": {"$ref": "common.schema.json#/$defs/approval_id"},
+    "approval_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "operation_idempotency_key": {"$ref": "common.schema.json#/$defs/idempotency_key"},
+    "state": {"enum": ["prepared", "dispatched", "confirmed", "unknown", "failed", "compensated"]},
+    "provider_operation_id": {"type": "string", "minLength": 1, "maxLength": 512},
+    "provider_evidence": {"$ref": "common.schema.json#/$defs/artifact_ref"},
+    "compensation": {
+      "type": "object",
+      "required": ["capability", "canonical_parameters", "parameters_sha256"],
+      "properties": {
+        "capability": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+        "canonical_parameters": {"$ref": "common.schema.json#/$defs/canonical_parameters"},
+        "parameters_sha256": {"$ref": "common.schema.json#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "prepared_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "dispatched_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "confirmed_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "updated_at": {"$ref": "common.schema.json#/$defs/date_time"}
+  },
+  "additionalProperties": false
+}

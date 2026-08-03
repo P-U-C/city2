@@ -1,0 +1,12 @@
+{
+  "artifact_id": "art_01980000-0000-7000-8000-00000000000a",
+  "byte_length": 128,
+  "created_at": "2026-08-03T00:00:00Z",
+  "git_commit_sha1": "0123456789abcdef0123456789abcdef01234567",
+  "media_type": "application/json",
+  "producer_run_id": "run_01980000-0000-7000-8000-000000000005",
+  "schema_version": "city2.artifact/v1",
+  "sensitivity": "internal",
+  "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "storage_uri": "cas:sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

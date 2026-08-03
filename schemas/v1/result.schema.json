@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/result.schema.json",
+  "title": "City2 provider-neutral run result v1",
+  "type": "object",
+  "required": [
+    "schema_version", "task_id", "task_revision", "run_id", "expected_task_version",
+    "lease_fencing_token", "run_status", "runner", "model", "agent_manifest_version",
+    "agent_manifest_sha256", "context_pack_ref", "outcome", "artifacts", "evidence",
+    "checks", "memory_candidates", "approvals_requested", "usage", "errors"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.result/v1"},
+    "task_id": {"$ref": "common.schema.json#/$defs/task_id"},
+    "task_revision": {"type": "integer", "minimum": 1},
+    "run_id": {"$ref": "common.schema.json#/$defs/run_id"},
+    "expected_task_version": {"type": "integer", "minimum": 1},
+    "lease_fencing_token": {"type": "string", "minLength": 16, "maxLength": 256},
+    "run_status": {"enum": ["completed", "failed", "cancelled", "completed_after_cancel"]},
+    "runner": {
+      "type": "object",
+      "required": ["id", "version", "capability_manifest_sha256"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+        "version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "capability_manifest_sha256": {"$ref": "common.schema.json#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "required": ["provider", "model", "capability_profile"],
+      "properties": {
+        "provider": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+        "model": {"type": "string", "minLength": 1, "maxLength": 256},
+        "capability_profile": {"type": "string", "minLength": 1, "maxLength": 128}
+      },
+      "additionalProperties": false
+    },
+    "agent_manifest_version": {"type": "integer", "minimum": 1},
+    "agent_manifest_sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "context_pack_ref": {"$ref": "common.schema.json#/$defs/artifact_ref"},
+    "outcome": {"type": "string", "maxLength": 20000},
+    "artifacts": {"type": "array", "uniqueItems": true, "items": {"$ref": "common.schema.json#/$defs/artifact_ref"}},
+    "evidence": {"type": "array", "items": {"$ref": "evidence.schema.json"}},
+    "checks": {"type": "array", "items": {"$ref": "evidence.schema.json"}},
+    "memory_candidates": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/memory_id"}},
+    "approvals_requested": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/approval_id"}},
+    "usage": {
+      "type": "object",
+      "required": ["wall_seconds", "input_tokens", "output_tokens"],
+      "properties": {
+        "wall_seconds": {"type": "number", "minimum": 0},
+        "input_tokens": {"type": "integer", "minimum": 0},
+        "output_tokens": {"type": "integer", "minimum": 0},
+        "billable_usd": {"$ref": "common.schema.json#/$defs/money"}
+      },
+      "additionalProperties": false
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message", "retryable"],
+        "properties": {
+          "code": {"$ref": "common.schema.json#/$defs/non_secret_name"},
+          "message": {"type": "string", "minLength": 1, "maxLength": 4000},
+          "retryable": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

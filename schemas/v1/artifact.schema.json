@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://p-u-c.github.io/city2/schemas/v1/artifact.schema.json",
+  "title": "City2 content-addressed artifact v1",
+  "type": "object",
+  "required": [
+    "schema_version", "artifact_id", "media_type", "byte_length", "sha256",
+    "storage_uri", "producer_run_id", "created_at", "sensitivity"
+  ],
+  "properties": {
+    "schema_version": {"const": "city2.artifact/v1"},
+    "artifact_id": {"$ref": "common.schema.json#/$defs/artifact_id"},
+    "media_type": {"type": "string", "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+$"},
+    "byte_length": {"type": "integer", "minimum": 0},
+    "sha256": {"$ref": "common.schema.json#/$defs/sha256"},
+    "storage_uri": {"$ref": "common.schema.json#/$defs/uri"},
+    "producer_run_id": {"$ref": "common.schema.json#/$defs/run_id"},
+    "created_at": {"$ref": "common.schema.json#/$defs/date_time"},
+    "sensitivity": {"$ref": "common.schema.json#/$defs/sensitivity"},
+    "git_commit_sha1": {"$ref": "common.schema.json#/$defs/git_sha1"}
+  },
+  "additionalProperties": false
+}

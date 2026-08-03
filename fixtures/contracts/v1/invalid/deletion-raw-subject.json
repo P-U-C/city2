@@ -1,0 +1,34 @@
+{
+  "aggregate_version": 1,
+  "approved_by": "human:chad",
+  "deletion_id": "del_01980000-0000-7000-8000-00000000000f",
+  "execute_by": "2026-08-10T00:00:00Z",
+  "issued_at": "2026-08-03T00:00:00Z",
+  "order_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+  "policy_version": "1.0.0",
+  "reason_code": "synthetic_test",
+  "requested_by": "human:chad",
+  "schema_version": "city2.deletion-order/v1",
+  "scope": [
+    "core",
+    "search_indexes",
+    "artifacts",
+    "backups",
+    "archive_keys"
+  ],
+  "state": "ordered",
+  "subject_selectors": [
+    {
+      "kind": "memory",
+      "value_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+    }
+  ],
+  "subject_value": "person@example.invalid",
+  "targets": [
+    {
+      "backend": "core",
+      "locator_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "state": "pending"
+    }
+  ]
+}

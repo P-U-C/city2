@@ -36,8 +36,11 @@ AGENTS.md                 PfTerminal's project operating contract
 city2                     Single operator command surface
 config/                   Public, non-secret activation contract
                           and declared producer fleet
+contracts/v1/             Portable runner, credential, archive and authority semantics
 docs/                     Architecture, migration, security and operations
+fixtures/contracts/v1/    Valid and adversarial contract examples
 infra/buzz/               Pinned private Buzz relay and agent integration
+schemas/v1/               Canonical Company OS JSON Schemas
 scripts/                  Validation and reproducible tool builds
 tests/                    Offline contract tests
 ```
@@ -56,10 +59,12 @@ tests/                    Offline contract tests
 
 The relay and coordinator are separate activation gates.
 See [Architecture](docs/ARCHITECTURE.md), [Migration](docs/MIGRATION.md) and
-[Operations](docs/OPERATIONS.md). The proposed long-term company operating
-model is the review draft in
-[Company OS design specification](docs/COMPANY-OS-SPEC.md); it is not an
-activation authorization.
+[Operations](docs/OPERATIONS.md). The accepted long-term operating model and
+its explicit milestone gates are in the
+[Company OS design specification](docs/COMPANY-OS-SPEC.md). Its M0 contract
+implementation includes the [portable interfaces](contracts/v1/README.md),
+[canonical schemas](schemas/v1/) and [threat model](docs/THREAT-MODEL.md).
+Design acceptance is not deployment authorization.
 
 ## Current state
 
@@ -72,7 +77,8 @@ activation authorization.
 - Workspace: private `control`, `city2`, and `ops` channels created.
 - Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
   a read-only repository mount; first owner-authored model proof remains gated.
-- Company OS: target architecture and memory/Walrus design drafted for
-  independent review; no implementation is implied by the draft.
+- Company OS: version 0.2.0 accepted after independent review; M0 schemas,
+  interfaces, policy vocabulary, threat model and executable fixtures are
+  implemented. No Core runtime, memory service or archive deployment exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.
