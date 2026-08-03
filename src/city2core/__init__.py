@@ -3,6 +3,7 @@
 from .core import Core, CoreError
 from .adapters import BuzzAdapter, PfTerminalRunnerAdapter
 from .memory import MemoryService
+from .review import ReviewService
 from .store import ConflictError, IntegrityError, Store
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "IntegrityError",
     "MemoryService",
     "PfTerminalRunnerAdapter",
+    "ReviewService",
     "Store",
 ]
