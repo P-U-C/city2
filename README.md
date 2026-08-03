@@ -92,8 +92,8 @@ Design acceptance and implementation are not deployment authorization.
   adapters, M4 independent review, M5 encrypted local/Testnet archive boundary
   and the version 0.8.0 M6 offline producer-observer conformance layer are
   implemented. Core is not deployed; `ai-infra` is selected only in disabled
-  manifests with an undeployed read-only observer unit and credential-free
-  reproducible bundle, the live coordinator remains outside Core and no
-  off-host archive exists.
+  manifests with an installed static/inactive observer unit and a bound one-time
+  signer; manifests remain disabled, the live coordinator remains outside Core
+  and no off-host archive exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.

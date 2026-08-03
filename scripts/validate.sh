@@ -22,6 +22,7 @@ required=(
   docs/PRODUCER.md
   docs/PRODUCER-REHEARSAL.md
   docs/PRODUCER-INSTALL-EVIDENCE.md
+  docs/PRODUCER-KEY-EVIDENCE.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
@@ -39,6 +40,7 @@ required=(
   config/producer-agent.example.json
   config/producer-pilot.ai-infra.json
   config/producer-agent.ai-infra.json
+  config/producer-observer.ai-infra.pub
   scripts/observe_producer.py
   infra/producer/ai-infra/city2-producer-observer-ai-infra.service
   infra/producer/ai-infra/REMOVAL.md

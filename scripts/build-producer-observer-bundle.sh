@@ -34,6 +34,8 @@ install -m 0644 "${ROOT}/config/producer-pilot.ai-infra.json" \
   "${bundle}/etc/city2/producer/ai-infra.contract.json"
 install -m 0644 "${ROOT}/config/producer-agent.ai-infra.json" \
   "${bundle}/etc/city2/producer/ai-infra.agent.json"
+install -m 0644 "${ROOT}/config/producer-observer.ai-infra.pub" \
+  "${bundle}/etc/city2/producer/observer-signing.pub"
 install -m 0644 \
   "${ROOT}/infra/producer/ai-infra/city2-producer-observer-ai-infra.service" \
   "${bundle}/etc/systemd/system/city2-producer-observer-ai-infra.service"

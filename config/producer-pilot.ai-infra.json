@@ -13,6 +13,10 @@
     "access": "read-only",
     "max_bytes": 16777216
   },
+  "signer": {
+    "key_version": "ai-infra-shadow-1",
+    "public_key_sha256": "2858eb9727bf82f98d7b2d18352df21a7aff9b51c7a758104d2620cc1a9b0da5"
+  },
   "authorities": {
     "schedule": "external-unchanged",
     "database": "external-unchanged",

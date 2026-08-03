@@ -12,8 +12,8 @@ import tempfile
 from typing import Any, Callable
 from urllib.parse import unquote, urlparse
 
-from .archive import _sign, _verify
-from .model import canonical_json, digest_profile, parse_time
+from .archive import _public_from_private, _public_key_der, _sign, _verify
+from .model import canonical_json, digest_profile, parse_time, sha256_bytes
 from .schema import validate_named
 from .store import IntegrityError, StoreError
 
@@ -119,6 +119,16 @@ class ProducerObserver:
     ) -> dict[str, Any]:
         if not self.contract["enabled"] or not self.agent["enabled"]:
             raise ProducerError("producer observer is disabled")
+        signer = self.contract.get("signer")
+        if signer:
+            if signer_key_version != signer["key_version"]:
+                raise ProducerError("producer signer key version mismatch")
+            try:
+                fingerprint = sha256_bytes(_public_from_private(Path(signing_key)))
+            except StoreError as error:
+                raise ProducerError("producer signer key is unavailable") from error
+            if fingerprint != signer["public_key_sha256"]:
+                raise ProducerError("producer signer public key mismatch")
         observed_time = parse_time(observed_at)
         path = Path(source)
         expected = _uri_path(_runtime_uri(self.contract))
@@ -262,6 +272,19 @@ def verify_producer_observation(
         or observation["source_uri"] != contract["source"]["uri"]
     ):
         raise IntegrityError("producer observation does not match contract")
+    signer = contract.get("signer")
+    if signer:
+        try:
+            fingerprint = sha256_bytes(_public_key_der(Path(trusted_public_key)))
+        except StoreError as error:
+            raise IntegrityError(
+                "producer observation signer is unavailable"
+            ) from error
+        if (
+            observation["signer_key_version"] != signer["key_version"]
+            or fingerprint != signer["public_key_sha256"]
+        ):
+            raise IntegrityError("producer observation signer does not match contract")
     unsigned = {key: value for key, value in observation.items() if key != "signature"}
     encoded = observation["signature"]
     try:

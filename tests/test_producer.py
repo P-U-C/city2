@@ -14,8 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from city2core import MemoryService, Store  # noqa: E402
-from city2core.archive import generate_checkpoint_key  # noqa: E402
-from city2core.model import digest_profile  # noqa: E402
+from city2core.archive import _public_key_der, generate_checkpoint_key  # noqa: E402
+from city2core.model import digest_profile, sha256_bytes  # noqa: E402
 from city2core.producer import (  # noqa: E402
     ProducerError,
     ProducerObserver,
@@ -98,6 +98,12 @@ class ProducerObserverTests(unittest.TestCase):
         self.assertFalse(contract["enabled"])
         self.assertFalse(agent["enabled"])
         self.assertEqual(
+            contract["signer"]["public_key_sha256"],
+            sha256_bytes(
+                _public_key_der(ROOT / "config" / "producer-observer.ai-infra.pub")
+            ),
+        )
+        self.assertEqual(
             agent["manifest_sha256"],
             digest_profile(agent, {"manifest_sha256", "aggregate_version"}),
         )
@@ -114,7 +120,28 @@ class ProducerObserverTests(unittest.TestCase):
                 signer_key_version="synthetic-1",
             )
         self.enable()
+        self.contract["signer"] = {
+            "key_version": "synthetic-1",
+            "public_key_sha256": sha256_bytes(_public_key_der(self.public)),
+        }
         observer = ProducerObserver(self.contract, self.agent)
+        with self.assertRaises(ProducerError):
+            observer.observe(
+                self.source,
+                observed_at="2026-08-03T00:01:00Z",
+                signing_key=self.key,
+                signer_key_version="wrong-version",
+            )
+        wrong_key = self.temp / "wrong.key"
+        wrong_public = self.temp / "wrong.pub"
+        generate_checkpoint_key(wrong_key, wrong_public)
+        with self.assertRaises(ProducerError):
+            observer.observe(
+                self.source,
+                observed_at="2026-08-03T00:01:00Z",
+                signing_key=wrong_key,
+                signer_key_version="synthetic-1",
+            )
         observation = observer.observe(
             self.source,
             observed_at="2026-08-03T00:01:00Z",
@@ -124,6 +151,10 @@ class ProducerObserverTests(unittest.TestCase):
         verify_producer_observation(
             observation, self.contract, trusted_public_key=self.public
         )
+        with self.assertRaises(IntegrityError):
+            verify_producer_observation(
+                observation, self.contract, trusted_public_key=wrong_public
+            )
         self.assertEqual(observation["freshness_state"], "current")
         self.assertEqual(observation["freshness_seconds"], 60)
         self.assertEqual(
