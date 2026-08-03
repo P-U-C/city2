@@ -82,6 +82,27 @@ class ProducerObserverTests(unittest.TestCase):
         )
         ProducerObserver(contract, agent)
 
+    def test_selected_ai_infra_candidate_is_disabled_and_exact_scoped(self):
+        contract = json.loads(
+            (ROOT / "config" / "producer-pilot.ai-infra.json").read_text()
+        )
+        agent = json.loads(
+            (ROOT / "config" / "producer-agent.ai-infra.json").read_text()
+        )
+        self.assertEqual(contract["producer_id"], "ai-infra")
+        self.assertEqual(contract["host_id"], "worker-1")
+        self.assertEqual(
+            contract["source"]["uri"],
+            "file:///home/ai-infra/ai-infra-corpus/out/ai-infrastructure-aggregates.json",
+        )
+        self.assertFalse(contract["enabled"])
+        self.assertFalse(agent["enabled"])
+        self.assertEqual(
+            agent["manifest_sha256"],
+            digest_profile(agent, {"manifest_sha256", "aggregate_version"}),
+        )
+        ProducerObserver(contract, agent)
+
     def test_signed_observation_memory_and_removal_leave_source_unchanged(self):
         before = self.source.read_bytes()
         observer = ProducerObserver(self.contract, self.agent)

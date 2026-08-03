@@ -76,6 +76,10 @@ PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_producer.py' -v
 Do not enable them by editing placeholders. Follow `docs/PRODUCER.md`; live
 selection first requires a healthy read-only fleet probe and separate review.
 
+The selected `ai-infra` manifests are also disabled. Activation requires a
+systemd read-only bind namespace that makes the producer's original tree
+inaccessible; file mode or an A0 manifest alone is not a write boundary.
+
 ## Prepare the relay
 
 The human owner first creates and backs up a Buzz identity on their own device.

@@ -1,0 +1,32 @@
+{
+  "schema_version": "city2.producer-contract/v1",
+  "contract_id": "m6-ai-infra",
+  "contract_version": 1,
+  "producer_id": "ai-infra",
+  "host_id": "worker-1",
+  "unix_user": "ai-infra",
+  "agent_id": "agt_019fc5f4-641b-7263-8b4e-79451c99dcfe",
+  "source": {
+    "uri": "file:///home/ai-infra/ai-infra-corpus/out/ai-infrastructure-aggregates.json",
+    "media_type": "application/json",
+    "access": "read-only",
+    "max_bytes": 16777216
+  },
+  "authorities": {
+    "schedule": "external-unchanged",
+    "database": "external-unchanged",
+    "source_write": "denied"
+  },
+  "memory_scope": "project:city2",
+  "sensitivity": "internal",
+  "freshness_slo_seconds": 108000,
+  "value_metrics": [
+    "signed_provenance",
+    "freshness_detection"
+  ],
+  "rollback": {
+    "disable_action": "remove-observer",
+    "downstream_dependencies": []
+  },
+  "enabled": false
+}

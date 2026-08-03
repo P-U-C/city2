@@ -6,8 +6,8 @@ producer/data plane. It records stable contracts—not captured database state.
 ## Current declaration
 
 - `clawd`: control host; PfTerminal, City2 and downstream consumers.
-- `worker-1`: producer host, reached by the stable `city-worker-peptides` SSH
-  alias.
+- `worker-1`: producer host, trying `city-worker-peptides` first and the
+  `city-worker-lan` fallback second.
 - 14 active sector producers, each with its own Unix user, corpus root, SQLite
   database, `/etc/cron.d` file and aggregate log.
 - `swell-checker`: active under `ubuntu` with its existing user crontab.
@@ -22,8 +22,9 @@ producer/data plane. It records stable contracts—not captured database state.
 ./city2 fleet --json
 ```
 
-The live command makes one multiplexed SSH connection to `worker-1`, runs one
-read-only root probe and reports:
+The live command tries aliases serially—never as a burst—then makes one
+multiplexed SSH connection to `worker-1`, runs one read-only root probe and
+reports the selected alias plus:
 
 - host disk headroom;
 - Unix user, runtime root and schedule presence;
