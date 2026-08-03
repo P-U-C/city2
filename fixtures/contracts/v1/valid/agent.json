@@ -18,7 +18,7 @@
   "filesystem_scopes": [
     "repository:read"
   ],
-  "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "manifest_sha256": "113f7100afbfe1eebd217c9b622ad53d696a467669c8625f92665aafd25049d0",
   "manifest_version": 1,
   "memory_read_scopes": [
     "company",

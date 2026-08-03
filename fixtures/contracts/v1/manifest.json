@@ -55,6 +55,24 @@
       "validation": "schema"
     },
     {
+      "error": "admission requires a measured baseline that meets its threshold",
+      "instance": "invalid/expansion-admit-below-threshold.json",
+      "schema": "expansion-admission.schema.json",
+      "validation": "semantic"
+    },
+    {
+      "error": "write authority cannot skip an authority class",
+      "instance": "invalid/expansion-authority-jump.json",
+      "schema": "expansion-admission.schema.json",
+      "validation": "semantic"
+    },
+    {
+      "error": "admission decisions are bound to their canonical digest",
+      "instance": "invalid/expansion-tampered-digest.json",
+      "schema": "expansion-admission.schema.json",
+      "validation": "semantic"
+    },
+    {
       "error": "a fact needs source evidence",
       "instance": "invalid/memory-fact-without-evidence.json",
       "schema": "memory.schema.json",
@@ -64,6 +82,12 @@
       "error": "a missing or null budget cannot mean unlimited",
       "instance": "invalid/objective-null-budget.json",
       "schema": "objective.schema.json",
+      "validation": "schema"
+    },
+    {
+      "error": "producer observers cannot receive write access",
+      "instance": "invalid/producer-write-authority.json",
+      "schema": "producer-contract.schema.json",
       "validation": "schema"
     },
     {
@@ -89,67 +113,33 @@
       "instance": "invalid/task-mutable-input.json",
       "schema": "task-envelope.schema.json",
       "validation": "schema"
-    },
-    {
-      "error": "producer observers cannot receive write access",
-      "instance": "invalid/producer-write-authority.json",
-      "schema": "producer-contract.schema.json",
-      "validation": "schema"
     }
   ],
   "schema_version": "city2.contract-fixtures/v1",
   "valid": [
     {
-      "instance": "valid/agent.json",
-      "schema": "agent.schema.json"
+      "instance": "../../../config/authority-policy.v1.json",
+      "schema": "authority-policy.schema.json"
     },
     {
-      "instance": "valid/objective.json",
-      "schema": "objective.schema.json"
+      "instance": "../../../config/expansion-admission.m7.json",
+      "schema": "expansion-admission.schema.json"
     },
     {
-      "instance": "valid/task-envelope.json",
-      "schema": "task-envelope.schema.json"
-    },
-    {
-      "instance": "valid/task-record.json",
-      "schema": "task-record.schema.json"
-    },
-    {
-      "instance": "valid/evidence.json",
-      "schema": "evidence.schema.json"
-    },
-    {
-      "instance": "valid/result.json",
-      "schema": "result.schema.json"
-    },
-    {
-      "instance": "valid/event.json",
-      "schema": "event.schema.json"
-    },
-    {
-      "instance": "valid/artifact.json",
-      "schema": "artifact.schema.json"
-    },
-    {
-      "instance": "valid/memory.json",
-      "schema": "memory.schema.json"
-    },
-    {
-      "instance": "valid/context-pack.json",
-      "schema": "context-pack.schema.json"
-    },
-    {
-      "instance": "valid/approval.json",
-      "schema": "approval.schema.json"
+      "instance": "../../../config/producer-contract.example.json",
+      "schema": "producer-contract.schema.json"
     },
     {
       "instance": "valid/action.json",
       "schema": "action.schema.json"
     },
     {
-      "instance": "valid/deletion-order.json",
-      "schema": "deletion-order.schema.json"
+      "instance": "valid/agent.json",
+      "schema": "agent.schema.json"
+    },
+    {
+      "instance": "valid/approval.json",
+      "schema": "approval.schema.json"
     },
     {
       "instance": "valid/archive-envelope.json",
@@ -160,24 +150,60 @@
       "schema": "archive-receipt.schema.json"
     },
     {
-      "instance": "valid/runner-capability.json",
-      "schema": "runner-capability.schema.json"
+      "instance": "valid/artifact.json",
+      "schema": "artifact.schema.json"
     },
     {
       "instance": "valid/authority-decision.json",
       "schema": "authority-decision.schema.json"
     },
     {
-      "instance": "../../../config/authority-policy.v1.json",
-      "schema": "authority-policy.schema.json"
+      "instance": "valid/context-pack.json",
+      "schema": "context-pack.schema.json"
     },
     {
-      "instance": "../../../config/producer-contract.example.json",
-      "schema": "producer-contract.schema.json"
+      "instance": "valid/deletion-order.json",
+      "schema": "deletion-order.schema.json"
+    },
+    {
+      "instance": "valid/event.json",
+      "schema": "event.schema.json"
+    },
+    {
+      "instance": "valid/evidence.json",
+      "schema": "evidence.schema.json"
+    },
+    {
+      "instance": "valid/expansion-admission.json",
+      "schema": "expansion-admission.schema.json"
+    },
+    {
+      "instance": "valid/memory.json",
+      "schema": "memory.schema.json"
+    },
+    {
+      "instance": "valid/objective.json",
+      "schema": "objective.schema.json"
     },
     {
       "instance": "valid/producer-observation.json",
       "schema": "producer-observation.schema.json"
+    },
+    {
+      "instance": "valid/result.json",
+      "schema": "result.schema.json"
+    },
+    {
+      "instance": "valid/runner-capability.json",
+      "schema": "runner-capability.schema.json"
+    },
+    {
+      "instance": "valid/task-envelope.json",
+      "schema": "task-envelope.schema.json"
+    },
+    {
+      "instance": "valid/task-record.json",
+      "schema": "task-record.schema.json"
     }
   ]
 }

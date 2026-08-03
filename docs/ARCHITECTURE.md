@@ -160,6 +160,12 @@ output and emits signed provenance plus candidate memory without reading a
 producer database or becoming a downstream dependency. No live producer is
 selected by source alone; see [`PRODUCER.md`](PRODUCER.md).
 
+M7 adds a provider-neutral expansion-admission gate. It can approve only one
+same-authority role or one-class write-authority increase after measurable
+evidence, evaluation, budget, incident and removal checks. The first Core-routed
+coordinator candidate is disabled and deferred; see
+[`EXPANSION.md`](EXPANSION.md).
+
 ## Safety gates
 
 1. **Repository:** validation and review pass.

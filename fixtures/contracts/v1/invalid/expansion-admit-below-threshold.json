@@ -1,0 +1,92 @@
+{
+  "accountable_approver": {
+    "actor": "human:ceo",
+    "reviewed_at": "2026-08-02T00:00:00Z",
+    "status": "approved"
+  },
+  "aggregate_version": 1,
+  "budget": {
+    "expected_monthly_cost_usd": "2.00",
+    "max_concurrency": 1,
+    "max_pilot_cost_usd": "1.00",
+    "max_runtime_seconds": 600
+  },
+  "candidate": {
+    "activation_state": "disabled",
+    "agent_id": "agt_01980000-0000-7000-8000-000000000001",
+    "current_authority": "A0",
+    "kind": "role",
+    "manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "manifest_uri": "artifact:fixture-agent-manifest",
+    "target_authority": "A0",
+    "unit_id": "fixture-readonly-role"
+  },
+  "created_at": "2026-08-01T00:00:00Z",
+  "decision": "admit",
+  "decision_id": "fixture-role-expansion-1",
+  "decision_sha256": "010b8b29163eaf2aef39d926d82a2fc49215c2f8f46288f95742920e0af8fe74",
+  "decision_version": 1,
+  "evaluation": {
+    "criteria": [
+      {
+        "criterion": "role-contract",
+        "evidence_refs": [
+          {
+            "content_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "observed_at": "2026-08-01T00:00:00Z",
+            "uri": "artifact:fixture-eval"
+          }
+        ],
+        "state": "pass"
+      }
+    ],
+    "status": "pass",
+    "suite": "fixture-role-eval",
+    "version": "1.0.0"
+  },
+  "incident_boundary": {
+    "authority_ceiling": "A0",
+    "escalation_owner": "human:ceo",
+    "max_consecutive_failures": 1,
+    "outward_actions": "denied",
+    "stop_conditions": [
+      "scope-violation"
+    ]
+  },
+  "measurement": {
+    "admission_threshold": 3,
+    "baseline_value": 2,
+    "direction": "increase",
+    "evaluation_version": "fixture-v1",
+    "evidence_refs": [
+      {
+        "content_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "observed_at": "2026-08-01T00:00:00Z",
+        "uri": "artifact:fixture-metric"
+      }
+    ],
+    "metric": "verified-backlog-items",
+    "sample_count": 3,
+    "target_value": 4,
+    "threshold_mode": "numeric",
+    "unit": "items",
+    "window_end": "2026-08-01T00:00:00Z",
+    "window_start": "2026-07-01T00:00:00Z"
+  },
+  "reason_codes": [
+    "threshold-met"
+  ],
+  "removal": {
+    "recovery_slo_seconds": 300,
+    "required_final_state": "prior-role-set",
+    "steps": [
+      "disable-role",
+      "verify-prior-state"
+    ],
+    "triggers": [
+      "target-missed"
+    ]
+  },
+  "review_at": "2026-09-01T00:00:00Z",
+  "schema_version": "city2.expansion-admission/v1"
+}
