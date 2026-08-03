@@ -9,7 +9,11 @@
     {
       "id": "worker-1",
       "role": "producer",
-      "access": {"type": "ssh", "alias": "city-worker-peptides"},
+      "access": {
+        "type": "ssh",
+        "alias": "city-worker-peptides",
+        "fallback_aliases": ["city-worker-lan"]
+      },
       "minimum_free_gib": 5
     }
   ],

@@ -81,7 +81,8 @@ Design acceptance and implementation are not deployment authorization.
 - Repository visibility: public; full reachable history passed the repository
   credential/private-address scan before the 2026-08-01 visibility change.
 - Disposable relay round-trip and destructive restore proof: passed.
-- Production relay: healthy on its Tailscale-only address.
+- Production relay: local stack healthy; remote Tailscale access is blocked
+  while this host is logged out.
 - Owner identity: connected; private key remains off-host.
 - Workspace: private `control`, `city2`, and `ops` channels created.
 - Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
@@ -90,7 +91,8 @@ Design acceptance and implementation are not deployment authorization.
   M0 contracts, M1 ledger, M2 memory/context and the version 0.5.0 M3 offline
   adapters, M4 independent review, M5 encrypted local/Testnet archive boundary
   and the version 0.8.0 M6 offline producer-observer conformance layer are
-  implemented. Core is not deployed; no live producer is selected, the live
-  coordinator remains outside Core and no off-host archive exists.
+  implemented. Core is not deployed; `ai-infra` is selected only in disabled
+  manifests, the live coordinator remains outside Core and no off-host archive
+  exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.

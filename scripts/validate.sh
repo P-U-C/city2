@@ -35,6 +35,8 @@ required=(
   config/coordinator-core.example.json
   config/producer-contract.example.json
   config/producer-agent.example.json
+  config/producer-pilot.ai-infra.json
+  config/producer-agent.ai-infra.json
   fixtures/contracts/v1/manifest.json
   schemas/v1/common.schema.json
   schemas/v1/agent.schema.json

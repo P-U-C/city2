@@ -13,7 +13,30 @@
         "properties": {
           "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
           "role": {"enum": ["control", "producer"]},
-          "access": {"type": "object"},
+          "access": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": ["type"],
+                "properties": {"type": {"const": "local"}},
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "required": ["type", "alias"],
+                "properties": {
+                  "type": {"const": "ssh"},
+                  "alias": {"type": "string", "minLength": 1},
+                  "fallback_aliases": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {"type": "string", "minLength": 1}
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          },
           "minimum_free_gib": {"type": "number", "minimum": 0}
         },
         "additionalProperties": false

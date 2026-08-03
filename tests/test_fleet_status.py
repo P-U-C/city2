@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import importlib.util
 from pathlib import Path
+import json
+import subprocess
 import unittest
 
 
@@ -59,7 +61,11 @@ def snapshot(*, database_age_hours: float = 1, free_gib: float = 6) -> dict:
                             "bytes": 1024,
                             "mtime": now.timestamp() - database_age_hours * 3600,
                         },
-                        "aggregate_log": {"exists": True, "bytes": 100, "mtime": now.timestamp()},
+                        "aggregate_log": {
+                            "exists": True,
+                            "bytes": 100,
+                            "mtime": now.timestamp(),
+                        },
                     }
                 ],
             }
@@ -80,13 +86,45 @@ class FleetStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(MODULE.ManifestError, "duplicate producer"):
             MODULE.validate_manifest(value)
 
+    def test_duplicate_or_primary_fallback_is_rejected(self) -> None:
+        value = manifest()
+        value["hosts"][0]["access"]["fallback_aliases"] = ["worker"]
+        with self.assertRaisesRegex(MODULE.ManifestError, "fallback aliases"):
+            MODULE.validate_manifest(value)
+
+    def test_ssh_fallback_is_serial_and_reports_selected_alias(self) -> None:
+        host = manifest()["hosts"][0]
+        host["access"]["fallback_aliases"] = ["worker-lan"]
+        calls = []
+
+        def run(command, **kwargs):
+            calls.append(command[3])
+            if command[3] == "worker":
+                return subprocess.CompletedProcess(
+                    command, 255, stdout="", stderr="name resolution failed"
+                )
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=json.dumps(
+                    {"disk_free_bytes": 10, "producers": [], "checked_at": "now"}
+                ),
+                stderr="",
+            )
+
+        result = MODULE.probe_host(host, manifest()["producers"], run=run)
+        self.assertEqual(calls, ["worker", "worker-lan"])
+        self.assertEqual(result["access_alias"], "worker-lan")
+
     def test_healthy_snapshot(self) -> None:
         report = MODULE.evaluate(manifest(), snapshot(), now=self.now)
         self.assertEqual(report["overall"], "ok")
         self.assertEqual(report["producers"][0]["status"], "ok")
 
     def test_stale_database_is_critical(self) -> None:
-        report = MODULE.evaluate(manifest(), snapshot(database_age_hours=31), now=self.now)
+        report = MODULE.evaluate(
+            manifest(), snapshot(database_age_hours=31), now=self.now
+        )
         self.assertEqual(report["overall"], "critical")
         self.assertIn("stale", report["producers"][0]["detail"])
 
