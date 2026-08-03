@@ -23,7 +23,7 @@ from .model import (
 from .schema import SchemaStore, ValidationError, validate_named
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 WRITER_ID = "city2-core-v1"
 FaultHook = Callable[[str], None]
 
@@ -829,6 +829,29 @@ class Store:
                 is None
             ):
                 raise IntegrityError("runner dispatch points to missing run")
+
+        for row in self.conn.execute("SELECT * FROM agent_manifests"):
+            manifest = json.loads(row["manifest_json"])
+            if (
+                canonical_json(manifest) != row["manifest_json"]
+                or manifest["manifest_sha256"] != row["manifest_sha256"]
+                or digest_profile(manifest, {"manifest_sha256", "aggregate_version"})
+                != row["manifest_sha256"]
+            ):
+                raise IntegrityError("agent manifest projection mismatch")
+
+        for row in self.conn.execute("SELECT * FROM task_reviews"):
+            if (
+                self.conn.execute(
+                    "SELECT 1 FROM tasks WHERE task_id = ?", (row["task_id"],)
+                ).fetchone()
+                is None
+                or self.conn.execute(
+                    "SELECT 1 FROM runs WHERE run_id = ?", (row["run_id"],)
+                ).fetchone()
+                is None
+            ):
+                raise IntegrityError("task review points to missing work")
 
         return {
             "database_id": self.meta("database_id"),

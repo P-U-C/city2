@@ -17,6 +17,7 @@ required=(
   docs/CORE.md
   docs/MEMORY.md
   docs/ADAPTERS.md
+  docs/REVIEW.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
