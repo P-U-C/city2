@@ -18,6 +18,7 @@ required=(
   docs/MEMORY.md
   docs/ADAPTERS.md
   docs/REVIEW.md
+  docs/ARCHIVE.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
@@ -50,6 +51,10 @@ required=(
 for path in "${required[@]}"; do
   [[ -f "${path}" ]] || fail "missing ${path}"
 done
+
+if [[ "${CI:-}" == "true" && ! -x build/archive-tools/age ]]; then
+  ./scripts/build-archive-tools.sh
+fi
 
 mapfile -t shell_files < <(find . -type f -not -path './.git/*' -not -path './build/*' -exec awk 'FNR == 1 && /^#!.*(ba)?sh/ { print FILENAME }' {} + | sort)
 for path in "${shell_files[@]}"; do
