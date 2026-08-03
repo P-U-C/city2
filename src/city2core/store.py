@@ -15,6 +15,7 @@ from .model import (
     canonical_json,
     digest_profile,
     new_id,
+    normalize_text,
     sha256_bytes,
     sha256_json,
     utc_now,
@@ -22,7 +23,7 @@ from .model import (
 from .schema import SchemaStore, ValidationError, validate_named
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 WRITER_ID = "city2-core-v1"
 FaultHook = Callable[[str], None]
 
@@ -58,7 +59,7 @@ class WriteTransaction:
         self.idempotency_key = idempotency_key
 
     def current_version(self, table: str, id_column: str, aggregate_id: str) -> int:
-        if table not in {"objectives", "tasks", "actions"}:
+        if table not in {"objectives", "tasks", "actions", "memory_records"}:
             raise ValueError(f"unsupported projection table: {table}")
         row = self.conn.execute(
             f"SELECT aggregate_version FROM {table} WHERE {id_column} = ?",
@@ -220,9 +221,6 @@ class Store:
             if mode != "wal":
                 raise IntegrityError(f"SQLite refused WAL mode: {mode}")
             cls._configure_connection(conn)
-            migration = cls.migration_path().read_text(encoding="utf-8")
-            migration_sha = sha256_bytes(migration.encode("utf-8"))
-            conn.executescript("BEGIN IMMEDIATE;\n" + migration)
             now = utc_now()
             metadata = {
                 "application_version": cls.application_version(),
@@ -231,19 +229,29 @@ class Store:
                 "schema_version": str(SCHEMA_VERSION),
                 "writer_id": writer_id,
             }
-            conn.execute(
-                "INSERT INTO schema_migrations(version, sha256, applied_at) VALUES (?, ?, ?)",
-                (SCHEMA_VERSION, migration_sha, now),
-            )
-            conn.executemany(
-                "INSERT INTO core_meta(key, value) VALUES (?, ?)",
-                sorted(metadata.items()),
-            )
-            conn.execute(
-                "INSERT INTO writer_state(writer_id, writer_sequence) VALUES (?, 0)",
-                (writer_id,),
-            )
-            conn.commit()
+            for version, migration_path in enumerate(cls.migration_paths(), 1):
+                migration = migration_path.read_text(encoding="utf-8")
+                conn.executescript("BEGIN IMMEDIATE;\n" + migration)
+                conn.execute(
+                    """INSERT INTO schema_migrations(version, sha256, applied_at)
+                       VALUES (?, ?, ?)""",
+                    (version, sha256_bytes(migration.encode("utf-8")), now),
+                )
+                if version == 1:
+                    conn.executemany(
+                        "INSERT INTO core_meta(key, value) VALUES (?, ?)",
+                        sorted(metadata.items()),
+                    )
+                    conn.execute(
+                        "INSERT INTO writer_state(writer_id, writer_sequence) VALUES (?, 0)",
+                        (writer_id,),
+                    )
+                else:
+                    conn.execute(
+                        "UPDATE core_meta SET value = ? WHERE key = 'schema_version'",
+                        (str(version),),
+                    )
+                conn.commit()
             os.chmod(db_path, 0o600)
         except BaseException:
             if conn.in_transaction:
@@ -259,6 +267,63 @@ class Store:
         store = cls(db_path, conn, writer_id=writer_id, fault_hook=fault_hook)
         store.verify_integrity()
         return store
+
+    @classmethod
+    def migrate(
+        cls,
+        path: str | Path,
+        *,
+        writer_id: str = WRITER_ID,
+        fault_hook: FaultHook | None = None,
+    ) -> "Store":
+        """Apply reviewed forward-only migrations, then return a verified store."""
+        db_path = Path(path)
+        if not db_path.is_file():
+            raise StoreError(f"database does not exist: {db_path}")
+        conn = cls._connect(db_path)
+        try:
+            mode = str(conn.execute("PRAGMA journal_mode").fetchone()[0]).lower()
+            if mode != "wal":
+                raise IntegrityError(f"unsafe SQLite journal_mode={mode}; expected wal")
+            cls._configure_connection(conn)
+            current = int(conn.execute("PRAGMA user_version").fetchone()[0])
+            if current < 1 or current > SCHEMA_VERSION:
+                raise IntegrityError(f"unsupported schema version: {current}")
+            for version, migration_path in enumerate(cls.migration_paths(), 1):
+                if version > current:
+                    break
+                row = conn.execute(
+                    "SELECT sha256 FROM schema_migrations WHERE version = ?", (version,)
+                ).fetchone()
+                if row is None or row[0] != sha256_bytes(migration_path.read_bytes()):
+                    raise IntegrityError(f"migration checksum mismatch: v{version}")
+            for version in range(current + 1, SCHEMA_VERSION + 1):
+                migration_path = cls.migration_paths()[version - 1]
+                migration = migration_path.read_text(encoding="utf-8")
+                conn.executescript("BEGIN IMMEDIATE;\n" + migration)
+                conn.execute(
+                    """INSERT INTO schema_migrations(version, sha256, applied_at)
+                       VALUES (?, ?, ?)""",
+                    (version, sha256_bytes(migration.encode("utf-8")), utc_now()),
+                )
+                conn.execute(
+                    "UPDATE core_meta SET value = ? WHERE key = 'schema_version'",
+                    (str(version),),
+                )
+                conn.execute(
+                    "UPDATE core_meta SET value = ? WHERE key = 'application_version'",
+                    (cls.application_version(),),
+                )
+                if fault_hook is not None:
+                    fault_hook(f"before_migration_{version}_commit")
+                conn.commit()
+        except BaseException:
+            if conn.in_transaction:
+                conn.rollback()
+            conn.close()
+            raise
+        conn.close()
+        return cls.open(db_path, writer_id=writer_id, fault_hook=fault_hook)
 
     @classmethod
     def open(
@@ -322,8 +387,9 @@ class Store:
             )
 
     @staticmethod
-    def migration_path() -> Path:
-        return Path(__file__).with_name("migrations") / "0001_core.sql"
+    def migration_paths() -> tuple[Path, ...]:
+        root = Path(__file__).with_name("migrations")
+        return tuple(sorted(root.glob("[0-9][0-9][0-9][0-9]_*.sql")))
 
     @staticmethod
     def application_version() -> str:
@@ -427,12 +493,15 @@ class Store:
         if check != "ok":
             raise IntegrityError(f"SQLite integrity_check failed: {check}")
 
-        migration = self.conn.execute(
-            "SELECT sha256 FROM schema_migrations WHERE version = ?", (SCHEMA_VERSION,)
-        ).fetchone()
-        expected_migration = sha256_bytes(self.migration_path().read_bytes())
-        if migration is None or str(migration[0]) != expected_migration:
-            raise IntegrityError("migration checksum mismatch")
+        if len(self.migration_paths()) != SCHEMA_VERSION:
+            raise IntegrityError("migration inventory does not match schema version")
+        for version, migration_path in enumerate(self.migration_paths(), 1):
+            migration = self.conn.execute(
+                "SELECT sha256 FROM schema_migrations WHERE version = ?", (version,)
+            ).fetchone()
+            expected_migration = sha256_bytes(migration_path.read_bytes())
+            if migration is None or str(migration[0]) != expected_migration:
+                raise IntegrityError(f"migration checksum mismatch: v{version}")
 
         terminal: dict[str, tuple[int, str, int, int, str, str]] = {}
         writer_sequences: dict[str, int] = {}
@@ -498,6 +567,7 @@ class Store:
             ("objectives", "objective_id"),
             ("tasks", "task_id"),
             ("actions", "action_id"),
+            ("memory_records", "memory_id"),
         ):
             for row in self.conn.execute(
                 f"""SELECT {id_column}, aggregate_version, last_event_id,
@@ -520,7 +590,7 @@ class Store:
         expected_projected = {
             aggregate_id
             for aggregate_id, marker in terminal.items()
-            if marker[5] in {"objective", "task", "action"}
+            if marker[5] in {"objective", "task", "action", "memory"}
         }
         if projected != expected_projected:
             raise IntegrityError("event/projection aggregate inventory mismatch")
@@ -684,6 +754,63 @@ class Store:
                 raise IntegrityError(
                     f"inactive task retains lease authority: {row['task_id']}"
                 )
+
+        expected_fts: dict[str, tuple[str, str, str]] = {}
+        for row in self.conn.execute("SELECT * FROM memory_records"):
+            record = json.loads(row["record_json"])
+            latest = self.conn.execute(
+                """SELECT event_type FROM events WHERE aggregate_id = ?
+                   ORDER BY aggregate_sequence DESC LIMIT 1""",
+                (row["memory_id"],),
+            ).fetchone()
+            expected_state = str(latest["event_type"]).removeprefix("memory.")
+            if expected_state == "created":
+                expected_state = "candidate"
+            if (
+                canonical_json(record) != row["record_json"]
+                or sha256_json(record) != row["record_sha256"]
+                or record.get("memory_id") != row["memory_id"]
+                or record.get("aggregate_version") != row["aggregate_version"]
+                or record.get("scope") != row["scope"]
+                or record.get("type") != row["memory_type"]
+                or record.get("review_state") != row["review_state"]
+                or row["review_state"] != expected_state
+                or record.get("statement") != row["statement"]
+                or record.get("sensitivity") != row["sensitivity"]
+            ):
+                raise IntegrityError(f"memory projection mismatch: {row['memory_id']}")
+            if row["review_state"] == "accepted":
+                expected_fts[str(row["memory_id"])] = (
+                    normalize_text(str(row["statement"])),
+                    str(row["labels_text"]),
+                    str(row["source_text"]),
+                )
+
+        actual_fts = {
+            str(row["memory_id"]): (
+                str(row["statement"]),
+                str(row["labels"]),
+                str(row["source_metadata"]),
+            )
+            for row in self.conn.execute(
+                "SELECT memory_id, statement, labels, source_metadata FROM memory_fts"
+            )
+        }
+        if actual_fts != expected_fts:
+            raise IntegrityError("memory FTS projection mismatch")
+
+        for row in self.conn.execute("SELECT * FROM context_packs"):
+            manifest = json.loads(row["manifest_json"])
+            content = json.loads(row["content_json"])
+            if (
+                canonical_json(manifest) != row["manifest_json"]
+                or sha256_json(manifest) != row["manifest_sha256"]
+                or canonical_json(content) != row["content_json"]
+                or sha256_json(content) != row["content_sha256"]
+                or manifest.get("context_id") != row["context_id"]
+                or manifest.get("task_id") != row["task_id"]
+            ):
+                raise IntegrityError(f"context pack mismatch: {row['context_id']}")
 
         return {
             "database_id": self.meta("database_id"),

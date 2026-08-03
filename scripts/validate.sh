@@ -15,6 +15,7 @@ required=(
   docs/ARCHITECTURE.md
   docs/COMPANY-OS-SPEC.md
   docs/CORE.md
+  docs/MEMORY.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md

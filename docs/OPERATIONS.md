@@ -18,6 +18,7 @@ explicitly supplied by the operator:
 ```bash
 ./city2 core init --db /approved/private/path/core.sqlite
 ./city2 core status --db /approved/private/path/core.sqlite
+./city2 core migrate --db /approved/private/path/core.sqlite
 ./city2 core export --db /approved/private/path/core.sqlite \
   --output /approved/private/path/events.jsonl
 ```

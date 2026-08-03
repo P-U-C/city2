@@ -1,4 +1,4 @@
-"""Operator CLI for the City2 M1 Core ledger."""
+"""Operator CLI for the City2 Core ledger."""
 
 from __future__ import annotations
 
@@ -26,6 +26,9 @@ def _parser() -> argparse.ArgumentParser:
 
     status = sub.add_parser("status", help="verify and report Core state")
     status.add_argument("--db", required=True)
+
+    migrate = sub.add_parser("migrate", help="apply reviewed forward-only migrations")
+    migrate.add_argument("--db", required=True)
 
     export = sub.add_parser("export", help="write a deterministic event JSONL export")
     export.add_argument("--db", required=True)
@@ -64,6 +67,9 @@ def main(argv: list[str] | None = None) -> int:
                 result = Core(store).status()
         elif args.command == "status":
             with Store.open(args.db) as store:
+                result = Core(store).status()
+        elif args.command == "migrate":
+            with Store.migrate(args.db) as store:
                 result = Core(store).status()
         elif args.command == "export":
             output = Path(args.output)

@@ -67,7 +67,8 @@ its explicit milestone gates are in the
 [Company OS design specification](docs/COMPANY-OS-SPEC.md). Its M0 contract
 implementation includes the [portable interfaces](contracts/v1/README.md),
 [canonical schemas](schemas/v1/) and [threat model](docs/THREAT-MODEL.md).
-M1 adds the [Core ledger and local recovery implementation](docs/CORE.md).
+M1 adds the [Core ledger and local recovery implementation](docs/CORE.md); M2
+adds [evidence-backed memory and deterministic context](docs/MEMORY.md).
 Design acceptance and implementation are not deployment authorization.
 
 ## Current state
@@ -82,7 +83,8 @@ Design acceptance and implementation are not deployment authorization.
 - Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
   a read-only repository mount; first owner-authored model proof remains gated.
 - Company OS: specification version 0.2.0 is accepted after independent review;
-  M0 contracts and the version 0.3.0 M1 Core ledger are implemented. The Core
-  is not deployed, and no memory service or off-host archive exists.
+  M0 contracts, the M1 ledger and the version 0.4.0 M2 memory/context layer are
+  implemented. Core is not deployed, and no coordinator integration or off-host
+  archive exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.
