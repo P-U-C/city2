@@ -29,6 +29,15 @@
       },
       "additionalProperties": false
     },
+    "signer": {
+      "type": "object",
+      "required": ["key_version", "public_key_sha256"],
+      "properties": {
+        "key_version": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"},
+        "public_key_sha256": {"$ref": "common.schema.json#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
     "authorities": {
       "type": "object",
       "required": ["schedule", "database", "source_write"],

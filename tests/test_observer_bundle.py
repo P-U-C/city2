@@ -42,6 +42,7 @@ class ObserverBundleTests(unittest.TestCase):
                     "ai-infra/REMOVAL.md",
                     "ai-infra/etc/city2/producer/ai-infra.contract.json",
                     "ai-infra/etc/city2/producer/ai-infra.agent.json",
+                    "ai-infra/etc/city2/producer/observer-signing.pub",
                     "ai-infra/etc/systemd/system/city2-producer-observer-ai-infra.service",
                     "ai-infra/opt/city2/lib/city2/scripts/observe_producer.py",
                     "ai-infra/opt/city2/lib/city2/src/city2core/producer.py",

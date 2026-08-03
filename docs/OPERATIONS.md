@@ -83,7 +83,9 @@ inaccessible; file mode or an A0 manifest alone is not a write boundary.
 The reviewed namespace source is
 `infra/producer/ai-infra/city2-producer-observer-ai-infra.service`. Repository
 validation checks its syntax and a synthetic credential-backed observation.
-It is deliberately not installed, enabled or started by any repository command.
+It is installed static/inactive with disabled manifests; no repository command
+enables or starts it. The one-time signer is separately bound by public
+fingerprint and remains root-only on worker-1.
 
 Build and inspect the credential-free deployment artifact without changing the
 host or worker:

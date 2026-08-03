@@ -36,6 +36,8 @@ The disposable worker staging/removal proof is recorded in
 [`PRODUCER-REHEARSAL.md`](PRODUCER-REHEARSAL.md).
 The persistent disabled-only install is recorded in
 [`PRODUCER-INSTALL-EVIDENCE.md`](PRODUCER-INSTALL-EVIDENCE.md).
+The one-time trusted signer is recorded in
+[`PRODUCER-KEY-EVIDENCE.md`](PRODUCER-KEY-EVIDENCE.md).
 
 `ProducerObserver` accepts only that declared regular output file. It rejects
 symlinks, database/journal suffixes, undeclared paths, oversized files,
@@ -77,16 +79,17 @@ consumers remain authoritative and have no dependency on observer evidence.
 ## Live activation gate
 
 This host's Tailscale client remains logged out, but the documented LAN fallback
-verified the fleet and candidate. M6 exit criteria are still not claimed because
-the reviewed read-only namespace is undeployed and the distinct Buzz identity,
-signed shadow evidence and removal proof do not exist.
+verified the fleet and candidate. The namespace is installed static/inactive and
+the one-time signer exists, but manifests remain disabled. M6 exit criteria are
+still not claimed because the distinct Buzz identity, signed shadow evidence and
+removal proof do not exist.
 
 Before activation:
 
 1. restore operator-approved Tailscale connectivity for remote relay access;
-2. keep the selected manifests disabled through independent review;
-3. independently review, install and manually start the undeployed systemd
-   namespace; do not enable it as a schedule;
+2. independently review the bound signer and exact one-run transaction;
+3. enable only the installed manifest copies and manually start the static unit
+   once; never enable it as a schedule;
 4. create a distinct narrow Buzz identity/channel membership;
 5. run a read-only shadow observation and independently verify its signature,
    value and source invariance;
