@@ -150,6 +150,11 @@ scoped retrieval, context-pack manifests and candidate-only controlled imports.
 It stores no transcript or model hidden state and does not connect the live
 coordinator; that remains M3.
 
+M3 adds offline Buzz and PfTerminal adapters plus a read-only CEO projection.
+The adapter is owner/channel/A0 constrained and runner capability negotiation
+fails closed. The live coordinator is deliberately not routed through Core by
+this source change; see [`ADAPTERS.md`](ADAPTERS.md) for the activation gate.
+
 ## Safety gates
 
 1. **Repository:** validation and review pass.

@@ -68,7 +68,8 @@ its explicit milestone gates are in the
 implementation includes the [portable interfaces](contracts/v1/README.md),
 [canonical schemas](schemas/v1/) and [threat model](docs/THREAT-MODEL.md).
 M1 adds the [Core ledger and local recovery implementation](docs/CORE.md); M2
-adds [evidence-backed memory and deterministic context](docs/MEMORY.md).
+adds [evidence-backed memory and deterministic context](docs/MEMORY.md); M3
+adds the undeployed [Buzz/PfTerminal adapter boundary](docs/ADAPTERS.md).
 Design acceptance and implementation are not deployment authorization.
 
 ## Current state
@@ -83,8 +84,8 @@ Design acceptance and implementation are not deployment authorization.
 - Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
   a read-only repository mount; first owner-authored model proof remains gated.
 - Company OS: specification version 0.2.0 is accepted after independent review;
-  M0 contracts, the M1 ledger and the version 0.4.0 M2 memory/context layer are
-  implemented. Core is not deployed, and no coordinator integration or off-host
-  archive exists.
+  M0 contracts, M1 ledger, M2 memory/context and the version 0.5.0 M3 offline
+  adapters are implemented. Core is not deployed; the live coordinator remains
+  outside Core and no off-host archive exists.
 - Existing City producers: unchanged.
 - OpenClaw: excluded from the new control path.
