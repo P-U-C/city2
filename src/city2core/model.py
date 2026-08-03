@@ -9,6 +9,7 @@ import json
 import math
 import secrets
 import time
+import unicodedata
 import uuid
 from typing import Any, Iterable
 
@@ -17,7 +18,9 @@ ZERO_SHA256 = "0" * 64
 ID_PREFIXES = {
     "action": "act_",
     "archive": "arc_",
+    "context": "ctx_",
     "event": "evt_",
+    "memory": "mem_",
     "objective": "obj_",
     "review": "rev_",
     "run": "run_",
@@ -134,6 +137,10 @@ def parse_time(value: str) -> datetime:
     if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
         raise ValueError("timestamp must be UTC")
     return parsed
+
+
+def normalize_text(value: str) -> str:
+    return " ".join(unicodedata.normalize("NFKC", value).casefold().split())
 
 
 def uuid7() -> str:

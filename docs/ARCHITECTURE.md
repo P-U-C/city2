@@ -144,6 +144,12 @@ and no interface or runner becomes authoritative. A Core database is not a
 replacement for Git or producer databases, and no service activation occurs in
 M1.
 
+M2 adds an undeployed `MemoryService` in the same modular monolith. It owns
+evidence-backed candidate/review state, accepted-memory FTS, deterministic
+scoped retrieval, context-pack manifests and candidate-only controlled imports.
+It stores no transcript or model hidden state and does not connect the live
+coordinator; that remains M3.
+
 ## Safety gates
 
 1. **Repository:** validation and review pass.

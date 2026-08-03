@@ -1,9 +1,10 @@
-# City2 Core — M1 operator and integrity contract
+# City2 Core — M1/M2 operator and integrity contract
 
 City2 Core is a small Python/SQLite modular monolith implementing the M1 ledger
 in the accepted [Company OS specification](COMPANY-OS-SPEC.md). It is source
 code and test evidence only: M1 does not install a daemon, activate a runner,
-change producer authority or deploy a database.
+change producer authority or deploy a database. M2 extends the same ledger with
+the memory/context boundary documented in [`MEMORY.md`](MEMORY.md).
 
 ## Boundary
 
@@ -94,6 +95,7 @@ authenticated encryption and backend adapters are M5 work.
 ```text
 ./city2 core init --db PATH
 ./city2 core status --db PATH
+./city2 core migrate --db PATH
 ./city2 core export --db PATH --output FILE
 ./city2 core keygen --private-key FILE --public-key FILE
 ./city2 core backup --db PATH --output DIRECTORY \
