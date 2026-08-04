@@ -23,6 +23,7 @@ class AgentRuntimeTests(unittest.TestCase):
         launcher = LAUNCHER.read_text()
         self.assertIn('credential="${CODEX_HOME:-}/auth.json"', launcher)
         self.assertNotIn('install -m 0600 "${credential}"', launcher)
+        self.assertNotIn('install -d -m 0700 "${HOME}" "${CODEX_HOME}"', launcher)
 
 
 if __name__ == "__main__":

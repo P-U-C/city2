@@ -40,7 +40,11 @@ case "${BUZZ_AGENT_HARNESS}" in
     }
     require HOME
     require CODEX_HOME
-    install -d -m 0700 "${HOME}" "${CODEX_HOME}"
+    install -d -m 0700 "${HOME}"
+    [[ -d "${CODEX_HOME}" ]] || {
+      echo "buzz-agent-launcher: service-private CODEX_HOME is unavailable" >&2
+      exit 1
+    }
     if [[ -n "${APP_SERVER_LOGS:-}" ]]; then
       install -d -m 0700 "${APP_SERVER_LOGS}"
     fi
