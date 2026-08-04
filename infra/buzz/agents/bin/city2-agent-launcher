@@ -33,7 +33,7 @@ BIN_DIR="${CITY2_BIN_DIR:-/opt/city2/bin}"
 
 case "${BUZZ_AGENT_HARNESS}" in
   pfterminal-chatgpt)
-    credential="${CREDENTIALS_DIRECTORY:-}/codex.auth"
+    credential="${CODEX_HOME:-}/auth.json"
     [[ -r "${credential}" ]] || {
       echo "buzz-agent-launcher: PfTerminal ChatGPT credential is unavailable" >&2
       exit 1
@@ -44,8 +44,7 @@ case "${BUZZ_AGENT_HARNESS}" in
     if [[ -n "${APP_SERVER_LOGS:-}" ]]; then
       install -d -m 0700 "${APP_SERVER_LOGS}"
     fi
-    install -m 0600 "${credential}" "${CODEX_HOME}/auth.json"
-    [[ -s "${CODEX_HOME}/auth.json" ]] || {
+    [[ -s "${credential}" ]] || {
       echo "buzz-agent-launcher: PfTerminal ChatGPT credential is empty" >&2
       exit 1
     }

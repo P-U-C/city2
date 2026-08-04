@@ -96,6 +96,8 @@ python3 scripts/validate_spec.py
 python3 scripts/validate_contracts.py
 
 if command -v systemd-analyze >/dev/null 2>&1; then
+  SYSTEMD_UNIT_PATH="${ROOT}/infra/buzz/agents/systemd:${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
+    systemd-analyze verify city2-buzz-agent@.service
   SYSTEMD_UNIT_PATH="${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
     systemd-analyze verify city2-producer-observer-ai-infra.service
 fi
@@ -191,5 +193,12 @@ grep -q '^unset BUZZ_PRIVATE_KEY$' \
 grep -q '^export NODE_OPTIONS=--jitless$' \
   infra/buzz/agents/bin/city2-codex-acp-launcher ||
   fail "Codex ACP must stay compatible with MemoryDenyWriteExecute"
+grep -q '^BindPaths=/home/%i/.codex/auth.json:/run/city2-agent-%i/codex/auth.json$' \
+  infra/buzz/agents/systemd/city2-buzz-agent@.service ||
+  fail "coordinator must share exactly the PfTerminal auth file for OAuth rotation"
+if grep -q '^LoadCredential=codex.auth:' \
+  infra/buzz/agents/systemd/city2-buzz-agent@.service; then
+  fail "coordinator must not clone a rotating OAuth credential"
+fi
 
 echo "validate: PASS"

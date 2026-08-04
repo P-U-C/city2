@@ -16,9 +16,12 @@ Installation copies pinned local build output to `/opt/city2` and installs the
 `city2-buzz-agent@.service` template. It never enables or starts a service.
 
 The service authenticates the bundled Codex runtime with the existing
-PfTerminal ChatGPT login. systemd exposes only `auth.json` as a private runtime
-credential; the launcher creates an ephemeral `CODEX_HOME` under `/run`. The
-service cannot see the PfTerminal vault, configuration, sessions or memory.
+PfTerminal ChatGPT login. systemd bind-mounts only `auth.json` into an otherwise
+ephemeral `CODEX_HOME` under `/run`. The mount is writable so every Codex
+process shares persisted OAuth rotation instead of consuming a stale copied
+refresh token. The service cannot traverse the host home or see the PfTerminal
+vault, configuration, sessions or memory. Restart it after an explicit
+PfTerminal re-login so the mount follows the replacement file.
 The intermediary ACP launcher strips the agent's Nostr private key before
 starting Codex, so model tools never inherit the signing identity.
 

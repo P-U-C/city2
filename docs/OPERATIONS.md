@@ -170,9 +170,13 @@ overlay network from turning a backup into an unrestartable relay. Run
 ## Coordinator runtime authentication
 
 Only after coordinator activation is approved, install the pinned adapter and
-start the service. systemd reads only the existing PfTerminal ChatGPT auth file
-and materializes it privately under `/run`; the launcher uses an ephemeral
-`CODEX_HOME`. No provider API key is copied or separately billed.
+start the service. systemd bind-mounts only the existing PfTerminal ChatGPT
+`auth.json` into an otherwise ephemeral `CODEX_HOME`. The narrow mount is
+read-write so Codex's guarded refresh can persist rotated OAuth credentials and
+all PfTerminal/Codex processes observe one current token chain. The service
+still cannot traverse the host home, and no provider API key is copied or
+separately billed. Restart the service after an explicit PfTerminal re-login so
+the mount follows the newly created auth file.
 
 ```bash
 ./scripts/build-agent-adapter.sh

@@ -41,10 +41,13 @@ requires an inspect/change/check/review loop.
 ## Coordinator authentication
 
 The first coordinator uses the host's existing PfTerminal ChatGPT login through
-the pinned `codex-acp` adapter. systemd reads only PfTerminal's `auth.json` and
-materializes it as a private credential under `/run`; the launcher copies that
-credential into an ephemeral, service-private `CODEX_HOME`. The process cannot
-read PfTerminal's vault, configuration, session history or memory store.
+the pinned `codex-acp` adapter. systemd bind-mounts only PfTerminal's
+`auth.json` into an otherwise ephemeral, service-private `CODEX_HOME`. That one
+file is writable because OAuth refresh-token rotation must be shared rather
+than copied into an independent token chain. The process cannot traverse the
+host home or read PfTerminal's vault, configuration, session history or memory
+store. An explicit re-login replaces `auth.json`, so restart the coordinator
+after re-login to attach the new file.
 
 This path uses Chad's existing ChatGPT plan instead of a separately billed API
 key. If a later agent needs a provider API key, it must originate in

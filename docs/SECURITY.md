@@ -5,8 +5,10 @@
 - Chad's human Buzz/Nostr private key remains on a human-controlled device.
 - The relay has its own server key and closed membership list.
 - Every agent has a unique Nostr key and Unix/service boundary.
-- The first coordinator receives only PfTerminal's ChatGPT auth file through a
-  systemd credential and an ephemeral `CODEX_HOME`; it cannot read the vault.
+- The first coordinator receives only PfTerminal's ChatGPT `auth.json` through
+  a narrow systemd bind mount into an otherwise ephemeral `CODEX_HOME`; it
+  cannot traverse the host home or read the vault. The file is writable only
+  because all Codex processes must share OAuth refresh-token rotation.
 - Any future provider API key must originate in PfTerminal's encrypted vault
   and reach a service only through a reviewed RAM-backed credential path.
 - Git, SQLite and existing production services remain independent authorities.
@@ -48,7 +50,9 @@ The first coordinator is:
 The relay signer retains the agent's Nostr key, but the Codex ACP launcher
 removes it from the model-runtime environment before any model or tool process
 starts. The ChatGPT runtime credential remains available only through the
-service-private ephemeral `CODEX_HOME` required by Codex itself.
+single-file bind inside the service-private `CODEX_HOME` required by Codex
+itself. A credential-file write therefore affects the shared PfTerminal login;
+the service exposes no surrounding host configuration or vault paths.
 
 Channel membership is not a filesystem sandbox. Systemd hardening and Unix
 identity boundaries remain required.

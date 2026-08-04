@@ -16,7 +16,7 @@ Environment=APP_SERVER_LOGS=/run/city2-agent-%i/logs
 Environment=NO_BROWSER=1
 Environment=PATH=/opt/city2/bin:/usr/bin:/bin
 EnvironmentFile=/home/%i/.config/city2/agent.env
-LoadCredential=codex.auth:/home/%i/.codex/auth.json
+BindPaths=/home/%i/.codex/auth.json:/run/city2-agent-%i/codex/auth.json
 ExecStart=/opt/city2/bin/city2-agent-launcher
 Restart=on-failure
 RestartSec=10s
