@@ -188,5 +188,8 @@ fi
 grep -q '^unset BUZZ_PRIVATE_KEY$' \
   infra/buzz/agents/bin/city2-codex-acp-launcher ||
   fail "Codex ACP child must not inherit the Nostr private key"
+grep -q '^export NODE_OPTIONS=--jitless$' \
+  infra/buzz/agents/bin/city2-codex-acp-launcher ||
+  fail "Codex ACP must stay compatible with MemoryDenyWriteExecute"
 
 echo "validate: PASS"

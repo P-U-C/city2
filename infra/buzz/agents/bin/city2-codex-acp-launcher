@@ -7,4 +7,9 @@ set -euo pipefail
 unset BUZZ_PRIVATE_KEY
 unset CREDENTIALS_DIRECTORY
 
+# The hardened service keeps MemoryDenyWriteExecute=true. V8's default JIT
+# requires writable executable mappings, so run the Node-based ACP adapter in
+# interpreter-only mode rather than weakening the systemd boundary.
+export NODE_OPTIONS=--jitless
+
 exec /opt/city2/bin/codex-acp

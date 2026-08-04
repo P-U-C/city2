@@ -56,12 +56,19 @@ for producer data and logs.
 
 PfTerminal owns the project lifecycle:
 
-1. Interpret an owner request from Telegram/TUI/headless execution.
+1. Interpret an owner request and define success and stop conditions.
 2. Load root `AGENTS.md` and inspect repository/runtime truth.
-3. Make scoped changes.
-4. Run validation and review.
-5. Execute approved deployment/rollback commands.
-6. Return durable evidence to the owner and, when enabled, the Buzz thread.
+3. Form the least-specific valid hypothesis that explains the evidence.
+4. Take the smallest reversible action that tests it.
+5. Measure the result, revise from evidence and repeat without reusing an
+   unchanged failed approach.
+6. Run validation and review proportional to risk.
+7. Execute approved deployment/rollback commands.
+8. Return durable evidence to the owner and, when enabled, the Buzz thread.
+
+This is a bounded optimization loop, not an always-running context loop. Every
+pass must reduce uncertainty or improve a verified result; completion, a
+documented blocker, an iteration limit or a human gate terminates it.
 
 `./city2` is the stable command surface. It roots headless PfTerminal turns in
 this repository and prevents the project from depending on an OpenClaw

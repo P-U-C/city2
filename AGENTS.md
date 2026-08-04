@@ -31,14 +31,23 @@ before changing an external producer or service.
 
 For every substantive change:
 
-1. Inspect current code and runtime evidence.
-2. State the smallest reversible change.
-3. Implement only that scope.
-4. Run `./city2 validate` and the narrowest relevant runtime test.
-5. Review the diff and scan it for secrets.
-6. Record outcome, evidence, changes, checks and any remaining gate.
+1. Define the objective, constraints, success criteria and stop conditions.
+2. Inspect current code, runtime evidence and prior failed attempts.
+3. State the weakest valid hypothesis sufficient to explain the evidence and
+   the smallest reversible action that can test it.
+4. Implement only that scope and measure the result.
+5. Record what improved, worsened or remains uncertain; revise the hypothesis
+   before another pass.
+6. Repeat until the success criteria are verified or a stop condition is met.
+7. Run `./city2 validate` and the narrowest relevant runtime test, then broaden
+   checks in proportion to risk.
+8. Review the diff, scan it for secrets, and record outcome, evidence, changes,
+   checks and any remaining gate.
 
-Never convert failed attempts into a false one-pass success.
+"Weakest" means least specific, not shortest: do not assert or encode more than
+the evidence requires. Never convert failed attempts into a false one-pass
+success, repeat an unchanged failed approach, or loop merely to keep context
+alive.
 
 ## Hard boundaries
 
