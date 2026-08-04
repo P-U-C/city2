@@ -12,18 +12,22 @@ class AgentRuntimeTests(unittest.TestCase):
         unit = UNIT.read_text()
         self.assertIn(
             "BindPaths=/home/%i/.codex/auth.json:"
-            "/run/city2-agent-%i/codex/auth.json",
+            "/run/city2-agent-%i/auth.json",
             unit,
         )
         self.assertNotIn("LoadCredential=codex.auth:", unit)
         self.assertIn("ProtectHome=yes", unit)
         self.assertIn("Environment=CODEX_HOME=/run/city2-agent-%i/codex", unit)
+        self.assertIn(
+            "Environment=CITY2_SHARED_AUTH_FILE=/run/city2-agent-%i/auth.json",
+            unit,
+        )
 
     def test_launcher_does_not_clone_rotating_oauth_credential(self):
         launcher = LAUNCHER.read_text()
-        self.assertIn('credential="${CODEX_HOME:-}/auth.json"', launcher)
+        self.assertIn('credential="${CITY2_SHARED_AUTH_FILE}"', launcher)
         self.assertNotIn('install -m 0600 "${credential}"', launcher)
-        self.assertNotIn('install -d -m 0700 "${HOME}" "${CODEX_HOME}"', launcher)
+        self.assertIn('ln -s "${credential}" "${CODEX_HOME}/auth.json"', launcher)
 
 
 if __name__ == "__main__":

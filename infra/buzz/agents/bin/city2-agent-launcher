@@ -33,18 +33,15 @@ BIN_DIR="${CITY2_BIN_DIR:-/opt/city2/bin}"
 
 case "${BUZZ_AGENT_HARNESS}" in
   pfterminal-chatgpt)
-    credential="${CODEX_HOME:-}/auth.json"
+    require CITY2_SHARED_AUTH_FILE
+    credential="${CITY2_SHARED_AUTH_FILE}"
     [[ -r "${credential}" ]] || {
       echo "buzz-agent-launcher: PfTerminal ChatGPT credential is unavailable" >&2
       exit 1
     }
     require HOME
     require CODEX_HOME
-    install -d -m 0700 "${HOME}"
-    [[ -d "${CODEX_HOME}" ]] || {
-      echo "buzz-agent-launcher: service-private CODEX_HOME is unavailable" >&2
-      exit 1
-    }
+    install -d -m 0700 "${HOME}" "${CODEX_HOME}"
     if [[ -n "${APP_SERVER_LOGS:-}" ]]; then
       install -d -m 0700 "${APP_SERVER_LOGS}"
     fi
@@ -52,6 +49,7 @@ case "${BUZZ_AGENT_HARNESS}" in
       echo "buzz-agent-launcher: PfTerminal ChatGPT credential is empty" >&2
       exit 1
     }
+    ln -s "${credential}" "${CODEX_HOME}/auth.json"
     export CODEX_HOME
     export NO_BROWSER=1
     export INITIAL_AGENT_MODE=read-only

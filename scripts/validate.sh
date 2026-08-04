@@ -199,7 +199,7 @@ grep -q '^unset BUZZ_PRIVATE_KEY$' \
 grep -q '^export NODE_OPTIONS=--jitless$' \
   infra/buzz/agents/bin/city2-codex-acp-launcher ||
   fail "Codex ACP must stay compatible with MemoryDenyWriteExecute"
-grep -q '^BindPaths=/home/%i/.codex/auth.json:/run/city2-agent-%i/codex/auth.json$' \
+grep -q '^BindPaths=/home/%i/.codex/auth.json:/run/city2-agent-%i/auth.json$' \
   infra/buzz/agents/systemd/city2-buzz-agent@.service ||
   fail "coordinator must share exactly the PfTerminal auth file for OAuth rotation"
 if grep -q '^LoadCredential=codex.auth:' \
