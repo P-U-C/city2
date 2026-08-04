@@ -96,8 +96,14 @@ python3 scripts/validate_spec.py
 python3 scripts/validate_contracts.py
 
 if command -v systemd-analyze >/dev/null 2>&1; then
-  SYSTEMD_UNIT_PATH="${ROOT}/infra/buzz/agents/systemd:${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
+  unit_tmp="$(mktemp -d /tmp/city2-units.XXXXXX)"
+  sed \
+    "s|^ExecStart=/opt/city2/bin/city2-agent-launcher$|ExecStart=${ROOT}/infra/buzz/agents/bin/city2-agent-launcher|" \
+    infra/buzz/agents/systemd/city2-buzz-agent@.service \
+    >"${unit_tmp}/city2-buzz-agent@.service"
+  SYSTEMD_UNIT_PATH="${unit_tmp}:${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
     systemd-analyze verify city2-buzz-agent@.service
+  rm -rf "${unit_tmp}"
   SYSTEMD_UNIT_PATH="${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
     systemd-analyze verify city2-producer-observer-ai-infra.service
 fi
