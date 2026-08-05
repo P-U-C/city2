@@ -49,6 +49,14 @@ host home or read PfTerminal's vault, configuration, session history or memory
 store. An explicit re-login replaces `auth.json`, so restart the coordinator
 after re-login to attach the new file.
 
+The service's systemd namespace, not a nested Codex sandbox, is the filesystem
+and process boundary. Codex runs in `agent-full-access` mode inside that narrow
+namespace because this LXC blocks the namespace operations used by Codex's
+Linux sandbox. `MemoryDenyWriteExecute` remains enabled. The coordinator pins
+the strongest currently compatible direct-tool model (`gpt-5.5`) and disables
+unrelated Codex apps, plugins, goals, multi-agent tools, memories and web search
+to avoid loading redundant tools or context.
+
 This path uses Chad's existing ChatGPT plan instead of a separately billed API
 key. If a later agent needs a provider API key, it must originate in
 PfTerminal's encrypted vault and move through a separately reviewed RAM-backed

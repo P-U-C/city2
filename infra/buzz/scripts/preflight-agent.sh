@@ -36,6 +36,7 @@ owner="$(value BUZZ_ACP_AGENT_OWNER)"
 agent_command="$(value BUZZ_ACP_AGENT_COMMAND)"
 mcp_command="$(value BUZZ_ACP_MCP_COMMAND)"
 harness="$(value BUZZ_AGENT_HARNESS)"
+model="$(value BUZZ_ACP_MODEL)"
 initial_mode="$(value INITIAL_AGENT_MODE)"
 respond_to="$(value BUZZ_ACP_RESPOND_TO)"
 permission_mode="$(value BUZZ_ACP_PERMISSION_MODE)"
@@ -53,8 +54,10 @@ agent_count="$(value BUZZ_ACP_AGENTS)"
   fail "unexpected MCP command"
 [[ "${harness}" == "pfterminal-chatgpt" ]] ||
   fail "first proof must use the reviewed PfTerminal ChatGPT harness"
-[[ "${initial_mode}" == "read-only" ]] ||
-  fail "first proof must use read-only ACP mode"
+[[ "${model}" == "gpt-5.5" ]] ||
+  fail "coordinator must use the reviewed direct-tool model"
+[[ "${initial_mode}" == "agent-full-access" ]] ||
+  fail "Codex must delegate sandboxing to the hardened systemd boundary"
 [[ "${respond_to}" == "owner-only" ]] || fail "first proof must be owner-only"
 [[ "${permission_mode}" == "dont-ask" ]] ||
   fail "first proof must not bypass permission requests"
@@ -80,6 +83,6 @@ unset private_key
 echo "agent-preflight: PASS"
 echo "  relay=$(printf '%s' "${relay_url}" | sed -E 's#(wss?://[^/:]+).*#\1#')"
 echo "  workdir=${workdir}"
-echo "  harness=PfTerminal ChatGPT -> pinned codex-acp (systemd credential)"
+echo "  harness=PfTerminal ChatGPT -> pinned codex-acp -> gpt-5.5"
 echo "  gate=owner-only; agents=1; heartbeat=off"
 echo "No agent, model request, or container was started."

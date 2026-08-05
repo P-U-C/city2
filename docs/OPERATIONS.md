@@ -178,6 +178,16 @@ still cannot traverse the host home, and no provider API key is copied or
 separately billed. Restart the service after an explicit PfTerminal re-login so
 the mount follows the newly created auth file.
 
+The LXC host cannot run Codex's nested Linux sandbox. The coordinator therefore
+uses ACP `agent-full-access` only *inside* the hardened systemd namespace;
+`ProtectSystem=strict`, `ProtectHome=yes`, and the read-only `/srv/city2` bind
+remain the actual enforcement boundary. `MemoryDenyWriteExecute` stays enabled,
+so the runtime pins `gpt-5.5`, the strongest currently available direct-tool
+model, rather than using a GPT-5.6 model whose required V8 code-mode executor is
+incompatible with that hardening. Unrelated apps, plugins, goals, multi-agent
+tools, web search, and memories are disabled in the ephemeral Codex config to
+keep context and authority narrow.
+
 ```bash
 ./scripts/build-agent-adapter.sh
 ./city2 buzz install-agent-tooling

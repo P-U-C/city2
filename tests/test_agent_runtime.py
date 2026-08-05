@@ -29,6 +29,26 @@ class AgentRuntimeTests(unittest.TestCase):
         self.assertNotIn('install -m 0600 "${credential}"', launcher)
         self.assertIn('ln -s "${credential}" "${CODEX_HOME}/auth.json"', launcher)
 
+    def test_systemd_is_the_sandbox_and_runtime_stays_direct_tool_only(self):
+        launcher = LAUNCHER.read_text()
+        self.assertIn('export INITIAL_AGENT_MODE=agent-full-access', launcher)
+        self.assertIn('export BUZZ_ACP_MODEL="${BUZZ_ACP_MODEL:-gpt-5.5}"', launcher)
+        self.assertIn('sandbox_mode = "danger-full-access"', launcher)
+        self.assertIn('apps = false', launcher)
+        self.assertIn('code_mode = false', launcher)
+        self.assertIn('multi_agent = false', launcher)
+        self.assertIn('plugins = false', launcher)
+
+        unit = UNIT.read_text()
+        for boundary in (
+            "ProtectHome=yes",
+            "ProtectSystem=strict",
+            "NoNewPrivileges=true",
+            "MemoryDenyWriteExecute=true",
+            "BindReadOnlyPaths=/home/%i/city2:/srv/city2",
+        ):
+            self.assertIn(boundary, unit)
+
 
 if __name__ == "__main__":
     unittest.main()

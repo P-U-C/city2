@@ -199,6 +199,12 @@ grep -q '^unset BUZZ_PRIVATE_KEY$' \
 grep -q '^export NODE_OPTIONS=--jitless$' \
   infra/buzz/agents/bin/city2-codex-acp-launcher ||
   fail "Codex ACP must stay compatible with MemoryDenyWriteExecute"
+grep -q '^    export INITIAL_AGENT_MODE=agent-full-access$' \
+  infra/buzz/agents/bin/city2-agent-launcher ||
+  fail "Codex must delegate sandboxing to the hardened systemd namespace"
+grep -q '^    export BUZZ_ACP_MODEL="${BUZZ_ACP_MODEL:-gpt-5.5}"$' \
+  infra/buzz/agents/bin/city2-agent-launcher ||
+  fail "coordinator must default to the reviewed direct-tool model"
 grep -q '^BindPaths=/home/%i/.codex/auth.json:/run/city2-agent-%i/auth.json$' \
   infra/buzz/agents/systemd/city2-buzz-agent@.service ||
   fail "coordinator must share exactly the PfTerminal auth file for OAuth rotation"

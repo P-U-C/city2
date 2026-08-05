@@ -23,7 +23,15 @@ refresh token. The service cannot traverse the host home or see the PfTerminal
 vault, configuration, sessions or memory. Restart it after an explicit
 PfTerminal re-login so the mount follows the replacement file.
 The intermediary ACP launcher strips the agent's Nostr private key before
-starting Codex, so model tools never inherit the signing identity.
+starting Codex, so the model runtime and ordinary children do not inherit the
+signing identity. `buzz-acp` separately passes it only to the configured Buzz
+MCP broker, which performs signed relay operations on the coordinator's behalf.
+
+Codex delegates sandboxing to the hardened systemd namespace because this LXC
+cannot run a nested Linux sandbox. The runtime pins direct-tool `gpt-5.5` so
+`MemoryDenyWriteExecute` remains enabled, and disables unrelated Codex apps,
+plugins, goals, multi-agent tools, memories and web search to keep the first
+coordinator's context and authority narrow.
 
 ## Identity
 

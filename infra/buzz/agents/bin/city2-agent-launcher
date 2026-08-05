@@ -50,9 +50,38 @@ case "${BUZZ_AGENT_HARNESS}" in
       exit 1
     }
     ln -s "${credential}" "${CODEX_HOME}/auth.json"
+    cat >"${CODEX_HOME}/config.toml" <<'EOF'
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[features]
+apps = false
+code_mode = false
+goals = false
+hooks = false
+memories = false
+multi_agent = false
+plugins = false
+tool_suggest = false
+
+[tools]
+view_image = false
+web_search = false
+EOF
+    chmod 0600 "${CODEX_HOME}/config.toml"
+
+    # This LXC cannot host Codex's nested Linux sandbox, while systemd already
+    # supplies the reviewed read-only filesystem and process boundary. GPT-5.6
+    # models currently force a V8 code-mode executor that conflicts with
+    # MemoryDenyWriteExecute, so pin the strongest available direct-tool model.
+    export BUZZ_ACP_MODEL="${BUZZ_ACP_MODEL:-gpt-5.5}"
+    [[ "${BUZZ_ACP_MODEL}" == "gpt-5.5" ]] || {
+      echo "buzz-agent-launcher: unsupported coordinator model ${BUZZ_ACP_MODEL}" >&2
+      exit 1
+    }
     export CODEX_HOME
     export NO_BROWSER=1
-    export INITIAL_AGENT_MODE=read-only
+    export INITIAL_AGENT_MODE=agent-full-access
     unset credential
     ;;
   *)

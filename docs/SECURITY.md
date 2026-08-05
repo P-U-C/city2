@@ -47,10 +47,19 @@ The first coordinator is:
   the rest of the user's home is inaccessible;
 - unable to access the PfTerminal vault after startup.
 
+The `agent-full-access` ACP label is internal to the service namespace; it does
+not grant host access. It prevents Codex from attempting a second Linux sandbox
+inside an LXC that cannot support one. systemd still enforces the read-only repo
+bind, hidden home, strict system filesystem, empty capability set, and
+`MemoryDenyWriteExecute`. The direct-tool model pin avoids disabling that last
+control for GPT-5.6's required V8 code-mode runtime.
+
 The relay signer retains the agent's Nostr key, but the Codex ACP launcher
-removes it from the model-runtime environment before any model or tool process
-starts. The ChatGPT runtime credential remains available only through the
-single-file bind inside the service-private `CODEX_HOME` required by Codex
+removes it from the model-runtime environment and ordinary child processes.
+`buzz-acp` passes it separately only to the configured Buzz MCP broker, which
+performs signed relay operations on the coordinator's behalf. The ChatGPT
+runtime credential remains available only through the single-file bind inside
+the service-private `CODEX_HOME` required by Codex
 itself. A credential-file write therefore affects the shared PfTerminal login;
 the service exposes no surrounding host configuration or vault paths.
 
