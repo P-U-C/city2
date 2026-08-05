@@ -63,7 +63,11 @@ case "${1:-help}" in
       echo "city2: systemd-run is required for contained reviews" >&2
       exit 1
     }
-    command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1 || {
+    command -v sudo >/dev/null 2>&1 || {
+      echo "city2: sudo is required for contained reviews" >&2
+      exit 1
+    }
+    sudo -n true >/dev/null 2>&1 || {
       echo "city2: passwordless sudo is required for contained reviews" >&2
       exit 1
     }
