@@ -202,6 +202,7 @@ grep -q '^export NODE_OPTIONS=--jitless$' \
 grep -q '^    export INITIAL_AGENT_MODE=agent-full-access$' \
   infra/buzz/agents/bin/city2-agent-launcher ||
   fail "Codex must delegate sandboxing to the hardened systemd namespace"
+# shellcheck disable=SC2016 -- match the literal default expression in source.
 grep -q '^    export BUZZ_ACP_MODEL="${BUZZ_ACP_MODEL:-gpt-5.5}"$' \
   infra/buzz/agents/bin/city2-agent-launcher ||
   fail "coordinator must default to the reviewed direct-tool model"
