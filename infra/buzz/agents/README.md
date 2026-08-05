@@ -41,8 +41,17 @@ non-member directory entry is intentionally hidden. Until the owner creates the
 agent through Buzz Desktop and supplies that attestation, publish the equivalent
 directory projection as `respond_to=allowlist` with only the owner's pubkey;
 keep `BUZZ_ACP_RESPOND_TO=owner-only` as the runtime enforcement boundary. The
-mobile provider refreshes the directory on relay reconnect, so relaunch the app
-after changing the profile.
+directory provider refreshes on relay reconnect.
+
+The App Store `0.4.11` build has a separate channel-member cache defect: it can
+start its one-shot member query before WebSocket connection and never refetch,
+so an empty `@` dropdown can omit a valid Bot. Upstream commit `06582ee6` fixes
+that lifecycle and is present in the `0.7.0` release-candidate line, but not the
+current App Store build. Do not churn relay membership to compensate. Type a
+name prefix such as `@Cit` to use the HTTP profile-search path, or enter the
+exact textual mention manually; both preserve the owner-only fallback. Mobile's
+Pulse **Agents** tab is a note feed, not an agent registry, and remains empty
+until an agent publishes a kind `1` note.
 
 Codex delegates sandboxing to the hardened systemd namespace because this LXC
 cannot run a nested Linux sandbox. The runtime pins direct-tool `gpt-5.5` so
