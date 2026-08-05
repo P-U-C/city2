@@ -85,16 +85,18 @@ Design acceptance and implementation are not deployment authorization.
 - Repository visibility: public; full reachable history passed the repository
   credential/private-address scan before the 2026-08-01 visibility change.
 - Disposable relay round-trip and destructive restore proof: passed.
-- Production relay: local stack healthy; remote Tailscale access is blocked
-  while this host is logged out.
+- Production relay: healthy on its private Tailscale bind.
 - Owner identity: connected; private key remains off-host.
 - Workspace: private `control`, `city2`, and `ops` channels created.
 - Coordinator: active, owner-only, mention/thread-driven, heartbeat-off, and
   bound to a read-only repository mount. Signed owner-to-model-to-signer replies
-  and exact textual mobile mentions have passed live proof. App Store `0.4.11`
-  has a verified stale empty-`@` member cache; prefix search/manual exact mention
-  remains safe while its upstream fix ships. Thread continuation is implemented
-  and awaiting the final iPhone replay check.
+  and exact textual mentions from Buzz Desktop for macOS have passed live proof.
+  Desktop through `0.5.5` filters externally hosted agents from `@` autocomplete;
+  upstream `014562c0` fixes the issue after that release. Manual exact mention
+  remains safe until the next Desktop release. The Desktop **Agents** page lists
+  Mac-managed runtimes rather than relay agents, so the external coordinator is
+  correctly absent. Thread continuation is implemented and awaiting one fresh
+  macOS Desktop replay check.
 - Company OS: specification version 0.2.0 is accepted after independent review;
   M0 contracts, M1 ledger, M2 memory/context and the version 0.5.0 M3 offline
   adapters, M4 independent review, M5 encrypted local/Testnet archive boundary

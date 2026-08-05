@@ -194,11 +194,18 @@ publishes it. Do not restore model-driven `buzz messages send` for ordinary
 coordinator replies or configure a signer-bearing MCP process: the model runtime
 intentionally has no signing key.
 
-Mobile clients may omit structured mention tags. The reviewed compatibility
+Buzz clients may omit structured mention tags. The reviewed compatibility
 path uses `BUZZ_ACP_TEXT_MENTION=<exact display name>` and
 `BUZZ_ACP_FOLLOW_OWN_THREADS=true`: only the registered owner's signed event can
 trigger by textual `@name`, and thread continuation additionally requires a
-valid immediate parent signed by the same coordinator.
+valid coordinator-signed response in that exact channel/thread.
+
+Buzz Desktop through `0.5.5` filters relay-only agents from mention
+autocomplete and shows only Mac-managed runtimes on its **Agents** page.
+Upstream `014562c0` fixes authorized, exact-channel relay-agent mentions after
+that release. Until a release containing it is installed, use the exact textual
+`@City2 Coordinator`; do not duplicate the coordinator or move its signing key
+to the Mac.
 
 ```bash
 ./scripts/build-agent-adapter.sh

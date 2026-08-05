@@ -29,29 +29,31 @@ process. The City2-patched `buzz-acp` captures only the ACP `final_answer` phase
 and publishes it directly with its own signer. Codex does not run the Buzz CLI
 or receive the key.
 
-For mobile compatibility, the owner may start a request with the exact textual
-`@<display name>` even if the app drops the structured `p` tag. A follow-up in
-the thread is accepted only when that exact channel/thread already contains a
-valid message signed by this coordinator. Both fallbacks run after the
-owner-only author gate.
+For client compatibility, the owner may start a request with the exact textual
+`@<display name>` even if Buzz omits the structured `p` tag. A follow-up in the
+thread is accepted only when that exact channel/thread already contains a valid
+message signed by this coordinator. Both fallbacks run after the owner-only
+author gate.
 
-Buzz mobile loads agent autocomplete from kind `10100` directory profiles and
-channel bot membership. Without a NIP-OA owner attestation, an `owner-only`
-non-member directory entry is intentionally hidden. Until the owner creates the
-agent through Buzz Desktop and supplies that attestation, publish the equivalent
-directory projection as `respond_to=allowlist` with only the owner's pubkey;
-keep `BUZZ_ACP_RESPOND_TO=owner-only` as the runtime enforcement boundary. The
-directory provider refreshes on relay reconnect.
+Buzz Desktop discovers externally hosted agents from kind `10100` directory
+profiles. Publish the coordinator as `respond_to=allowlist` with only the
+owner's pubkey and all channels where it may be invoked; keep
+`BUZZ_ACP_RESPOND_TO=owner-only` as the runtime enforcement boundary.
 
-The App Store `0.4.11` build has a separate channel-member cache defect: it can
-start its one-shot member query before WebSocket connection and never refetch,
-so an empty `@` dropdown can omit a valid Bot. Upstream commit `06582ee6` fixes
-that lifecycle and is present in the `0.7.0` release-candidate line, but not the
-current App Store build. Do not churn relay membership to compensate. Type a
-name prefix such as `@Cit` to use the HTTP profile-search path, or enter the
-exact textual mention manually; both preserve the owner-only fallback. Mobile's
-Pulse **Agents** tab is a note feed, not an agent registry, and remains empty
-until an agent publishes a kind `1` note.
+Released Buzz Desktop builds through `0.5.5` have an autocomplete eligibility
+bug that filters relay-discovered agents unless the same Mac also manages them
+locally. Upstream commit
+[`014562c0`](https://github.com/block/buzz/commit/014562c063eae6ab1b7c6e3d20f2be3024c5f3a8)
+fixes exact-channel, allowlist-authorized relay agent mentions, but landed after
+the `0.5.5` release. Until a later Desktop release includes it, enter the exact
+textual `@City2 Coordinator` manually. Prefix search does not bypass this
+Desktop filter. Do not churn membership, duplicate the agent on the Mac, or
+copy its private key to the Mac as a workaround. After upgrading, fully quit
+and reopen Buzz so its five-minute relay-agent directory cache reloads.
+
+Desktop's **Agents** page is a library and runtime manager for personas and
+agents stored on that Mac; it is not the relay-agent directory. A
+PfTerminal-hosted coordinator is therefore not expected to appear there.
 
 Codex delegates sandboxing to the hardened systemd namespace because this LXC
 cannot run a nested Linux sandbox. The runtime pins direct-tool `gpt-5.5` so
