@@ -58,3 +58,41 @@ active.
 The original acceptance remains valid. Consecutive owner-authored turns after
 this remediation are tracked separately from the transport proof so a missed
 message cannot be rewritten as a success.
+
+## 2026-08-05 routing-drift closure
+
+A later missed owner turn had a separate configuration cause: the deployed ACP
+routing file contained only `control`, while the valid signed thread event was
+in `ops`. The relay profile, owner gate, Bot membership and continuation
+predicate remained valid; the coordinator was not subscribed to that channel.
+
+Production routing was restored to the complete `control`, `city2` and `ops`
+set. The service restarted cleanly, discovered three channels and established
+three subscriptions. PR #24 added an exact-name routing synchronizer that:
+
+- resolves every requested name against the agent's current memberships;
+- requires exactly one match per name;
+- atomically replaces routing only after the complete set validates;
+- preserves the last known-good file on missing or duplicate names; and
+- prints neither channel identifiers nor credentials.
+
+Two consecutive post-fix owner turns then passed the complete path. Raw relay
+events independently established valid owner and coordinator signatures,
+correct thread linkage and no structured mention on either owner event.
+Coordinator response latency was seven seconds for the first turn and five
+seconds for the second. The hardened service remained active with zero restarts.
+
+**Result:** closed. Both the persisted-event remediation and complete-channel
+routing now have consecutive live owner-turn evidence.
+
+## Desktop owner-label caveat
+
+Buzz Desktop's `owner unavailable` text is independent of runtime ownership.
+The coordinator's latest signed kind-0 profile is signature-valid but carries
+no NIP-OA owner-attestation tag, so Desktop has no cryptographic owner value to
+display. The relay's registered owner gate and Bot membership remain valid.
+
+The human private key remains off-host. Removing the label requires a public
+NIP-OA attestation signed on the human Mac and a coordinator profile republish;
+the human key must not be copied or exported merely to change this cosmetic
+label.
