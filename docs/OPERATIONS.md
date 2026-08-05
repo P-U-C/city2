@@ -200,6 +200,13 @@ path uses `BUZZ_ACP_TEXT_MENTION=<exact display name>` and
 trigger by textual `@name`, and thread continuation additionally requires a
 valid coordinator-signed response in that exact channel/thread.
 
+WebSocket delivery remains primary, but the pinned harness also reconciles
+persisted channel events through the authenticated HTTP bridge every three
+seconds. The catch-up query reuses the live channel/kind/mention filters, has a
+two-second timeout and five-second overlap, verifies signatures, and shares one
+bounded event-ID dedup boundary with WebSocket delivery. This is a delivery
+backstop, not a broader subscription or authority grant.
+
 Buzz Desktop through `0.5.5` filters relay-only agents from mention
 autocomplete and shows only Mac-managed runtimes on its **Agents** page.
 Upstream `014562c0` fixes authorized, exact-channel relay-agent mentions after

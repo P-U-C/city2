@@ -66,7 +66,7 @@ index 8a698954..df69a2da 100644
 +    }
 +
 diff --git a/crates/buzz-acp/src/lib.rs b/crates/buzz-acp/src/lib.rs
-index 403512a3..c1edbe61 100644
+index 403512a3..9cfa8b00 100644
 --- a/crates/buzz-acp/src/lib.rs
 +++ b/crates/buzz-acp/src/lib.rs
 @@ -217,0 +218,108 @@ async fn is_owner_or_sibling(
@@ -74,8 +74,8 @@ index 403512a3..c1edbe61 100644
 +    matches!(std::env::var(name).as_deref(), Ok("1" | "true" | "yes"))
 +}
 +
-+/// Match the literal display-name mention clients leave in message text when
-+/// they omit the structured Nostr `p` tag. The caller still applies the
++/// Match the literal display-name mention clients leave in message text
++/// when they omit the structured Nostr `p` tag. The caller still applies the
 +/// cryptographic owner gate before using this as a trigger.
 +fn textual_agent_mention(content: &str, display_name: &str) -> bool {
 +    let display_name = display_name.trim();
@@ -375,4 +375,306 @@ index 158477c0..bce5cbf7 100644
 +        .map_err(|error| format!("publish failed: {error}"))?;
 +    Ok(())
 +}
++
+diff --git a/crates/buzz-acp/src/relay.rs b/crates/buzz-acp/src/relay.rs
+index aea5cee0..4f5e76d8 100644
+--- a/crates/buzz-acp/src/relay.rs
++++ b/crates/buzz-acp/src/relay.rs
+@@ -102,0 +103,10 @@ const REQ_PACING_INTERVAL: Duration = Duration::from_millis(125);
++/// Persisted-event reconciliation interval. WebSocket fan-out is primary; this
++/// closes the gap when an accepted HTTP-bridge write is stored but not observed
++/// on an otherwise healthy live subscription.
++const CATCHUP_INTERVAL: Duration = Duration::from_secs(3);
++/// Bound catch-up reads so relay liveness and command handling remain prompt.
++const CATCHUP_TIMEOUT: Duration = Duration::from_secs(2);
++/// Replay overlap for same-second writes and delivery races. Event-ID dedup
++/// makes the overlap safe.
++const CATCHUP_SKEW_SECS: u64 = 5;
++const CATCHUP_LIMIT: usize = 200;
+@@ -565,0 +576,8 @@ pub struct HarnessRelay {
++    /// Live subscriptions mirrored for authenticated persisted-event catch-up.
++    catchup_channels: HashMap<Uuid, ChannelFilter>,
++    /// Newest event timestamp delivered to the harness per channel.
++    catchup_since: HashMap<Uuid, u64>,
++    catchup_interval: tokio::time::Interval,
++    catchup_pending: VecDeque<BuzzEvent>,
++    /// Shared delivery-boundary dedup for WebSocket and catch-up events.
++    delivered_ids: TwoGenDedup,
+@@ -631,0 +650,5 @@ impl HarnessRelay {
++        let http = reqwest::Client::builder()
++            .timeout(std::time::Duration::from_secs(10))
++            .connect_timeout(std::time::Duration::from_secs(5))
++            .build()
++            .map_err(|e| RelayError::Http(format!("failed to build HTTP client: {e}")))?;
+@@ -652,5 +675 @@ impl HarnessRelay {
+-            http: reqwest::Client::builder()
+-                .timeout(std::time::Duration::from_secs(10))
+-                .connect_timeout(std::time::Duration::from_secs(5))
+-                .build()
+-                .map_err(|e| RelayError::Http(format!("failed to build HTTP client: {e}")))?,
++            http,
+@@ -660,0 +680,8 @@ impl HarnessRelay {
++            catchup_channels: HashMap::new(),
++            catchup_since: HashMap::new(),
++            catchup_interval: tokio::time::interval_at(
++                tokio::time::Instant::now() + CATCHUP_INTERVAL,
++                CATCHUP_INTERVAL,
++            ),
++            catchup_pending: VecDeque::new(),
++            delivered_ids: TwoGenDedup::new(SEEN_ID_LIMIT),
+@@ -771 +798 @@ impl HarnessRelay {
+-                filter,
++                filter: filter.clone(),
+@@ -775,0 +803,5 @@ impl HarnessRelay {
++        let now = unix_now_secs();
++        self.catchup_channels.insert(channel_id, filter);
++        self.catchup_since
++            .entry(channel_id)
++            .or_insert(replay_since.unwrap_or(now));
+@@ -815,0 +848,4 @@ impl HarnessRelay {
++        self.catchup_channels.remove(&channel_id);
++        self.catchup_since.remove(&channel_id);
++        self.catchup_pending
++            .retain(|event| event.channel_id != channel_id);
+@@ -825,2 +861,56 @@ impl HarnessRelay {
+-        // The background task sends `None` to signal connection loss.
+-        self.event_rx.recv().await.flatten()
++        loop {
++            while let Some(event) = self.catchup_pending.pop_front() {
++                if self.accept_delivery(&event) {
++                    return Some(event);
++                }
++            }
++
++            tokio::select! {
++                candidate = self.event_rx.recv() => {
++                    // The background task sends `None` to signal connection loss.
++                    let event = candidate.flatten()?;
++                    if self.accept_delivery(&event) {
++                        return Some(event);
++                    }
++                }
++                _ = self.catchup_interval.tick(), if !self.catchup_channels.is_empty() => {
++                    let subscriptions = self
++                        .catchup_channels
++                        .iter()
++                        .map(|(channel_id, filter)| CatchupSubscription {
++                            channel_id: *channel_id,
++                            filter: filter.clone(),
++                            since: self
++                                .catchup_since
++                                .get(channel_id)
++                                .copied()
++                                .unwrap_or_else(unix_now_secs),
++                        })
++                        .collect();
++                    let rest = self.rest_client();
++                    let agent_pubkey = self.keys.public_key().to_hex();
++                    match tokio::time::timeout(
++                        CATCHUP_TIMEOUT,
++                        query_persisted_catchup(&rest, &agent_pubkey, subscriptions),
++                    )
++                    .await
++                    {
++                        Ok(Ok(events)) => self.catchup_pending.extend(events),
++                        Ok(Err(error)) => tracing::warn!("persisted-event catch-up failed: {error}"),
++                        Err(_) => tracing::warn!("persisted-event catch-up timed out"),
++                    }
++                }
++            }
++        }
++    }
++
++    fn accept_delivery(&mut self, event: &BuzzEvent) -> bool {
++        if !self.delivered_ids.insert(event.event.id.to_hex()) {
++            return false;
++        }
++        let ts = event.event.created_at.as_secs();
++        self.catchup_since
++            .entry(event.channel_id)
++            .and_modify(|seen| *seen = (*seen).max(ts))
++            .or_insert(ts);
++        true
+@@ -908,0 +999,101 @@ impl HarnessRelay {
++#[derive(Debug, Clone)]
++struct CatchupSubscription {
++    channel_id: Uuid,
++    filter: ChannelFilter,
++    since: u64,
++}
++
++/// Query all active channel subscriptions in one authenticated HTTP request.
++/// Results pass the same channel/kind/mention constraints as the live REQ and
++/// are sorted oldest-first before entering the shared delivery dedup boundary.
++async fn query_persisted_catchup(
++    rest: &RestClient,
++    agent_pubkey_hex: &str,
++    subscriptions: Vec<CatchupSubscription>,
++) -> Result<Vec<BuzzEvent>, RelayError> {
++    if subscriptions.is_empty() {
++        return Ok(Vec::new());
++    }
++
++    let filters: Vec<nostr::Filter> = subscriptions
++        .iter()
++        .map(|subscription| build_catchup_filter(subscription, agent_pubkey_hex))
++        .collect();
++
++    let response = rest.query(&filters).await?;
++    let rows = response
++        .as_array()
++        .ok_or_else(|| RelayError::Http("expected JSON array from persisted catch-up".into()))?;
++    let mut events = Vec::with_capacity(rows.len());
++    for row in rows {
++        let Ok(event) = serde_json::from_value::<Event>(row.clone()) else {
++            continue;
++        };
++        let Some(channel_id) = extract_h_tag_uuid(&event) else {
++            continue;
++        };
++        let Some(subscription) = subscriptions
++            .iter()
++            .find(|candidate| candidate.channel_id == channel_id)
++        else {
++            continue;
++        };
++        if !catchup_event_matches(&event, subscription, agent_pubkey_hex) {
++            continue;
++        }
++        events.push(BuzzEvent { channel_id, event });
++    }
++    events.sort_by_key(|event| event.event.created_at);
++    Ok(events)
++}
++
++fn build_catchup_filter(
++    subscription: &CatchupSubscription,
++    agent_pubkey_hex: &str,
++) -> nostr::Filter {
++    use nostr::{Alphabet, Filter, SingleLetterTag, Timestamp};
++
++    let h_tag = SingleLetterTag::lowercase(Alphabet::H);
++    let p_tag = SingleLetterTag::lowercase(Alphabet::P);
++    let mut filter = Filter::new()
++        .custom_tags(h_tag, [subscription.channel_id.to_string()])
++        .since(Timestamp::from(
++            subscription.since.saturating_sub(CATCHUP_SKEW_SECS),
++        ))
++        .limit(CATCHUP_LIMIT);
++    if let Some(kinds) = &subscription.filter.kinds {
++        filter = filter.kinds(kinds.iter().map(|kind| Kind::Custom(*kind as u16)));
++    }
++    if subscription.filter.require_mention {
++        filter = filter.custom_tags(p_tag, [agent_pubkey_hex]);
++    }
++    filter
++}
++
++fn catchup_event_matches(
++    event: &Event,
++    subscription: &CatchupSubscription,
++    agent_pubkey_hex: &str,
++) -> bool {
++    if event.verify().is_err() || extract_h_tag_uuid(event) != Some(subscription.channel_id) {
++        return false;
++    }
++    let kind = event.kind.as_u16() as u32;
++    if subscription
++        .filter
++        .kinds
++        .as_ref()
++        .is_some_and(|kinds| !kinds.contains(&kind))
++    {
++        return false;
++    }
++    !subscription.filter.require_mention
++        || event.tags.iter().any(|tag| {
++            let parts = tag.as_slice();
++            parts.first().map(String::as_str) == Some("p")
++                && parts
++                    .get(1)
++                    .is_some_and(|value| value.eq_ignore_ascii_case(agent_pubkey_hex))
++        })
++}
++
+@@ -4388,0 +4580,80 @@ mod tests {
++    fn make_catchup_event(
++        keys: &nostr::Keys,
++        channel_id: Uuid,
++        kind: u16,
++        mention: Option<&str>,
++    ) -> Event {
++        let mut tags = vec![Tag::parse(["h", &channel_id.to_string()]).unwrap()];
++        if let Some(pubkey) = mention {
++            tags.push(Tag::parse(["p", pubkey]).unwrap());
++        }
++        EventBuilder::new(Kind::Custom(kind), "catch-up")
++            .tags(tags)
++            .sign_with_keys(keys)
++            .unwrap()
++    }
++
++    #[test]
++    fn persisted_catchup_filter_matches_live_subscription_contract() {
++        let channel_id = Uuid::new_v4();
++        let agent = nostr::Keys::generate().public_key().to_hex();
++        let mut subscription = CatchupSubscription {
++            channel_id,
++            filter: ChannelFilter {
++                kinds: Some(vec![9, 1009]),
++                require_mention: false,
++            },
++            since: 1_000,
++        };
++
++        let plain: serde_json::Value =
++            serde_json::to_value(build_catchup_filter(&subscription, &agent)).unwrap();
++        assert_eq!(plain["#h"], serde_json::json!([channel_id.to_string()]));
++        assert_eq!(plain["kinds"], serde_json::json!([9, 1009]));
++        assert_eq!(plain["since"], serde_json::json!(995));
++        assert!(plain.get("#p").is_none());
++
++        subscription.filter.require_mention = true;
++        let mentioned: serde_json::Value =
++            serde_json::to_value(build_catchup_filter(&subscription, &agent)).unwrap();
++        assert_eq!(mentioned["#p"], serde_json::json!([agent]));
++    }
++
++    #[test]
++    fn persisted_catchup_accepts_valid_unmentioned_thread_event_and_rejects_drift() {
++        let author = nostr::Keys::generate();
++        let agent = nostr::Keys::generate().public_key().to_hex();
++        let channel_id = Uuid::new_v4();
++        let subscription = CatchupSubscription {
++            channel_id,
++            filter: test_channel_filter(),
++            since: 1_000,
++        };
++        let unmentioned = make_catchup_event(&author, channel_id, 9, None);
++        assert!(catchup_event_matches(&unmentioned, &subscription, &agent));
++
++        let wrong_channel = make_catchup_event(&author, Uuid::new_v4(), 9, None);
++        assert!(!catchup_event_matches(
++            &wrong_channel,
++            &subscription,
++            &agent
++        ));
++        let wrong_kind = make_catchup_event(&author, channel_id, 10, None);
++        assert!(!catchup_event_matches(&wrong_kind, &subscription, &agent));
++
++        let mention_required = CatchupSubscription {
++            filter: ChannelFilter {
++                kinds: Some(vec![9]),
++                require_mention: true,
++            },
++            ..subscription
++        };
++        assert!(!catchup_event_matches(
++            &unmentioned,
++            &mention_required,
++            &agent
++        ));
++        let mentioned = make_catchup_event(&author, channel_id, 9, Some(&agent));
++        assert!(catchup_event_matches(&mentioned, &mention_required, &agent));
++    }
 +
