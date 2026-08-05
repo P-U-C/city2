@@ -5,3 +5,8 @@ services:
     # replacement value; !override is required here.
     ports: !override
       - "${BUZZ_BIND_IP:?set BUZZ_BIND_IP}:${BUZZ_HTTP_PORT:-3000}:3000"
+  pairing-proxy:
+    # Only the path-restricting proxy is exposed to the private network. The
+    # stateless pairing relay remains internal to the Compose network.
+    ports: !override
+      - "${BUZZ_BIND_IP:?set BUZZ_BIND_IP}:${BUZZ_PAIRING_PORT:-5000}:8080"

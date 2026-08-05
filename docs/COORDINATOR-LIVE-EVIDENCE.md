@@ -85,6 +85,74 @@ seconds for the second. The hardened service remained active with zero restarts.
 **Result:** closed. Both the persisted-event remediation and complete-channel
 routing now have consecutive live owner-turn evidence.
 
+## 2026-08-05 recovery drill 2: bounded relay loss
+
+The second predeclared recovery drill stopped only the Buzz relay container for
+three seconds. A fresh aligned backup passed checksum, PostgreSQL-catalog and
+volume-archive verification before injection. PostgreSQL, Redis, MinIO and the
+coordinator process remained running and unchanged.
+
+The relay loss was observed and recovered healthy in 25.973 seconds, below the
+60-second ceiling. The unchanged coordinator autonomously reconnected and
+restored exactly three channel subscriptions. Protected runtime bytes did not
+drift, no owner event was replayed, and the directory profile, owner gate and
+Bot memberships remained valid.
+
+Chad then replied inside the existing `ops` thread without a structured
+mention. An authenticated raw-event query independently verified the owner's
+signature, the coordinator's signature and identical thread linkage. The
+coordinator replied seven seconds later.
+
+**Result:** accepted. Two of the three required recovery drills are complete.
+No Core/M7 state, authority, identity, membership, producer, schedule or
+downstream contract changed.
+
+## 2026-08-05 private mobile pairing path
+
+Buzz Desktop's **Settings → Mobile** initially failed with HTTP 404. The main
+relay advertised NIP-43 but no `pairing_relay_url`, so Desktop used its legacy
+fallback and attempted `/pair` on the main relay, which does not implement that
+route.
+
+City2 now runs the pinned image's dedicated, stateless `buzz-pair-relay` binary
+as an internal Compose service. A digest-pinned, read-only Nginx sidecar is the
+only service with the explicit Tailscale pairing binding; it permits exact
+`/pair` WebSocket upgrades and enforces connection and HTTP timeout limits. The
+main relay advertises that exact private URL in NIP-11; no pairing port is
+published on a public interface.
+
+The first relay recreation remained fail-closed in its existing Git object-store
+conformance gate and became unhealthy. An independent MinIO write/read/delete
+probe passed. One bounded relay-only restart then passed the same conformance
+gate and became healthy in 20 seconds; dependencies, the pairing service and the
+coordinator process did not restart. The coordinator autonomously restored all
+three subscriptions.
+
+Final runtime checks proved a matching NIP-11 pairing URL and HTTP 101 WebSocket
+upgrade on `/pair`. Relay, pairing sidecar, PostgreSQL, Redis and MinIO were all
+healthy; the coordinator remained active with zero restarts.
+
+An independent review then found that the upstream pairing binary explicitly
+requires a path-restricting reverse proxy with HTTP timeouts. The direct private
+binding was therefore not accepted as final. The remediated layout places the
+pairing relay behind a digest-pinned, non-root, read-only Nginx sidecar; only
+exact `/pair` WebSocket upgrades are proxied, other paths return 404, non-GET
+requests are denied, and the internal relay has no host port. A final live probe
+reconfirmed NIP-11, HTTP 101, path rejection, healthy services and all three
+coordinator subscriptions.
+
+The review also exposed an unsafe harness boundary: a reviewer cleanup command
+stopped both production containers sharing the Buzz image. The runtime gate
+caught the outage before publication and the normal wrapper restored service in
+13 seconds without restarting dependencies or the coordinator. `./city2 review`
+now runs in a root-created transient systemd boundary with a read-only repo,
+hidden home, disposable config-only state, `NoNewPrivileges` and no Docker
+access.
+
+**Result:** infrastructure accepted; iPhone scan/import remains a client-side
+acceptance check. The human private key remains on human-controlled devices and
+no Core/M7 authority changed.
+
 ## Desktop owner-label caveat
 
 Buzz Desktop's `owner unavailable` text is independent of runtime ownership.

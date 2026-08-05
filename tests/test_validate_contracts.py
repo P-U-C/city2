@@ -1,5 +1,4 @@
 import importlib.util
-import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -162,14 +161,19 @@ class ContractValidationTests(unittest.TestCase):
         )
 
     def test_unpinned_git_reference_rejects_untracked_file(self):
-        build = ROOT / "build"
-        build.mkdir(exist_ok=True)
-        with tempfile.NamedTemporaryFile(dir=build) as untracked:
-            relative = Path(untracked.name).relative_to(ROOT)
+        clean = validate_contracts.subprocess.CompletedProcess(
+            ["git", "diff"], returncode=0
+        )
+        missing = validate_contracts.subprocess.CompletedProcess(
+            ["git", "show"], returncode=1
+        )
+        with mock.patch.object(
+            validate_contracts.subprocess, "run", side_effect=(clean, missing)
+        ):
             with self.assertRaisesRegex(
                 validate_contracts.ValidationError, "tracked Git index"
             ):
-                validate_contracts._git_reference_bytes(f"git:{relative}")
+                validate_contracts._git_reference_bytes("git:build/untracked")
 
     def test_unpinned_git_reference_rejects_unstaged_change(self):
         dirty = validate_contracts.subprocess.CompletedProcess(

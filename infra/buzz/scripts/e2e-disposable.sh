@@ -45,21 +45,25 @@ cleanup() {
 }
 trap cleanup EXIT
 
-cp -a "${SOURCE_ROOT}/." "${TMP_ROOT}/"
+( cd "${SOURCE_ROOT}" && tar --exclude='./.env' -cf - . ) |
+  tar -C "${TMP_ROOT}" -xf -
 install -d -m 0755 "${TMP_ROOT}/bin"
 cp "${BIN_ROOT}"/{buzz,buzz-acp,buzz-agent,buzz-dev-mcp,buzz-admin,BINARIES.sha256} \
   "${TMP_ROOT}/bin/"
 chmod 750 "${TMP_ROOT}"/run.sh "${TMP_ROOT}"/scripts/*.sh
 
 port=""
+pairing_port=""
 for candidate in $(seq 33100 33199); do
-  if ! ss -ltnH | awk '{print $4}' | grep -Eq "(^|:)${candidate}$"; then
+  candidate_pairing="$((candidate + 100))"
+  if ! ss -ltnH | awk '{print $4}' | grep -Eq "(^|:)(${candidate}|${candidate_pairing})$"; then
     port="${candidate}"
+    pairing_port="${candidate_pairing}"
     break
   fi
 done
-[[ -n "${port}" ]] || {
-  echo "e2e: no test port available" >&2
+[[ -n "${port}" && -n "${pairing_port}" ]] || {
+  echo "e2e: no relay/pairing test port pair available" >&2
   exit 1
 }
 
@@ -78,6 +82,10 @@ unset outsider_output
   "${owner_public}" 127.0.0.1 127.0.0.1 >/dev/null
 sed -i "s/^BUZZ_HTTP_PORT=.*/BUZZ_HTTP_PORT=${port}/" "${TMP_ROOT}/.env"
 sed -i "s/:3000/:${port}/g" "${TMP_ROOT}/.env"
+sed -i "s/^BUZZ_PAIRING_PORT=.*/BUZZ_PAIRING_PORT=${pairing_port}/" "${TMP_ROOT}/.env"
+sed -i \
+  "s#^BUZZ_PAIRING_RELAY_URL=.*#BUZZ_PAIRING_RELAY_URL=ws://127.0.0.1:${pairing_port}/pair#" \
+  "${TMP_ROOT}/.env"
 
 export BUZZ_COMPOSE_PROJECT="${PROJECT}"
 stage="preflight"
@@ -89,6 +97,21 @@ base_http="http://127.0.0.1:${port}"
 stage="health"
 curl -fsS "${base_http}/_liveness" >/dev/null
 curl -fsS "${base_http}/_readiness" >/dev/null
+
+stage="pairing-proxy"
+pair_base="http://127.0.0.1:${pairing_port}"
+pair_headers="${TMP_ROOT}/pairing.headers"
+curl --silent --show-error --http1.1 --max-time 2 \
+  --dump-header "${pair_headers}" --output /dev/null \
+  --header 'Connection: Upgrade' \
+  --header 'Upgrade: websocket' \
+  --header 'Sec-WebSocket-Version: 13' \
+  --header 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
+  "${pair_base}/pair" || true
+grep -Eq '^HTTP/1\.[01] 101 ' "${pair_headers}"
+[[ "$(curl -sS -o /dev/null -w '%{http_code}' "${pair_base}/other")" == "404" ]]
+[[ "$(curl -sS -o /dev/null -w '%{http_code}' "${pair_base}/pair")" == "426" ]]
+rm -f "${pair_headers}"
 
 buzz_owner() {
   BUZZ_RELAY_URL="${base_http}" \
@@ -199,6 +222,7 @@ echo "  relay=loopback-only"
 echo "  signed-owner-roundtrip=pass"
 echo "  outsider-membership-gate=pass"
 echo "  backup-integrity=pass"
+echo "  pairing-proxy=pass"
 echo "  destructive-restore-in-test-project=pass"
 echo "  provider-calls=none"
 

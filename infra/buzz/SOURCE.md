@@ -5,6 +5,8 @@
 - Source date: `2026-07-30T18:20:58-07:00`
 - Relay image: `ghcr.io/block/buzz@sha256:a2b59030b29242adb0783a05cbabd63f51518fdfe7b724845a68f77adab7e1f9`
 - Observed image tag: `sha-10d5a26`
+- Pairing proxy image: `nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752`
+- Pairing proxy version/source: `1.31.3-alpine`, official Nginx image revision `ccdab6c99ae2e2fc53a144dc68d6b8f44163adf2`
 - Reviewed: `2026-07-31`
 - Codex ACP adapter: `@agentclientprotocol/codex-acp@1.1.7`
 - Adapter lockfile SHA-256: `33207b0e54905f6b3c7889ba1fc8b9b63eaa12b8cfd936e4991eec3a8365e224`
@@ -12,6 +14,12 @@
 `compose.yml` is the upstream `deploy/compose/compose.yml` at that commit.
 `compose.private.yml` replaces the relay's all-interface port publication with
 one explicit loopback/Tailscale binding.
+
+The pairing extension runs the Buzz image's `buzz-pair-relay` binary only on
+the internal Compose network. The separately pinned official Nginx image is a
+non-root, read-only path and timeout boundary; only its private host binding is
+advertised to clients. Updating either image digest requires source review and
+the disposable E2E.
 
 `scripts/build-buzz-tools.sh` clones this exact commit and builds `buzz`,
 `buzz-acp`, `buzz-agent`, `buzz-dev-mcp` and `buzz-admin` with `cargo --locked`.

@@ -62,7 +62,7 @@ compose() {
     "$@"
 }
 
-for service in relay postgres redis minio; do
+for service in relay pairing-relay pairing-proxy postgres redis minio; do
   compose ps --status running --services | grep -Fxq "${service}" || {
     echo "backup: ${service} is not running" >&2
     exit 1
@@ -80,7 +80,7 @@ restart_services() {
   trap - EXIT
   if [[ "${restart_required}" == "true" ]]; then
     compose up -d --wait redis minio >/dev/null 2>&1 || restart_failed=true
-    compose up -d --wait relay >/dev/null 2>&1 || restart_failed=true
+    compose up -d --wait pairing-relay pairing-proxy relay >/dev/null 2>&1 || restart_failed=true
   fi
   if [[ "${restart_failed}" == "true" ]]; then
     echo "backup: CRITICAL: service restart failed; run ./city2 buzz start" >&2
@@ -132,7 +132,7 @@ EOF
 chmod 0600 "${dest}"/*
 
 compose up -d --wait redis minio >/dev/null
-compose up -d --wait relay >/dev/null
+compose up -d --wait pairing-relay pairing-proxy relay >/dev/null
 restart_required=false
 trap - EXIT
 
