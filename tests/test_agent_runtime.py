@@ -55,7 +55,7 @@ class AgentRuntimeTests(unittest.TestCase):
         self.assertIn('Some("final_answer")', buzz_patch)
         self.assertIn("post_final_answer", buzz_patch)
         self.assertIn("textual_agent_mention", buzz_patch)
-        self.assertIn("response_contains_agent_parent", buzz_patch)
+        self.assertIn("response_contains_agent_thread_reply", buzz_patch)
 
         unit = UNIT.read_text()
         for boundary in (

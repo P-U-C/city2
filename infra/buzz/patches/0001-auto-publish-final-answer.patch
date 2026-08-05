@@ -66,10 +66,10 @@ index 8a698954..df69a2da 100644
 +    }
 +
 diff --git a/crates/buzz-acp/src/lib.rs b/crates/buzz-acp/src/lib.rs
-index 403512a3..3a691735 100644
+index 403512a3..c1edbe61 100644
 --- a/crates/buzz-acp/src/lib.rs
 +++ b/crates/buzz-acp/src/lib.rs
-@@ -217,0 +218,75 @@ async fn is_owner_or_sibling(
+@@ -217,0 +218,108 @@ async fn is_owner_or_sibling(
 +fn env_truthy(name: &str) -> bool {
 +    matches!(std::env::var(name).as_deref(), Ok("1" | "true" | "yes"))
 +}
@@ -104,48 +104,81 @@ index 403512a3..3a691735 100644
 +}
 +
 +/// Fail-closed continuation check for mobile thread replies that omit a `p`
-+/// tag. Only an immediate reply to a valid event signed by this agent passes.
++/// tag. Buzz mobile flattens replies onto the thread root, so accept only when
++/// this agent has a valid signed reply in the same channel and thread.
 +async fn replies_to_agent(
 +    event: &nostr::Event,
++    channel_id: Uuid,
 +    agent_pubkey: &str,
 +    rest_client: &relay::RestClient,
 +) -> bool {
 +    if !env_truthy("BUZZ_ACP_FOLLOW_OWN_THREADS") {
 +        return false;
 +    }
-+    let Some(parent_hex) = queue::parse_thread_tags(event).parent_event_id else {
++    let Some(root_hex) = queue::parse_thread_tags(event).root_event_id else {
 +        return false;
 +    };
-+    let Ok(parent_id) = nostr::EventId::from_hex(&parent_hex) else {
++    if nostr::EventId::from_hex(&root_hex).is_err() {
++        return false;
++    }
++    let Ok(agent_key) = nostr::PublicKey::from_hex(agent_pubkey) else {
 +        return false;
 +    };
-+    let filter = nostr::Filter::new().id(parent_id).limit(1);
++    use nostr::{Alphabet, SingleLetterTag};
++    let filter = nostr::Filter::new()
++        .kinds([
++            nostr::Kind::Custom(buzz_core::kind::KIND_STREAM_MESSAGE as u16),
++            nostr::Kind::Custom(buzz_core::kind::KIND_STREAM_MESSAGE_V2 as u16),
++        ])
++        .author(agent_key)
++        .custom_tags(SingleLetterTag::lowercase(Alphabet::E), [&root_hex])
++        .custom_tags(
++            SingleLetterTag::lowercase(Alphabet::H),
++            [channel_id.to_string()],
++        )
++        .limit(1);
 +    let response =
 +        match tokio::time::timeout(Duration::from_secs(2), rest_client.query(&[filter])).await {
 +            Ok(Ok(value)) => value,
 +            _ => return false,
 +        };
-+    response_contains_agent_parent(&response, parent_id, agent_pubkey)
++    response_contains_agent_thread_reply(&response, &root_hex, channel_id, agent_pubkey)
 +}
 +
-+fn response_contains_agent_parent(
++fn response_contains_agent_thread_reply(
 +    response: &serde_json::Value,
-+    parent_id: nostr::EventId,
++    root_id: &str,
++    channel_id: Uuid,
 +    agent_pubkey: &str,
 +) -> bool {
++    let expected_channel = channel_id.to_string();
 +    response
 +        .as_array()
 +        .into_iter()
 +        .flatten()
 +        .filter_map(|value| serde_json::from_value::<nostr::Event>(value.clone()).ok())
-+        .any(|parent| {
-+            parent.id == parent_id
-+                && parent.pubkey.to_hex() == agent_pubkey
-+                && parent.verify().is_ok()
++        .any(|reply| {
++            let valid_kind = matches!(
++                reply.kind.as_u16() as u32,
++                buzz_core::kind::KIND_STREAM_MESSAGE | buzz_core::kind::KIND_STREAM_MESSAGE_V2
++            );
++            let same_channel = reply.tags.iter().any(|tag| {
++                let parts = tag.as_slice();
++                parts.first().map(String::as_str) == Some("h")
++                    && parts.get(1).map(String::as_str) == Some(expected_channel.as_str())
++            });
++            let same_root = queue::parse_thread_tags(&reply)
++                .root_event_id
++                .is_some_and(|candidate| candidate.eq_ignore_ascii_case(root_id));
++            valid_kind
++                && same_channel
++                && same_root
++                && reply.pubkey.to_hex() == agent_pubkey
++                && reply.verify().is_ok()
 +        })
 +}
 +
-@@ -2174,6 +2249,21 @@ async fn tokio_main() -> Result<()> {
+@@ -2174,6 +2282,22 @@ async fn tokio_main() -> Result<()> {
 -                            let prompt_tag = match matched {
 -                                Some(m) => m.prompt_tag,
 -                                None => {
@@ -164,6 +197,7 @@ index 403512a3..3a691735 100644
 +                            } else if is_registered_owner
 +                                && replies_to_agent(
 +                                    &buzz_event.event,
++                                    buzz_event.channel_id,
 +                                    &pubkey_hex,
 +                                    &ctx.rest_client,
 +                                )
@@ -173,7 +207,7 @@ index 403512a3..3a691735 100644
 +                            } else {
 +                                tracing::debug!(channel_id = %buzz_event.channel_id, kind = buzz_event.event.kind.as_u16(), "event matched no rule or owner continuation — dropping");
 +                                continue;
-@@ -4422,0 +4513,50 @@ mod author_gate_tests {
+@@ -4422,0 +4547,86 @@ mod author_gate_tests {
 +    #[test]
 +    fn textual_mention_requires_exact_name_at_message_start() {
 +        assert!(textual_agent_mention(
@@ -196,30 +230,66 @@ index 403512a3..3a691735 100644
 +    }
 +
 +    #[test]
-+    fn thread_parent_must_be_valid_and_signed_by_this_agent() {
++    fn thread_continuation_requires_valid_agent_reply_in_same_thread_and_channel() {
 +        let agent = nostr::Keys::generate();
 +        let other = nostr::Keys::generate();
-+        let parent = nostr::EventBuilder::new(nostr::Kind::Custom(9), "answer")
-+            .sign_with_keys(&agent)
++        let channel_id = Uuid::new_v4();
++        let other_channel_id = Uuid::new_v4();
++        let root = nostr::Keys::generate();
++        let root_event = nostr::EventBuilder::new(nostr::Kind::Custom(9), "question")
++            .sign_with_keys(&root)
 +            .unwrap();
-+        let response = serde_json::json!([parent]);
++        let reply = buzz_sdk::build_message(
++            channel_id,
++            "answer",
++            Some(&buzz_sdk::ThreadRef {
++                root_event_id: root_event.id,
++                parent_event_id: root_event.id,
++            }),
++            &[],
++            false,
++            &[],
++        )
++        .unwrap()
++        .sign_with_keys(&agent)
++        .unwrap();
++        let response = serde_json::json!([reply]);
 +
-+        assert!(response_contains_agent_parent(
++        assert!(response_contains_agent_thread_reply(
 +            &response,
-+            parent.id,
++            &root_event.id.to_hex(),
++            channel_id,
 +            &agent.public_key().to_hex()
 +        ));
-+        assert!(!response_contains_agent_parent(
++        assert!(!response_contains_agent_thread_reply(
 +            &response,
-+            parent.id,
++            &root_event.id.to_hex(),
++            channel_id,
 +            &other.public_key().to_hex()
++        ));
++        assert!(!response_contains_agent_thread_reply(
++            &response,
++            &root_event.id.to_hex(),
++            other_channel_id,
++            &agent.public_key().to_hex()
++        ));
++
++        let other_root = nostr::EventBuilder::new(nostr::Kind::Custom(9), "other")
++            .sign_with_keys(&root)
++            .unwrap();
++        assert!(!response_contains_agent_thread_reply(
++            &response,
++            &other_root.id.to_hex(),
++            channel_id,
++            &agent.public_key().to_hex()
 +        ));
 +
 +        let mut tampered = response;
 +        tampered[0]["content"] = serde_json::json!("changed after signing");
-+        assert!(!response_contains_agent_parent(
++        assert!(!response_contains_agent_thread_reply(
 +            &tampered,
-+            parent.id,
++            &root_event.id.to_hex(),
++            channel_id,
 +            &agent.public_key().to_hex()
 +        ));
 +    }

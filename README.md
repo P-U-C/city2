@@ -89,8 +89,10 @@ Design acceptance and implementation are not deployment authorization.
   while this host is logged out.
 - Owner identity: connected; private key remains off-host.
 - Workspace: private `control`, `city2`, and `ops` channels created.
-- Coordinator: active, owner-only, mention-driven, heartbeat-off, and bound to
-  a read-only repository mount; first owner-authored model proof remains gated.
+- Coordinator: active, owner-only, mention/thread-driven, heartbeat-off, and
+  bound to a read-only repository mount. Signed owner-to-model-to-signer replies
+  and exact textual mobile mentions have passed live proof; thread continuation
+  is implemented and awaiting the final iPhone replay check.
 - Company OS: specification version 0.2.0 is accepted after independent review;
   M0 contracts, M1 ledger, M2 memory/context and the version 0.5.0 M3 offline
   adapters, M4 independent review, M5 encrypted local/Testnet archive boundary

@@ -31,8 +31,18 @@ or receive the key.
 
 For mobile compatibility, the owner may start a request with the exact textual
 `@<display name>` even if the app drops the structured `p` tag. A follow-up in
-the thread is accepted only when its immediate parent verifies as a message
-signed by this coordinator. Both fallbacks run after the owner-only author gate.
+the thread is accepted only when that exact channel/thread already contains a
+valid message signed by this coordinator. Both fallbacks run after the
+owner-only author gate.
+
+Buzz mobile loads agent autocomplete from kind `10100` directory profiles and
+channel bot membership. Without a NIP-OA owner attestation, an `owner-only`
+non-member directory entry is intentionally hidden. Until the owner creates the
+agent through Buzz Desktop and supplies that attestation, publish the equivalent
+directory projection as `respond_to=allowlist` with only the owner's pubkey;
+keep `BUZZ_ACP_RESPOND_TO=owner-only` as the runtime enforcement boundary. The
+mobile provider refreshes the directory on relay reconnect, so relaunch the app
+after changing the profile.
 
 Codex delegates sandboxing to the hardened systemd namespace because this LXC
 cannot run a nested Linux sandbox. The runtime pins direct-tool `gpt-5.5` so
