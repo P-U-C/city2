@@ -23,9 +23,9 @@ their private forum channels with his human owner identity.
 
 1. In Buzz, create the private forum channel named by the manifest.
 2. Keep Chad as sole Owner and add `City2 Coordinator` as Bot.
-3. Give PfTerminal the channel UUID. PfTerminal regenerates the coordinator's
-   routing file with `create-agent-routing.sh`, preflights it, and restarts the
-   service.
+3. Give PfTerminal the exact channel name. PfTerminal atomically resolves every
+   declared member channel and regenerates the complete coordinator routing file
+   with `sync-agent-routing.sh`; it then preflights and restarts the service.
 4. Start requests with `@City2 Coordinator`. Continue naturally by replying to
    its message in the thread; no repeated mention is required.
 
