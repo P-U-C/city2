@@ -41,7 +41,8 @@ disabled A0 coordinator pilot routed through Core. It is deliberately deferred:
 - the M2 fresh-session criterion has not run in the live path;
 - the M3 live Core-routing/restart criterion has not run;
 - the checked-in decision predates the coordinator's completed demotion; and
-- there are zero successful live recovery drills versus a threshold of three.
+- the immutable decision recorded zero successful live recovery drills versus
+  a threshold of three.
 
 The decision is immutable evidence of what was known when it was created. On
 2026-08-03 the coordinator subsequently signed its own reduction from Owner to
@@ -55,8 +56,11 @@ was not installed or committed. Public, content-free evidence is in
 off-repository.
 
 This completed precondition does not convert the old decision to `admit` and
-does not authorize Core routing. M2/M3 live evidence and three recovery drills
-remain absent.
+does not authorize Core routing. One subsequent coordinator-restart drill was
+accepted on 2026-08-05 after two consecutive signed owner turns closed its
+transport and routing follow-ups. M2/M3 live evidence and two additional
+recovery drills remain absent. The immutable decision stays unchanged; a later
+review must create a new admission record with the new evidence.
 
 The bound `config/coordinator-agent.m7.json` grants no credential, write,
 publication or outward-action authority. No Core database, service, identity,
@@ -68,7 +72,8 @@ channel, model call or deployment is created by this decision.
    verified identity/relay backup.
 2. Run the reviewed A0 status path through Core with fresh sessions and no
    conversation dependence.
-3. Prove restart/relay-loss recovery three times and attach immutable evidence.
+3. Complete the two remaining restart/relay-loss proofs and attach immutable
+   evidence alongside the accepted first drill.
 4. Revise the admission record, its measurement window and digest; do not edit
    the existing decision in place.
 5. Obtain accountable approval and independent review.
