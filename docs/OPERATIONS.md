@@ -217,9 +217,16 @@ to the Mac.
 ```bash
 ./scripts/build-agent-adapter.sh
 ./city2 buzz install-agent-tooling
+sudo infra/buzz/scripts/sync-agent-routing.sh \
+  "$HOME/.config/city2/agent.env" /opt/city2/config/buzz-acp.toml \
+  control city2 ops
 infra/buzz/scripts/preflight-agent.sh "$HOME/.config/city2/agent.env"
 sudo systemctl enable --now city2-buzz-agent@"$USER".service
 ```
+
+Always pass the complete intended channel-name set to
+`sync-agent-routing.sh`. It resolves exact current memberships and refuses a
+missing or duplicate name without replacing the last known-good routing file.
 
 ## Disposable E2E
 
