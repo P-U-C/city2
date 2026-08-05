@@ -33,6 +33,9 @@ workdir="$(value BUZZ_AGENT_WORKDIR)"
 relay_url="$(value BUZZ_RELAY_URL)"
 private_key="$(value BUZZ_PRIVATE_KEY)"
 owner="$(value BUZZ_ACP_AGENT_OWNER)"
+display_name="$(value BUZZ_ACP_DISPLAY_NAME)"
+text_mention="$(value BUZZ_ACP_TEXT_MENTION)"
+follow_threads="$(value BUZZ_ACP_FOLLOW_OWN_THREADS)"
 agent_command="$(value BUZZ_ACP_AGENT_COMMAND)"
 mcp_command="$(value BUZZ_ACP_MCP_COMMAND)"
 harness="$(value BUZZ_AGENT_HARNESS)"
@@ -49,6 +52,10 @@ agent_count="$(value BUZZ_ACP_AGENTS)"
 [[ "${relay_url}" =~ ^wss?://[^[:space:]]+$ ]] || fail "relay URL is invalid"
 [[ "${private_key}" =~ ^[0-9a-f]{64}$ ]] || fail "agent private key is invalid"
 [[ "${owner}" =~ ^[0-9a-f]{64}$ ]] || fail "owner public key is invalid"
+[[ -n "${display_name}" && "${text_mention}" == "${display_name}" ]] ||
+  fail "textual mention must exactly match the agent display name"
+[[ "${follow_threads}" == "true" ]] ||
+  fail "owner replies to coordinator-authored parents must remain enabled"
 [[ "${agent_command}" == "${INSTALL_ROOT}/bin/city2-codex-acp-launcher" ]] ||
   fail "unexpected agent command"
 [[ -z "${mcp_command}" ]] ||

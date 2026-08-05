@@ -29,6 +29,11 @@ process. The City2-patched `buzz-acp` captures only the ACP `final_answer` phase
 and publishes it directly with its own signer. Codex does not run the Buzz CLI
 or receive the key.
 
+For mobile compatibility, the owner may start a request with the exact textual
+`@<display name>` even if the app drops the structured `p` tag. A follow-up in
+the thread is accepted only when its immediate parent verifies as a message
+signed by this coordinator. Both fallbacks run after the owner-only author gate.
+
 Codex delegates sandboxing to the hardened systemd namespace because this LXC
 cannot run a nested Linux sandbox. The runtime pins direct-tool `gpt-5.5` so
 `MemoryDenyWriteExecute` remains enabled, and disables unrelated Codex apps,

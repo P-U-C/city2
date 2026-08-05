@@ -194,6 +194,12 @@ publishes it. Do not restore model-driven `buzz messages send` for ordinary
 coordinator replies or configure a signer-bearing MCP process: the model runtime
 intentionally has no signing key.
 
+Mobile clients may omit structured mention tags. The reviewed compatibility
+path uses `BUZZ_ACP_TEXT_MENTION=<exact display name>` and
+`BUZZ_ACP_FOLLOW_OWN_THREADS=true`: only the registered owner's signed event can
+trigger by textual `@name`, and thread continuation additionally requires a
+valid immediate parent signed by the same coordinator.
+
 ```bash
 ./scripts/build-agent-adapter.sh
 ./city2 buzz install-agent-tooling

@@ -10,6 +10,7 @@ Usage: ./city2 <command> [args]
   doctor              Read-only host/project capability report
   validate            Run static and contract checks
   fleet [options]     Read-only producer inventory/health
+  workstreams [args]  Inspect channel/task/agent workstream plans
   agent <request>     Run a PfTerminal turn rooted in this repository
   review [prompt]     Review uncommitted changes with PfTerminal
   core <command>      Operate the local Company OS Core ledger
@@ -36,6 +37,10 @@ case "${1:-help}" in
   fleet)
     shift
     exec "${ROOT}/scripts/fleet_status.py" "$@"
+    ;;
+  workstreams)
+    shift
+    exec "${ROOT}/scripts/workstream_status.py" "$@"
     ;;
   agent)
     shift

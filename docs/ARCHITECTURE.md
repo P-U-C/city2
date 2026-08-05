@@ -103,6 +103,12 @@ Start with three private channels:
 | `city2` | forum | One thread per work item and its evidence loop |
 | `ops` | stream | Health, backup and operator events without secrets |
 
+The operating expansion is declared in `config/workstreams.json`: one private
+forum channel per workstream and one top-level thread per task. Initially all
+workstream channels use isolated per-channel sessions in the single hardened
+coordinator. Dedicated specialist identities remain an explicit admission gate;
+see `docs/WORKSTREAMS.md`.
+
 Every substantive update uses:
 
 ```text

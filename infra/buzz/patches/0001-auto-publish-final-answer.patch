@@ -2,30 +2,15 @@ diff --git a/crates/buzz-acp/src/acp.rs b/crates/buzz-acp/src/acp.rs
 index 8a698954..df69a2da 100644
 --- a/crates/buzz-acp/src/acp.rs
 +++ b/crates/buzz-acp/src/acp.rs
-@@ -211,6 +211,10 @@ pub struct AcpClient {
-     /// deltas. Both goose and buzz-agent emit this notification; goose gates
-     /// on client capability advertisement, buzz-agent emits unconditionally.
-     goose_usage: UsageTracker,
+@@ -213,0 +214,4 @@ pub struct AcpClient {
 +    /// Final user-visible answer emitted by Codex for the current prompt.
 +    /// Commentary and reasoning chunks are intentionally excluded.
 +    final_answer: String,
 +    final_answer_message_id: Option<String>,
- }
- 
- /// Recursively merge `overlay` into `base`, with `overlay` winning on scalar/shape
-@@ -550,6 +554,8 @@ impl AcpClient {
-             steering_supported: false,
-             steer_rx: None,
-             goose_usage: UsageTracker::default(),
+@@ -552,0 +557,2 @@ impl AcpClient {
 +            final_answer: String::new(),
 +            final_answer_message_id: None,
-         })
-     }
- 
-@@ -564,6 +570,14 @@ impl AcpClient {
-         self.observer_context = context;
-     }
- 
+@@ -566,0 +573,8 @@ impl AcpClient {
 +    /// Take the final user-visible answer captured during the current prompt.
 +    pub fn take_final_answer(&mut self) -> Option<String> {
 +        self.final_answer_message_id = None;
@@ -34,22 +19,10 @@ index 8a698954..df69a2da 100644
 +        (!answer.is_empty()).then_some(answer)
 +    }
 +
-     /// Return a clone of the observer handle, if attached.
-     pub(crate) fn observer_handle(&self) -> Option<ObserverHandle> {
-         self.observer.clone()
-@@ -751,6 +765,8 @@ impl AcpClient {
-         idle_timeout: std::time::Duration,
-         max_duration: std::time::Duration,
-     ) -> Result<StopReason, AcpError> {
+@@ -753,0 +768,2 @@ impl AcpClient {
 +        self.final_answer.clear();
 +        self.final_answer_message_id = None;
-         let params = build_prompt_params(session_id, prompt_blocks);
-         let hard_deadline = tokio::time::Instant::now() + max_duration;
-         self.current_hard_deadline = Some(hard_deadline);
-@@ -1715,6 +1731,23 @@ impl AcpClient {
-             "agent_message_chunk" => {
-                 if let Some(text) = update["content"]["text"].as_str() {
-                     tracing::info!(target: "acp::stream", "{text}");
+@@ -1717,0 +1734,17 @@ impl AcpClient {
 +                    if update
 +                        .pointer("/_meta/codex/phase")
 +                        .and_then(|value| value.as_str())
@@ -67,13 +40,7 @@ index 8a698954..df69a2da 100644
 +                        self.final_answer_message_id = message_id;
 +                        self.final_answer.push_str(text);
 +                    }
-                 }
-                 false
-             }
-@@ -3435,6 +3468,30 @@ mod tests {
-             .expect("spawn cat as inert client")
-     }
- 
+@@ -3437,0 +3471,24 @@ mod tests {
 +    #[tokio::test]
 +    async fn final_answer_capture_excludes_commentary_and_is_single_use() {
 +        let mut client = spawn_inert_client().await;
@@ -98,17 +65,170 @@ index 8a698954..df69a2da 100644
 +        assert_eq!(client.take_final_answer(), None);
 +    }
 +
-     /// Build a `session/update` JSON-RPC notification carrying a
-     /// `session_info_update` with the given `_meta.goose.activeRunId` value.
-     /// Pass `None` to omit the `activeRunId` field entirely.
+diff --git a/crates/buzz-acp/src/lib.rs b/crates/buzz-acp/src/lib.rs
+index 403512a3..3a691735 100644
+--- a/crates/buzz-acp/src/lib.rs
++++ b/crates/buzz-acp/src/lib.rs
+@@ -217,0 +218,75 @@ async fn is_owner_or_sibling(
++fn env_truthy(name: &str) -> bool {
++    matches!(std::env::var(name).as_deref(), Ok("1" | "true" | "yes"))
++}
++
++/// Match the literal display-name mention mobile clients leave in message text
++/// when they omit the structured Nostr `p` tag. The caller still applies the
++/// cryptographic owner gate before using this as a trigger.
++fn textual_agent_mention(content: &str, display_name: &str) -> bool {
++    let display_name = display_name.trim();
++    if display_name.is_empty() {
++        return false;
++    }
++    let content = content.trim_start();
++    let prefix = format!("@{display_name}");
++    let Some(head) = content.get(..prefix.len()) else {
++        return false;
++    };
++    if !head.eq_ignore_ascii_case(&prefix) {
++        return false;
++    }
++    content[prefix.len()..]
++        .chars()
++        .next()
++        .is_none_or(|ch| ch.is_whitespace() || matches!(ch, ':' | ',' | ';' | '-' | '—'))
++}
++
++fn configured_textual_mention(event: &nostr::Event) -> bool {
++    let Ok(display_name) = std::env::var("BUZZ_ACP_TEXT_MENTION") else {
++        return false;
++    };
++    textual_agent_mention(&event.content, &display_name)
++}
++
++/// Fail-closed continuation check for mobile thread replies that omit a `p`
++/// tag. Only an immediate reply to a valid event signed by this agent passes.
++async fn replies_to_agent(
++    event: &nostr::Event,
++    agent_pubkey: &str,
++    rest_client: &relay::RestClient,
++) -> bool {
++    if !env_truthy("BUZZ_ACP_FOLLOW_OWN_THREADS") {
++        return false;
++    }
++    let Some(parent_hex) = queue::parse_thread_tags(event).parent_event_id else {
++        return false;
++    };
++    let Ok(parent_id) = nostr::EventId::from_hex(&parent_hex) else {
++        return false;
++    };
++    let filter = nostr::Filter::new().id(parent_id).limit(1);
++    let response =
++        match tokio::time::timeout(Duration::from_secs(2), rest_client.query(&[filter])).await {
++            Ok(Ok(value)) => value,
++            _ => return false,
++        };
++    response_contains_agent_parent(&response, parent_id, agent_pubkey)
++}
++
++fn response_contains_agent_parent(
++    response: &serde_json::Value,
++    parent_id: nostr::EventId,
++    agent_pubkey: &str,
++) -> bool {
++    response
++        .as_array()
++        .into_iter()
++        .flatten()
++        .filter_map(|value| serde_json::from_value::<nostr::Event>(value.clone()).ok())
++        .any(|parent| {
++            parent.id == parent_id
++                && parent.pubkey.to_hex() == agent_pubkey
++                && parent.verify().is_ok()
++        })
++}
++
+@@ -2174,6 +2249,21 @@ async fn tokio_main() -> Result<()> {
+-                            let prompt_tag = match matched {
+-                                Some(m) => m.prompt_tag,
+-                                None => {
+-                                    tracing::debug!(channel_id = %buzz_event.channel_id, kind = buzz_event.event.kind.as_u16(), "event matched no rule — dropping");
+-                                    continue;
+-                                }
++                            let is_registered_owner = owner_cache
++                                .get()
++                                .is_some_and(|owner| buzz_event.event.pubkey.to_hex() == *owner);
++                            let prompt_tag = if let Some(matched) = matched {
++                                matched.prompt_tag
++                            } else if is_registered_owner
++                                && configured_textual_mention(&buzz_event.event)
++                            {
++                                "owner-text-mention".to_string()
++                            } else if is_registered_owner
++                                && replies_to_agent(
++                                    &buzz_event.event,
++                                    &pubkey_hex,
++                                    &ctx.rest_client,
++                                )
++                                .await
++                            {
++                                "owner-thread-continuation".to_string()
++                            } else {
++                                tracing::debug!(channel_id = %buzz_event.channel_id, kind = buzz_event.event.kind.as_u16(), "event matched no rule or owner continuation — dropping");
++                                continue;
+@@ -4422,0 +4513,50 @@ mod author_gate_tests {
++    #[test]
++    fn textual_mention_requires_exact_name_at_message_start() {
++        assert!(textual_agent_mention(
++            "@City2 Coordinator check status",
++            "City2 Coordinator"
++        ));
++        assert!(textual_agent_mention(
++            "  @city2 coordinator: check status",
++            "City2 Coordinator"
++        ));
++        assert!(!textual_agent_mention(
++            "tell @City2 Coordinator later",
++            "City2 Coordinator"
++        ));
++        assert!(!textual_agent_mention(
++            "@City2 CoordinatorExtra check status",
++            "City2 Coordinator"
++        ));
++        assert!(!textual_agent_mention("@City2 check", "City2 Coordinator"));
++    }
++
++    #[test]
++    fn thread_parent_must_be_valid_and_signed_by_this_agent() {
++        let agent = nostr::Keys::generate();
++        let other = nostr::Keys::generate();
++        let parent = nostr::EventBuilder::new(nostr::Kind::Custom(9), "answer")
++            .sign_with_keys(&agent)
++            .unwrap();
++        let response = serde_json::json!([parent]);
++
++        assert!(response_contains_agent_parent(
++            &response,
++            parent.id,
++            &agent.public_key().to_hex()
++        ));
++        assert!(!response_contains_agent_parent(
++            &response,
++            parent.id,
++            &other.public_key().to_hex()
++        ));
++
++        let mut tampered = response;
++        tampered[0]["content"] = serde_json::json!("changed after signing");
++        assert!(!response_contains_agent_parent(
++            &tampered,
++            parent.id,
++            &agent.public_key().to_hex()
++        ));
++    }
++
 diff --git a/crates/buzz-acp/src/pool.rs b/crates/buzz-acp/src/pool.rs
 index 158477c0..bce5cbf7 100644
 --- a/crates/buzz-acp/src/pool.rs
 +++ b/crates/buzz-acp/src/pool.rs
-@@ -2084,6 +2084,33 @@ pub async fn run_prompt_task(
-         Ok(stop_reason) => {
-             log_stop_reason(&source, &stop_reason);
- 
+@@ -2086,0 +2087,27 @@ pub async fn run_prompt_task(
 +            if auto_publish_final_enabled() {
 +                let publish_result = match (&source, batch.as_ref(), agent.acp.take_final_answer())
 +                {
@@ -136,13 +256,7 @@ index 158477c0..bce5cbf7 100644
 +                }
 +            }
 +
-             let should_rotate = matches!(
-                 stop_reason,
-                 StopReason::MaxTokens | StopReason::MaxTurnRequests
-@@ -3844,6 +3871,55 @@ pub(crate) async fn post_failure_notice(
-     }
- }
- 
+@@ -3846,0 +3874,49 @@ pub(crate) async fn post_failure_notice(
 +fn auto_publish_final_enabled() -> bool {
 +    matches!(
 +        std::env::var("BUZZ_ACP_AUTO_PUBLISH_FINAL").as_deref(),
@@ -192,6 +306,3 @@ index 158477c0..bce5cbf7 100644
 +    Ok(())
 +}
 +
- /// Best-effort: remove a reaction via a signed kind:5 (NIP-09) deletion event.
- ///
- /// Queries kind:7 reactions by our pubkey targeting the event, finds the matching

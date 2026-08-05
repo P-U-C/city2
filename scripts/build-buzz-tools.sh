@@ -23,8 +23,8 @@ done
 git clone --filter=blob:none "${REPO}" "${WORK}/buzz"
 git -C "${WORK}/buzz" checkout --detach "${COMMIT}"
 [[ "$(git -C "${WORK}/buzz" rev-parse HEAD)" == "${COMMIT}" ]]
-git -C "${WORK}/buzz" apply --check "${PATCH}"
-git -C "${WORK}/buzz" apply "${PATCH}"
+git -C "${WORK}/buzz" apply --unidiff-zero --check "${PATCH}"
+git -C "${WORK}/buzz" apply --unidiff-zero "${PATCH}"
 
 cargo build \
   --manifest-path "${WORK}/buzz/Cargo.toml" \

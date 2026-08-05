@@ -67,6 +67,13 @@ captures only messages marked as `final_answer` and publishes that answer in
 the triggering owner's thread. Commentary, reasoning, and tool output are not
 published, and the Nostr key never enters Codex's environment.
 
+Inbound mobile compatibility does not weaken the author gate. After exact
+owner-signature verification, the coordinator accepts an exact textual
+`@<display name>` at the start of a message when the client omitted its `p` tag.
+It also accepts an owner reply only when the immediate parent is fetched,
+signature-verified, and authored by that coordinator. Unrelated channel traffic
+still fails closed.
+
 Channel membership is not a filesystem sandbox. Systemd hardening and Unix
 identity boundaries remain required.
 
