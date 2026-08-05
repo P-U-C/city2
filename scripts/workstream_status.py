@@ -60,12 +60,22 @@ def print_plan(data: dict, workstream_id: str) -> None:
     print(f"Purpose: {item['purpose']}")
     print(f"Initial agent: {item['agent']} via {item['agent_mode']}")
     print(f"Import sources: {', '.join(item['task_sources'])}")
-    print("Activation:")
-    print("  1. Create a private Buzz forum channel with this slug.")
-    print("  2. Add the City2 Coordinator as Bot; keep Chad as sole Owner.")
-    print("  3. Add the channel UUID to the coordinator routing config and restart it.")
-    print("  4. Seed one top-level thread per open task with source links and current state.")
-    print("  5. Promote to a dedicated agent only after the isolation gate is reviewed.")
+    if item["state"] == "active":
+        print("Active channel:")
+        print("  1. Keep one top-level thread per task with source links and current state.")
+        print("  2. Use the existing isolated coordinator session for this channel.")
+        print("  3. Promote to a dedicated agent only after the isolation gate is reviewed.")
+    elif item["state"] == "proposed":
+        print("Activation:")
+        print("  1. Create a private Buzz forum channel with this slug.")
+        print("  2. Add the City2 Coordinator as Bot; keep Chad as sole Owner.")
+        print("  3. Add the channel UUID to the coordinator routing config and restart it.")
+        print("  4. Seed one top-level thread per open task with source links and current state.")
+        print("  5. Promote to a dedicated agent only after the isolation gate is reviewed.")
+    else:
+        print("Parked:")
+        print("  No channel or agent activation is authorized.")
+        print("  Require a new evidence-backed decision before changing this state.")
 
 
 def main() -> int:
