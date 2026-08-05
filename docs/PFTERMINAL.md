@@ -29,8 +29,26 @@ bypass flag.
 
 ```bash
 ./city2 review
-./city2 review "Focus on secret handling and rollback"
 ```
+
+The review runs as the invoking user inside a root-created transient systemd
+service. The repository is the only project tree exposed and is read-only; the
+rest of the home directory is hidden behind a private temporary filesystem.
+Only a disposable config-only PfTerminal state directory and a private `/tmp`
+are writable. The single Codex authentication file needed for token refresh is
+bound directly onto that disposable state's expected auth path. The disposable
+state is deleted when review exits; the encrypted vault, memories, prior
+sessions and other project trees are not mounted.
+`NoNewPrivileges` prevents the reviewer from regaining `sudo` or Docker access.
+The unit also clears its capability bounding set and blocks mount syscalls so
+the filesystem namespace cannot be changed from inside the review.
+The command fails closed when that boundary cannot be created. Custom review
+prompts are disabled because this PfTerminal version cannot combine them with
+its uncommitted-change scope.
+
+This boundary was added after an uncontained reviewer used an image-wide Docker
+cleanup command that stopped live City2 containers. Runtime validation detected
+the outage and the normal lifecycle wrapper restored service before publication.
 
 ## Project contract
 

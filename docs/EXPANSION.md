@@ -56,11 +56,13 @@ was not installed or committed. Public, content-free evidence is in
 off-repository.
 
 This completed precondition does not convert the old decision to `admit` and
-does not authorize Core routing. One subsequent coordinator-restart drill was
-accepted on 2026-08-05 after two consecutive signed owner turns closed its
-transport and routing follow-ups. M2/M3 live evidence and two additional
-recovery drills remain absent. The immutable decision stays unchanged; a later
-review must create a new admission record with the new evidence.
+does not authorize Core routing. A coordinator-restart drill and a bounded
+relay-loss drill were accepted on 2026-08-05. The second drill recovered the
+relay in 25.973 seconds without restarting the coordinator or dependencies,
+then passed a signed owner thread turn in seven seconds. M2/M3 live evidence
+and one additional recovery drill remain absent. The immutable decision stays
+unchanged; a later review must create a new admission record with the new
+evidence.
 
 The bound `config/coordinator-agent.m7.json` grants no credential, write,
 publication or outward-action authority. No Core database, service, identity,
@@ -72,8 +74,8 @@ channel, model call or deployment is created by this decision.
    verified identity/relay backup.
 2. Run the reviewed A0 status path through Core with fresh sessions and no
    conversation dependence.
-3. Complete the two remaining restart/relay-loss proofs and attach immutable
-   evidence alongside the accepted first drill.
+3. Complete the one remaining recovery proof and attach immutable evidence
+   alongside the two accepted drills.
 4. Revise the admission record, its measurement window and digest; do not edit
    the existing decision in place.
 5. Obtain accountable approval and independent review.

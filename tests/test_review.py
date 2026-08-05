@@ -18,6 +18,7 @@ from test_memory import ACTOR, objective_fields, task_fields, timestamp  # noqa:
 
 MAKER_ID = "agt_01980000-0000-7000-8000-000000000001"
 REVIEWER_ID = "agt_01980000-0000-7000-8000-000000000002"
+WRAPPER = (ROOT / "city2").read_text(encoding="utf-8")
 
 
 def manifest(agent_id, name, tools, policy):
@@ -177,6 +178,35 @@ class ReviewTests(unittest.TestCase):
                 finding_dispositions={},
                 idempotency_key="review:no-evidence",
             )
+
+
+class ReviewWrapperBoundaryTests(unittest.TestCase):
+    def test_review_is_fail_closed_inside_root_created_boundary(self):
+        review_case = WRAPPER.split("  review)", 1)[1].split("  core)", 1)[0]
+        self.assertIn("sudo -n systemd-run", review_case)
+        self.assertIn("--uid=\"$(id -u)\"", review_case)
+        self.assertIn("--property=NoNewPrivileges=yes", review_case)
+        self.assertIn("--property=CapabilityBoundingSet=", review_case)
+        self.assertIn("--property=ProtectHome=tmpfs", review_case)
+        self.assertIn("--property=ProtectSystem=strict", review_case)
+        self.assertIn("--property=PrivateTmp=yes", review_case)
+        self.assertIn("--property=SystemCallFilter=~@mount", review_case)
+        self.assertIn('BindReadOnlyPaths=${ROOT}', review_case)
+        self.assertIn('BindReadOnlyPaths=${PFTERMINAL_INSTALL}', review_case)
+        self.assertIn('BindPaths=${REVIEW_STATE}', review_case)
+        self.assertIn(
+            'BindPaths=${CODEX_AUTH}:${REVIEW_STATE}/auth.json', review_case
+        )
+        self.assertIn('CODEX_HOME="${REVIEW_STATE}"', review_case)
+        self.assertIn("city2-review-state.XXXXXX", review_case)
+        self.assertNotIn('BindPaths=${PFTERMINAL_STATE}', review_case)
+        self.assertNotIn("exec pfterminal review", review_case)
+
+    def test_review_rejects_unscoped_custom_prompt(self):
+        review_case = WRAPPER.split("  review)", 1)[1].split("  core)", 1)[0]
+        rejection = "custom review prompts are unsupported"
+        self.assertIn('[[ "$#" -eq 0 ]]', review_case)
+        self.assertIn(rejection, review_case)
 
 
 if __name__ == "__main__":

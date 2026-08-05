@@ -49,10 +49,13 @@ s3_secret_key="$(openssl rand -hex 32)"
 
 cat >"${ENV_FILE}" <<EOF
 BUZZ_IMAGE=ghcr.io/block/buzz@sha256:a2b59030b29242adb0783a05cbabd63f51518fdfe7b724845a68f77adab7e1f9
+BUZZ_PAIRING_PROXY_IMAGE=nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
 BUZZ_BIND_IP=${bind_ip}
 BUZZ_HTTP_PORT=3000
+BUZZ_PAIRING_PORT=5000
 BUZZ_DOMAIN=${relay_host}
 RELAY_URL=ws://${relay_host}:3000
+BUZZ_PAIRING_RELAY_URL=ws://${relay_host}:5000/pair
 BUZZ_MEDIA_BASE_URL=http://${relay_host}:3000/media
 BUZZ_MEDIA_SERVER_DOMAIN=${relay_host}
 BUZZ_CORS_ORIGINS=http://${relay_host}:3000

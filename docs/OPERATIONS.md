@@ -135,6 +135,20 @@ infra/buzz/scripts/bootstrap-env.sh <OWNER_PUBLIC_NPUB_OR_HEX>
 Bootstrap writes `infra/buzz/.env` with mode `0600` and never prints secret
 values. Back it up through an encrypted path before startup.
 
+The stack includes a non-root, read-only, stateless NIP-AB pairing sidecar
+behind a digest-pinned, non-root, read-only Nginx proxy on the dedicated private
+pairing port. Only exact `/pair` WebSocket upgrades reach the sidecar; the proxy
+enforces connection limits and HTTP timeouts. The sidecar has no host port or
+Linux capabilities. The main relay advertises the
+proxied URL through NIP-11. Both externally reachable ports bind only to
+`BUZZ_BIND_IP`; keep the Mac and iPhone on the same Tailscale network. In Buzz
+Desktop, **Settings → Mobile** should therefore open a pairing session instead
+of falling back to the main relay's unsupported `/pair` path. Pairing does not
+move the human private key onto this host.
+Existing installations must add `BUZZ_PAIRING_PORT` and
+`BUZZ_PAIRING_RELAY_URL` using `.env.example` before the next stack start;
+preflight fails closed when the advertised URL and private binding differ.
+
 ## Start/stop
 
 These are explicit runtime changes:

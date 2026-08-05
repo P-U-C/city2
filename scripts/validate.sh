@@ -3,6 +3,16 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT}"
+pycache_tmp="$(mktemp -d /tmp/city2-pycache.XXXXXX)"
+export PYTHONPYCACHEPREFIX="${pycache_tmp}"
+
+cleanup_validation() {
+  rm -rf "${pycache_tmp}"
+  if [[ -n "${tmp:-}" ]]; then
+    rm -rf "${tmp}"
+  fi
+}
+trap cleanup_validation EXIT
 
 fail() {
   echo "validate: FAIL: $*" >&2
@@ -64,6 +74,7 @@ required=(
   infra/buzz/SOURCE.md
   infra/buzz/compose.yml
   infra/buzz/compose.private.yml
+  infra/buzz/pairing-proxy.conf
   infra/buzz/.env.example
   infra/buzz/agents/codex-acp/package.json
   infra/buzz/agents/codex-acp/package-lock.json
@@ -118,14 +129,17 @@ fi
 
 if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
   tmp="$(mktemp -d /tmp/city2-compose.XXXXXX)"
-  trap 'rm -rf "${tmp}"' EXIT
-  cp infra/buzz/compose.yml infra/buzz/compose.private.yml "${tmp}/"
+  cp infra/buzz/compose.yml infra/buzz/compose.private.yml \
+    infra/buzz/pairing-proxy.conf "${tmp}/"
   cat >"${tmp}/.env" <<'EOF'
 BUZZ_IMAGE=ghcr.io/block/buzz@sha256:a2b59030b29242adb0783a05cbabd63f51518fdfe7b724845a68f77adab7e1f9
+BUZZ_PAIRING_PROXY_IMAGE=nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
 BUZZ_BIND_IP=127.0.0.1
 BUZZ_HTTP_PORT=3000
+BUZZ_PAIRING_PORT=5000
 BUZZ_DOMAIN=127.0.0.1
 RELAY_URL=ws://127.0.0.1:3000
+BUZZ_PAIRING_RELAY_URL=ws://127.0.0.1:5000/pair
 BUZZ_MEDIA_BASE_URL=http://127.0.0.1:3000/media
 BUZZ_MEDIA_SERVER_DOMAIN=127.0.0.1
 BUZZ_CORS_ORIGINS=http://127.0.0.1:3000
@@ -154,7 +168,7 @@ EOF
     -f "${tmp}/compose.private.yml" \
     config --quiet
   rm -rf "${tmp}"
-  trap - EXIT
+  unset tmp
 fi
 
 if rg -n --hidden \

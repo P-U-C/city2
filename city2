@@ -12,7 +12,7 @@ Usage: ./city2 <command> [args]
   fleet [options]     Read-only producer inventory/health
   workstreams [args]  Inspect channel/task/agent workstream plans
   agent <request>     Run a PfTerminal turn rooted in this repository
-  review [prompt]     Review uncommitted changes with PfTerminal
+  review              Review uncommitted changes in a read-only boundary
   core <command>      Operate the local Company OS Core ledger
   buzz <command>      Run the explicit Buzz lifecycle wrapper
   status              Concise Git and relay status
@@ -54,14 +54,62 @@ case "${1:-help}" in
     ;;
   review)
     shift
+    [[ "$#" -eq 0 ]] || {
+      echo "city2: custom review prompts are unsupported by this PfTerminal version" >&2
+      exit 2
+    }
     require_pfterminal
-    export CODEX_HOME="${CODEX_HOME:-${HOME}/.codex}"
-    if [[ "$#" -gt 0 ]]; then
-      cd "${ROOT}"
-      exec pfterminal review --uncommitted "$*"
-    fi
-    cd "${ROOT}"
-    exec pfterminal review --uncommitted
+    command -v systemd-run >/dev/null 2>&1 || {
+      echo "city2: systemd-run is required for contained reviews" >&2
+      exit 1
+    }
+    command -v sudo >/dev/null 2>&1 || {
+      echo "city2: sudo is required for contained reviews" >&2
+      exit 1
+    }
+    sudo -n true >/dev/null 2>&1 || {
+      echo "city2: passwordless sudo is required for contained reviews" >&2
+      exit 1
+    }
+    PFTERMINAL_BIN="$(readlink -f "$(command -v pfterminal)")"
+    PFTERMINAL_INSTALL="$(cd "$(dirname "${PFTERMINAL_BIN}")/.." && pwd)"
+    PFTERMINAL_CONFIG="${HOME}/.pfterminal/config.toml"
+    CODEX_AUTH="${HOME}/.codex/auth.json"
+    [[ -f "${PFTERMINAL_CONFIG}" ]] || {
+      echo "city2: missing PfTerminal configuration: ${PFTERMINAL_CONFIG}" >&2
+      exit 1
+    }
+    [[ -f "${CODEX_AUTH}" ]] || {
+      echo "city2: missing Codex authentication file: ${CODEX_AUTH}" >&2
+      exit 1
+    }
+    REVIEW_STATE="$(mktemp -d /tmp/city2-review-state.XXXXXX)"
+    trap 'rm -rf "${REVIEW_STATE}"' EXIT
+    install -m 0600 "${PFTERMINAL_CONFIG}" "${REVIEW_STATE}/config.toml"
+    install -m 0600 /dev/null "${REVIEW_STATE}/auth.json"
+    export CODEX_HOME="${REVIEW_STATE}"
+    sudo -n systemd-run --quiet --wait --pipe --collect \
+      --service-type=exec \
+      --uid="$(id -u)" \
+      --gid="$(id -g)" \
+      --working-directory="${ROOT}" \
+      --setenv="HOME=${HOME}" \
+      --setenv="CODEX_HOME=${CODEX_HOME}" \
+      --setenv="PATH=${PATH}" \
+      --setenv="TERM=${TERM:-dumb}" \
+      --property=NoNewPrivileges=yes \
+      --property=CapabilityBoundingSet= \
+      --property=ProtectHome=tmpfs \
+      --property=ProtectSystem=strict \
+      --property=PrivateDevices=yes \
+      --property=PrivateTmp=yes \
+      --property=RestrictSUIDSGID=yes \
+      --property=SystemCallFilter=~@mount \
+      --property="BindReadOnlyPaths=${ROOT}" \
+      --property="BindReadOnlyPaths=${PFTERMINAL_INSTALL}" \
+      --property="BindPaths=${REVIEW_STATE}" \
+      --property="BindPaths=${CODEX_AUTH}:${REVIEW_STATE}/auth.json" \
+      "${PFTERMINAL_BIN}" review --uncommitted
     ;;
   core)
     shift
