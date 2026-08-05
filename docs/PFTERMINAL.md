@@ -41,10 +41,26 @@ requires an inspect/change/check/review loop.
 ## Coordinator authentication
 
 The first coordinator uses the host's existing PfTerminal ChatGPT login through
-the pinned `codex-acp` adapter. systemd reads only PfTerminal's `auth.json` and
-materializes it as a private credential under `/run`; the launcher copies that
-credential into an ephemeral, service-private `CODEX_HOME`. The process cannot
-read PfTerminal's vault, configuration, session history or memory store.
+the pinned `codex-acp` adapter. systemd bind-mounts only PfTerminal's
+`auth.json` into an otherwise ephemeral, service-private `CODEX_HOME`. That one
+file is writable because OAuth refresh-token rotation must be shared rather
+than copied into an independent token chain. The process cannot traverse the
+host home or read PfTerminal's vault, configuration, session history or memory
+store. An explicit re-login replaces `auth.json`, so restart the coordinator
+after re-login to attach the new file.
+
+The service's systemd namespace, not a nested Codex sandbox, is the filesystem
+and process boundary. Codex runs in `agent-full-access` mode inside that narrow
+namespace because this LXC blocks the namespace operations used by Codex's
+Linux sandbox. `MemoryDenyWriteExecute` remains enabled. The coordinator pins
+the strongest currently compatible direct-tool model (`gpt-5.5`) and disables
+unrelated Codex apps, plugins, goals, multi-agent tools, memories and web search
+to avoid loading redundant tools or context.
+
+Coordinator replies cross the Buzz boundary after the model turn: the pinned
+ACP patch captures only Codex's `final_answer`, then `buzz-acp` signs and posts
+it in the triggering thread. This avoids giving the signing key to PfTerminal,
+Codex, or ordinary model-launched commands.
 
 This path uses Chad's existing ChatGPT plan instead of a separately billed API
 key. If a later agent needs a provider API key, it must originate in

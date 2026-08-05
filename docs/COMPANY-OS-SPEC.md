@@ -158,6 +158,20 @@ These are the architectural rules reviewers should treat as hardest to change.
 9. **Every outward side effect has an idempotency key and evidence.**
 10. **Every replaceable layer has a conformance test and export path.**
 11. **No new component without a measured reason and removal playbook.**
+12. **Substantive work is a bounded evidence loop.** Each pass must test a
+    changed hypothesis or action, produce evidence and stop on verified success,
+    a documented blocker, an explicit iteration limit or a human gate.
+13. **Prefer the weakest sufficient hypothesis.** Among explanations consistent
+    with the evidence and objective, agents choose the least specific one and
+    strengthen it only when tests eliminate broader alternatives. Weakness is
+    not brevity, and unknowns are not silently converted into assumptions.
+
+Invariant 13 is an operational adaptation of Bennett's "weakest valid
+hypothesis" result in [*The Optimal Choice of Hypothesis Is the Weakest, Not the
+Shortest*](https://arxiv.org/abs/2301.12987). City2 does not claim to compute the
+paper's formal extension cardinality or that its uniform-task assumptions hold
+for company work. It uses the result as a disciplined anti-overfitting heuristic
+inside the evidence loop.
 
 ## 7. Target architecture
 

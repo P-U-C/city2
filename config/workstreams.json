@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "policy": {
+    "task_unit": "one forum thread per task",
+    "default_agent_mode": "coordinator-session",
+    "dedicated_agent_gate": "activate only when workload or authority requires isolation and the per-agent auth/memory boundary is reviewed"
+  },
+  "workstreams": [
+    {
+      "id": "executive",
+      "channel": "control",
+      "state": "active",
+      "agent": "City2 Coordinator",
+      "agent_mode": "coordinator-session",
+      "purpose": "CEO priorities, decisions, approvals, delegation, and stop controls",
+      "task_sources": ["owner directives", "City2 decision log"]
+    },
+    {
+      "id": "post-fiat",
+      "channel": "post-fiat",
+      "state": "proposed",
+      "agent": "Post Fiat Operator",
+      "agent_mode": "coordinator-session",
+      "purpose": "Task Node work, validator operations, and public evidence delivery",
+      "task_sources": ["Task Node", "pft-audit", "pft-validator"]
+    },
+    {
+      "id": "trading",
+      "channel": "trading",
+      "state": "proposed",
+      "agent": "Markets Operator",
+      "agent_mode": "coordinator-session",
+      "purpose": "Mispricing research, paper-book review, and gated execution readiness",
+      "task_sources": ["puc-trading", "paper book", "IBKR readiness"]
+    },
+    {
+      "id": "editorial",
+      "channel": "editorial",
+      "state": "proposed",
+      "agent": "Editorial Operator",
+      "agent_mode": "coordinator-session",
+      "purpose": "Convergence, The Brief, The Signal, The Swell, and distribution",
+      "task_sources": ["editorial", "convergence", "trend corpus"]
+    },
+    {
+      "id": "products",
+      "channel": "products",
+      "state": "proposed",
+      "agent": "Product Operator",
+      "agent_mode": "coordinator-session",
+      "purpose": "Vivi, Wellness Radar, SoftLife, and new product delivery",
+      "task_sources": ["vivi", "wellness-radar", "SoftLife"]
+    },
+    {
+      "id": "integrity",
+      "channel": "integrity",
+      "state": "proposed",
+      "agent": "Integrity Operator",
+      "agent_mode": "coordinator-session",
+      "purpose": "Sybil detection, reward integrity, chain forensics, and scout analytics",
+      "task_sources": ["pf-scout-bot", "validator lens", "chain index"]
+    },
+    {
+      "id": "city2-ops",
+      "channel": "city2-ops",
+      "state": "proposed",
+      "agent": "City2 Infrastructure Operator",
+      "agent_mode": "coordinator-session",
+      "purpose": "City2 runtime, backups, recovery drills, fleet health, and agent admission",
+      "task_sources": ["city2", "RUNBOOK", "fleet manifest"]
+    }
+  ]
+}

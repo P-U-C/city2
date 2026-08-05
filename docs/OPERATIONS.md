@@ -170,9 +170,42 @@ overlay network from turning a backup into an unrestartable relay. Run
 ## Coordinator runtime authentication
 
 Only after coordinator activation is approved, install the pinned adapter and
-start the service. systemd reads only the existing PfTerminal ChatGPT auth file
-and materializes it privately under `/run`; the launcher uses an ephemeral
-`CODEX_HOME`. No provider API key is copied or separately billed.
+start the service. systemd bind-mounts only the existing PfTerminal ChatGPT
+`auth.json` into an otherwise ephemeral `CODEX_HOME`. The narrow mount is
+read-write so Codex's guarded refresh can persist rotated OAuth credentials and
+all PfTerminal/Codex processes observe one current token chain. The service
+still cannot traverse the host home, and no provider API key is copied or
+separately billed. Restart the service after an explicit PfTerminal re-login so
+the mount follows the newly created auth file.
+
+The LXC host cannot run Codex's nested Linux sandbox. The coordinator therefore
+uses ACP `agent-full-access` only *inside* the hardened systemd namespace;
+`ProtectSystem=strict`, `ProtectHome=yes`, and the read-only `/srv/city2` bind
+remain the actual enforcement boundary. `MemoryDenyWriteExecute` stays enabled,
+so the runtime pins `gpt-5.5`, the strongest currently available direct-tool
+model, rather than using a GPT-5.6 model whose required V8 code-mode executor is
+incompatible with that hardening. Unrelated apps, plugins, goals, multi-agent
+tools, web search, and memories are disabled in the ephemeral Codex config to
+keep context and authority narrow.
+
+`BUZZ_ACP_AUTO_PUBLISH_FINAL=true` enables the reviewed signer-side response
+path. Codex returns a final answer; patched `buzz-acp` anchors, signs, and
+publishes it. Do not restore model-driven `buzz messages send` for ordinary
+coordinator replies or configure a signer-bearing MCP process: the model runtime
+intentionally has no signing key.
+
+Buzz clients may omit structured mention tags. The reviewed compatibility
+path uses `BUZZ_ACP_TEXT_MENTION=<exact display name>` and
+`BUZZ_ACP_FOLLOW_OWN_THREADS=true`: only the registered owner's signed event can
+trigger by textual `@name`, and thread continuation additionally requires a
+valid coordinator-signed response in that exact channel/thread.
+
+Buzz Desktop through `0.5.5` filters relay-only agents from mention
+autocomplete and shows only Mac-managed runtimes on its **Agents** page.
+Upstream `014562c0` fixes authorized, exact-channel relay-agent mentions after
+that release. Until a release containing it is installed, use the exact textual
+`@City2 Coordinator`; do not duplicate the coordinator or move its signing key
+to the Mac.
 
 ```bash
 ./scripts/build-agent-adapter.sh

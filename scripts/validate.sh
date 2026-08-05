@@ -96,6 +96,14 @@ python3 scripts/validate_spec.py
 python3 scripts/validate_contracts.py
 
 if command -v systemd-analyze >/dev/null 2>&1; then
+  unit_tmp="$(mktemp -d /tmp/city2-units.XXXXXX)"
+  sed \
+    "s|^ExecStart=/opt/city2/bin/city2-agent-launcher$|ExecStart=${ROOT}/infra/buzz/agents/bin/city2-agent-launcher|" \
+    infra/buzz/agents/systemd/city2-buzz-agent@.service \
+    >"${unit_tmp}/city2-buzz-agent@.service"
+  SYSTEMD_UNIT_PATH="${unit_tmp}:${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
+    systemd-analyze verify city2-buzz-agent@.service
+  rm -rf "${unit_tmp}"
   SYSTEMD_UNIT_PATH="${ROOT}/infra/producer/ai-infra:/lib/systemd/system:/usr/lib/systemd/system" \
     systemd-analyze verify city2-producer-observer-ai-infra.service
 fi
@@ -188,5 +196,43 @@ fi
 grep -q '^unset BUZZ_PRIVATE_KEY$' \
   infra/buzz/agents/bin/city2-codex-acp-launcher ||
   fail "Codex ACP child must not inherit the Nostr private key"
+grep -q '^export NODE_OPTIONS=--jitless$' \
+  infra/buzz/agents/bin/city2-codex-acp-launcher ||
+  fail "Codex ACP must stay compatible with MemoryDenyWriteExecute"
+grep -q '^    export INITIAL_AGENT_MODE=agent-full-access$' \
+  infra/buzz/agents/bin/city2-agent-launcher ||
+  fail "Codex must delegate sandboxing to the hardened systemd namespace"
+# Match the literal default expression in source.
+# shellcheck disable=SC2016
+grep -q '^    export BUZZ_ACP_MODEL="${BUZZ_ACP_MODEL:-gpt-5.5}"$' \
+  infra/buzz/agents/bin/city2-agent-launcher ||
+  fail "coordinator must default to the reviewed direct-tool model"
+grep -q '^BUZZ_ACP_AUTO_PUBLISH_FINAL=true$' \
+  infra/buzz/agents/env/agent.env.example ||
+  fail "coordinator replies must use signer-side final-answer publication"
+grep -q '^BUZZ_ACP_FOLLOW_OWN_THREADS=true$' \
+  infra/buzz/agents/env/agent.env.example ||
+  fail "owner replies to coordinator messages must continue the thread"
+grep -q '^BUZZ_ACP_TEXT_MENTION=' \
+  infra/buzz/agents/env/agent.env.example ||
+  fail "mobile textual mention fallback must be configured"
+grep -q '^BUZZ_ACP_MCP_COMMAND=$' \
+  infra/buzz/agents/env/agent.env.example ||
+  fail "first coordinator must not expose a signer-bearing MCP process"
+grep -q '0001-auto-publish-final-answer.patch' scripts/build-buzz-tools.sh ||
+  fail "Buzz build must apply the reviewed final-answer publisher patch"
+grep -q 'Some("final_answer")' \
+  infra/buzz/patches/0001-auto-publish-final-answer.patch ||
+  fail "Buzz patch must capture only final-answer ACP messages"
+grep -q 'BUZZ_ACP_FOLLOW_OWN_THREADS' \
+  infra/buzz/patches/0001-auto-publish-final-answer.patch ||
+  fail "Buzz patch must verify coordinator thread continuations"
+grep -q '^BindPaths=/home/%i/.codex/auth.json:/run/city2-agent-%i/auth.json$' \
+  infra/buzz/agents/systemd/city2-buzz-agent@.service ||
+  fail "coordinator must share exactly the PfTerminal auth file for OAuth rotation"
+if grep -q '^LoadCredential=codex.auth:' \
+  infra/buzz/agents/systemd/city2-buzz-agent@.service; then
+  fail "coordinator must not clone a rotating OAuth credential"
+fi
 
 echo "validate: PASS"

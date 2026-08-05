@@ -33,12 +33,17 @@ workdir="$(value BUZZ_AGENT_WORKDIR)"
 relay_url="$(value BUZZ_RELAY_URL)"
 private_key="$(value BUZZ_PRIVATE_KEY)"
 owner="$(value BUZZ_ACP_AGENT_OWNER)"
+display_name="$(value BUZZ_ACP_DISPLAY_NAME)"
+text_mention="$(value BUZZ_ACP_TEXT_MENTION)"
+follow_threads="$(value BUZZ_ACP_FOLLOW_OWN_THREADS)"
 agent_command="$(value BUZZ_ACP_AGENT_COMMAND)"
 mcp_command="$(value BUZZ_ACP_MCP_COMMAND)"
 harness="$(value BUZZ_AGENT_HARNESS)"
+model="$(value BUZZ_ACP_MODEL)"
 initial_mode="$(value INITIAL_AGENT_MODE)"
 respond_to="$(value BUZZ_ACP_RESPOND_TO)"
 permission_mode="$(value BUZZ_ACP_PERMISSION_MODE)"
+auto_publish="$(value BUZZ_ACP_AUTO_PUBLISH_FINAL)"
 heartbeat="$(value BUZZ_ACP_HEARTBEAT_INTERVAL)"
 agent_count="$(value BUZZ_ACP_AGENTS)"
 
@@ -47,17 +52,25 @@ agent_count="$(value BUZZ_ACP_AGENTS)"
 [[ "${relay_url}" =~ ^wss?://[^[:space:]]+$ ]] || fail "relay URL is invalid"
 [[ "${private_key}" =~ ^[0-9a-f]{64}$ ]] || fail "agent private key is invalid"
 [[ "${owner}" =~ ^[0-9a-f]{64}$ ]] || fail "owner public key is invalid"
+[[ -n "${display_name}" && "${text_mention}" == "${display_name}" ]] ||
+  fail "textual mention must exactly match the agent display name"
+[[ "${follow_threads}" == "true" ]] ||
+  fail "owner replies to coordinator-authored parents must remain enabled"
 [[ "${agent_command}" == "${INSTALL_ROOT}/bin/city2-codex-acp-launcher" ]] ||
   fail "unexpected agent command"
-[[ "${mcp_command}" == "${INSTALL_ROOT}/bin/buzz-dev-mcp" ]] ||
-  fail "unexpected MCP command"
+[[ -z "${mcp_command}" ]] ||
+  fail "first coordinator must not expose a signer-bearing MCP process"
 [[ "${harness}" == "pfterminal-chatgpt" ]] ||
   fail "first proof must use the reviewed PfTerminal ChatGPT harness"
-[[ "${initial_mode}" == "read-only" ]] ||
-  fail "first proof must use read-only ACP mode"
+[[ "${model}" == "gpt-5.5" ]] ||
+  fail "coordinator must use the reviewed direct-tool model"
+[[ "${initial_mode}" == "agent-full-access" ]] ||
+  fail "Codex must delegate sandboxing to the hardened systemd boundary"
 [[ "${respond_to}" == "owner-only" ]] || fail "first proof must be owner-only"
 [[ "${permission_mode}" == "dont-ask" ]] ||
   fail "first proof must not bypass permission requests"
+[[ "${auto_publish}" == "true" ]] ||
+  fail "coordinator final answers must publish through the harness signer"
 [[ "${heartbeat}" == "0" ]] || fail "heartbeat must remain disabled"
 [[ "${agent_count}" == "1" ]] || fail "first proof must use one agent process"
 
@@ -80,6 +93,6 @@ unset private_key
 echo "agent-preflight: PASS"
 echo "  relay=$(printf '%s' "${relay_url}" | sed -E 's#(wss?://[^/:]+).*#\1#')"
 echo "  workdir=${workdir}"
-echo "  harness=PfTerminal ChatGPT -> pinned codex-acp (systemd credential)"
+echo "  harness=PfTerminal ChatGPT -> pinned codex-acp -> gpt-5.5"
 echo "  gate=owner-only; agents=1; heartbeat=off"
 echo "No agent, model request, or container was started."

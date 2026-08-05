@@ -2,9 +2,16 @@
 set -euo pipefail
 
 # buzz-acp needs the Nostr key to sign relay traffic; the model runtime does
-# not. Prevent the ACP/Codex child and every tool it launches from inheriting
-# that identity secret or the systemd credential-directory handle.
+# not. Prevent the ACP/Codex process and ordinary children from inheriting that
+# identity secret or the systemd credential-directory handle. buzz-acp
+# separately passes the signer only to its configured Buzz MCP broker so that
+# broker can perform signed relay operations.
 unset BUZZ_PRIVATE_KEY
 unset CREDENTIALS_DIRECTORY
+
+# The hardened service keeps MemoryDenyWriteExecute=true. V8's default JIT
+# requires writable executable mappings, so run the Node-based ACP adapter in
+# interpreter-only mode rather than weakening the systemd boundary.
+export NODE_OPTIONS=--jitless
 
 exec /opt/city2/bin/codex-acp
