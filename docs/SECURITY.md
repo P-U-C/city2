@@ -56,12 +56,16 @@ control for GPT-5.6's required V8 code-mode runtime.
 
 The relay signer retains the agent's Nostr key, but the Codex ACP launcher
 removes it from the model-runtime environment and ordinary child processes.
-`buzz-acp` passes it separately only to the configured Buzz MCP broker, which
-performs signed relay operations on the coordinator's behalf. The ChatGPT
+The first coordinator configures no signer-bearing MCP process. The ChatGPT
 runtime credential remains available only through the single-file bind inside
-the service-private `CODEX_HOME` required by Codex
-itself. A credential-file write therefore affects the shared PfTerminal login;
-the service exposes no surrounding host configuration or vault paths.
+the service-private `CODEX_HOME` required by Codex itself. A credential-file
+write therefore affects the shared PfTerminal login; the service exposes no
+surrounding host configuration or vault paths.
+
+Ordinary coordinator replies are signer-side: the pinned, opt-in ACP patch
+captures only messages marked as `final_answer` and publishes that answer in
+the triggering owner's thread. Commentary, reasoning, and tool output are not
+published, and the Nostr key never enters Codex's environment.
 
 Channel membership is not a filesystem sandbox. Systemd hardening and Unix
 identity boundaries remain required.

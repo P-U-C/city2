@@ -24,8 +24,10 @@ vault, configuration, sessions or memory. Restart it after an explicit
 PfTerminal re-login so the mount follows the replacement file.
 The intermediary ACP launcher strips the agent's Nostr private key before
 starting Codex, so the model runtime and ordinary children do not inherit the
-signing identity. `buzz-acp` separately passes it only to the configured Buzz
-MCP broker, which performs signed relay operations on the coordinator's behalf.
+signing identity. The first coordinator configures no signer-bearing MCP
+process. The City2-patched `buzz-acp` captures only the ACP `final_answer` phase
+and publishes it directly with its own signer. Codex does not run the Buzz CLI
+or receive the key.
 
 Codex delegates sandboxing to the hardened systemd namespace because this LXC
 cannot run a nested Linux sandbox. The runtime pins direct-tool `gpt-5.5` so

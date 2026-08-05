@@ -207,6 +207,17 @@ grep -q '^    export INITIAL_AGENT_MODE=agent-full-access$' \
 grep -q '^    export BUZZ_ACP_MODEL="${BUZZ_ACP_MODEL:-gpt-5.5}"$' \
   infra/buzz/agents/bin/city2-agent-launcher ||
   fail "coordinator must default to the reviewed direct-tool model"
+grep -q '^BUZZ_ACP_AUTO_PUBLISH_FINAL=true$' \
+  infra/buzz/agents/env/agent.env.example ||
+  fail "coordinator replies must use signer-side final-answer publication"
+grep -q '^BUZZ_ACP_MCP_COMMAND=$' \
+  infra/buzz/agents/env/agent.env.example ||
+  fail "first coordinator must not expose a signer-bearing MCP process"
+grep -q '0001-auto-publish-final-answer.patch' scripts/build-buzz-tools.sh ||
+  fail "Buzz build must apply the reviewed final-answer publisher patch"
+grep -q 'Some("final_answer")' \
+  infra/buzz/patches/0001-auto-publish-final-answer.patch ||
+  fail "Buzz patch must capture only final-answer ACP messages"
 grep -q '^BindPaths=/home/%i/.codex/auth.json:/run/city2-agent-%i/auth.json$' \
   infra/buzz/agents/systemd/city2-buzz-agent@.service ||
   fail "coordinator must share exactly the PfTerminal auth file for OAuth rotation"

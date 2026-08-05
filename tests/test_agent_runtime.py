@@ -39,6 +39,20 @@ class AgentRuntimeTests(unittest.TestCase):
         self.assertIn('multi_agent = false', launcher)
         self.assertIn('plugins = false', launcher)
 
+        env_example = (ROOT / "infra/buzz/agents/env/agent.env.example").read_text()
+        self.assertIn("BUZZ_ACP_AUTO_PUBLISH_FINAL=true", env_example)
+        self.assertIn("BUZZ_ACP_MCP_COMMAND=\n", env_example)
+        prompt = (ROOT / "infra/buzz/agents/prompts/coordinator.md").read_text()
+        self.assertIn("harness signs and publishes that final answer", prompt)
+
+        build_script = (ROOT / "scripts/build-buzz-tools.sh").read_text()
+        self.assertIn("0001-auto-publish-final-answer.patch", build_script)
+        buzz_patch = (
+            ROOT / "infra/buzz/patches/0001-auto-publish-final-answer.patch"
+        ).read_text()
+        self.assertIn('Some("final_answer")', buzz_patch)
+        self.assertIn("post_final_answer", buzz_patch)
+
         unit = UNIT.read_text()
         for boundary in (
             "ProtectHome=yes",

@@ -57,6 +57,11 @@ the strongest currently compatible direct-tool model (`gpt-5.5`) and disables
 unrelated Codex apps, plugins, goals, multi-agent tools, memories and web search
 to avoid loading redundant tools or context.
 
+Coordinator replies cross the Buzz boundary after the model turn: the pinned
+ACP patch captures only Codex's `final_answer`, then `buzz-acp` signs and posts
+it in the triggering thread. This avoids giving the signing key to PfTerminal,
+Codex, or ordinary model-launched commands.
+
 This path uses Chad's existing ChatGPT plan instead of a separately billed API
 key. If a later agent needs a provider API key, it must originate in
 PfTerminal's encrypted vault and move through a separately reviewed RAM-backed

@@ -188,6 +188,12 @@ incompatible with that hardening. Unrelated apps, plugins, goals, multi-agent
 tools, web search, and memories are disabled in the ephemeral Codex config to
 keep context and authority narrow.
 
+`BUZZ_ACP_AUTO_PUBLISH_FINAL=true` enables the reviewed signer-side response
+path. Codex returns a final answer; patched `buzz-acp` anchors, signs, and
+publishes it. Do not restore model-driven `buzz messages send` for ordinary
+coordinator replies or configure a signer-bearing MCP process: the model runtime
+intentionally has no signing key.
+
 ```bash
 ./scripts/build-agent-adapter.sh
 ./city2 buzz install-agent-tooling

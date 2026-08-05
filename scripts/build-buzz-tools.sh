@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMIT="10d5a26414dc90dc89fd27de74b21e105d4fa622"
 REPO="https://github.com/block/buzz.git"
+PATCH="${ROOT}/infra/buzz/patches/0001-auto-publish-final-answer.patch"
 OUT="${ROOT}/build/bin"
 WORK="$(mktemp -d /tmp/city2-buzz-build.XXXXXX)"
 
@@ -22,6 +23,8 @@ done
 git clone --filter=blob:none "${REPO}" "${WORK}/buzz"
 git -C "${WORK}/buzz" checkout --detach "${COMMIT}"
 [[ "$(git -C "${WORK}/buzz" rev-parse HEAD)" == "${COMMIT}" ]]
+git -C "${WORK}/buzz" apply --check "${PATCH}"
+git -C "${WORK}/buzz" apply "${PATCH}"
 
 cargo build \
   --manifest-path "${WORK}/buzz/Cargo.toml" \

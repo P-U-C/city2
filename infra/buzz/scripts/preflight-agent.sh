@@ -40,6 +40,7 @@ model="$(value BUZZ_ACP_MODEL)"
 initial_mode="$(value INITIAL_AGENT_MODE)"
 respond_to="$(value BUZZ_ACP_RESPOND_TO)"
 permission_mode="$(value BUZZ_ACP_PERMISSION_MODE)"
+auto_publish="$(value BUZZ_ACP_AUTO_PUBLISH_FINAL)"
 heartbeat="$(value BUZZ_ACP_HEARTBEAT_INTERVAL)"
 agent_count="$(value BUZZ_ACP_AGENTS)"
 
@@ -50,8 +51,8 @@ agent_count="$(value BUZZ_ACP_AGENTS)"
 [[ "${owner}" =~ ^[0-9a-f]{64}$ ]] || fail "owner public key is invalid"
 [[ "${agent_command}" == "${INSTALL_ROOT}/bin/city2-codex-acp-launcher" ]] ||
   fail "unexpected agent command"
-[[ "${mcp_command}" == "${INSTALL_ROOT}/bin/buzz-dev-mcp" ]] ||
-  fail "unexpected MCP command"
+[[ -z "${mcp_command}" ]] ||
+  fail "first coordinator must not expose a signer-bearing MCP process"
 [[ "${harness}" == "pfterminal-chatgpt" ]] ||
   fail "first proof must use the reviewed PfTerminal ChatGPT harness"
 [[ "${model}" == "gpt-5.5" ]] ||
@@ -61,6 +62,8 @@ agent_count="$(value BUZZ_ACP_AGENTS)"
 [[ "${respond_to}" == "owner-only" ]] || fail "first proof must be owner-only"
 [[ "${permission_mode}" == "dont-ask" ]] ||
   fail "first proof must not bypass permission requests"
+[[ "${auto_publish}" == "true" ]] ||
+  fail "coordinator final answers must publish through the harness signer"
 [[ "${heartbeat}" == "0" ]] || fail "heartbeat must remain disabled"
 [[ "${agent_count}" == "1" ]] || fail "first proof must use one agent process"
 

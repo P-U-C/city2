@@ -18,6 +18,11 @@ one explicit loopback/Tailscale binding.
 Generated tools and checksums are local output under `build/bin/`; they are not
 committed.
 
+The build verifies and applies
+`patches/0001-auto-publish-final-answer.patch` against that exact commit. The
+opt-in patch captures only ACP `final_answer` messages and lets `buzz-acp`
+publish them with its signer; the model runtime never receives the Nostr key.
+
 The coordinator adapter dependency graph is locked in
 `infra/buzz/agents/codex-acp/package-lock.json`. `scripts/build-agent-adapter.sh`
 installs that graph under ignored `build/codex-acp/`; installation copies it to

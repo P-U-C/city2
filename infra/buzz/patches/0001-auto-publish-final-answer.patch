@@ -1,0 +1,197 @@
+diff --git a/crates/buzz-acp/src/acp.rs b/crates/buzz-acp/src/acp.rs
+index 8a698954..df69a2da 100644
+--- a/crates/buzz-acp/src/acp.rs
++++ b/crates/buzz-acp/src/acp.rs
+@@ -211,6 +211,10 @@ pub struct AcpClient {
+     /// deltas. Both goose and buzz-agent emit this notification; goose gates
+     /// on client capability advertisement, buzz-agent emits unconditionally.
+     goose_usage: UsageTracker,
++    /// Final user-visible answer emitted by Codex for the current prompt.
++    /// Commentary and reasoning chunks are intentionally excluded.
++    final_answer: String,
++    final_answer_message_id: Option<String>,
+ }
+ 
+ /// Recursively merge `overlay` into `base`, with `overlay` winning on scalar/shape
+@@ -550,6 +554,8 @@ impl AcpClient {
+             steering_supported: false,
+             steer_rx: None,
+             goose_usage: UsageTracker::default(),
++            final_answer: String::new(),
++            final_answer_message_id: None,
+         })
+     }
+ 
+@@ -564,6 +570,14 @@ impl AcpClient {
+         self.observer_context = context;
+     }
+ 
++    /// Take the final user-visible answer captured during the current prompt.
++    pub fn take_final_answer(&mut self) -> Option<String> {
++        self.final_answer_message_id = None;
++        let answer = std::mem::take(&mut self.final_answer);
++        let answer = answer.trim().to_string();
++        (!answer.is_empty()).then_some(answer)
++    }
++
+     /// Return a clone of the observer handle, if attached.
+     pub(crate) fn observer_handle(&self) -> Option<ObserverHandle> {
+         self.observer.clone()
+@@ -751,6 +765,8 @@ impl AcpClient {
+         idle_timeout: std::time::Duration,
+         max_duration: std::time::Duration,
+     ) -> Result<StopReason, AcpError> {
++        self.final_answer.clear();
++        self.final_answer_message_id = None;
+         let params = build_prompt_params(session_id, prompt_blocks);
+         let hard_deadline = tokio::time::Instant::now() + max_duration;
+         self.current_hard_deadline = Some(hard_deadline);
+@@ -1715,6 +1731,23 @@ impl AcpClient {
+             "agent_message_chunk" => {
+                 if let Some(text) = update["content"]["text"].as_str() {
+                     tracing::info!(target: "acp::stream", "{text}");
++                    if update
++                        .pointer("/_meta/codex/phase")
++                        .and_then(|value| value.as_str())
++                        == Some("final_answer")
++                    {
++                        let message_id = update
++                            .get("messageId")
++                            .and_then(|value| value.as_str())
++                            .map(str::to_owned);
++                        if self.final_answer_message_id.is_some()
++                            && self.final_answer_message_id != message_id
++                        {
++                            self.final_answer.clear();
++                        }
++                        self.final_answer_message_id = message_id;
++                        self.final_answer.push_str(text);
++                    }
+                 }
+                 false
+             }
+@@ -3435,6 +3468,30 @@ mod tests {
+             .expect("spawn cat as inert client")
+     }
+ 
++    #[tokio::test]
++    async fn final_answer_capture_excludes_commentary_and_is_single_use() {
++        let mut client = spawn_inert_client().await;
++        let update = |phase: &str, message_id: &str, text: &str| {
++            serde_json::json!({
++                "params": {
++                    "update": {
++                        "sessionUpdate": "agent_message_chunk",
++                        "messageId": message_id,
++                        "content": {"type": "text", "text": text},
++                        "_meta": {"codex": {"phase": phase}}
++                    }
++                }
++            })
++        };
++
++        client.handle_session_update(&update("commentary", "comment", "working"));
++        client.handle_session_update(&update("final_answer", "final", "Outcome\n"));
++        client.handle_session_update(&update("final_answer", "final", "Done"));
++
++        assert_eq!(client.take_final_answer().as_deref(), Some("Outcome\nDone"));
++        assert_eq!(client.take_final_answer(), None);
++    }
++
+     /// Build a `session/update` JSON-RPC notification carrying a
+     /// `session_info_update` with the given `_meta.goose.activeRunId` value.
+     /// Pass `None` to omit the `activeRunId` field entirely.
+diff --git a/crates/buzz-acp/src/pool.rs b/crates/buzz-acp/src/pool.rs
+index 158477c0..bce5cbf7 100644
+--- a/crates/buzz-acp/src/pool.rs
++++ b/crates/buzz-acp/src/pool.rs
+@@ -2084,6 +2084,33 @@ pub async fn run_prompt_task(
+         Ok(stop_reason) => {
+             log_stop_reason(&source, &stop_reason);
+ 
++            if auto_publish_final_enabled() {
++                let publish_result = match (&source, batch.as_ref(), agent.acp.take_final_answer())
++                {
++                    (PromptSource::Channel(_), Some(batch), Some(answer)) => {
++                        post_final_answer(&ctx.rest_client, batch, &answer).await
++                    }
++                    (PromptSource::Channel(_), Some(_), None) => {
++                        Err("agent completed without a final answer".to_string())
++                    }
++                    _ => Ok(()),
++                };
++                if let Err(error) = publish_result {
++                    tracing::error!(target: "pool::prompt", "automatic final-answer publish failed: {error}");
++                    send_prompt_result(
++                        &result_tx,
++                        &turn_id,
++                        agent,
++                        source,
++                        PromptOutcome::Error(AcpError::Protocol(format!(
++                            "automatic final-answer publish failed: {error}"
++                        ))),
++                        requeue_batch_if_queue(&ctx, batch),
++                    );
++                    return;
++                }
++            }
++
+             let should_rotate = matches!(
+                 stop_reason,
+                 StopReason::MaxTokens | StopReason::MaxTurnRequests
+@@ -3844,6 +3871,55 @@ pub(crate) async fn post_failure_notice(
+     }
+ }
+ 
++fn auto_publish_final_enabled() -> bool {
++    matches!(
++        std::env::var("BUZZ_ACP_AUTO_PUBLISH_FINAL").as_deref(),
++        Ok("1" | "true" | "yes")
++    )
++}
++
++/// Publish the ACP final answer through the harness signer. The model process
++/// never receives the Nostr key. Owner-facing replies stay flat at the trigger's
++/// thread root, or open a new thread rooted at a top-level trigger.
++async fn post_final_answer(
++    rest: &crate::relay::RestClient,
++    batch: &FlushBatch,
++    content: &str,
++) -> Result<(), String> {
++    let triggering = batch
++        .events
++        .last()
++        .ok_or_else(|| "cannot publish a response for an empty batch".to_string())?;
++    let thread_tags = crate::queue::parse_thread_tags(&triggering.event);
++    let root_id = match thread_tags.root_event_id.as_deref() {
++        Some(root) => nostr::EventId::from_hex(root)
++            .map_err(|error| format!("invalid thread root: {error}"))?,
++        None => triggering.event.id,
++    };
++    let thread_ref = buzz_sdk::ThreadRef {
++        root_event_id: root_id,
++        parent_event_id: root_id,
++    };
++    let author = triggering.event.pubkey.to_hex();
++    let event = buzz_sdk::build_message(
++        batch.channel_id,
++        content,
++        Some(&thread_ref),
++        &[&author],
++        false,
++        &[],
++    )
++    .map_err(|error| format!("build failed: {error}"))?
++    .sign_with_keys(&rest.keys)
++    .map_err(|error| format!("sign failed: {error}"))?;
++
++    tokio::time::timeout(Duration::from_secs(5), rest.submit_event(&event))
++        .await
++        .map_err(|_| "publish timed out".to_string())?
++        .map_err(|error| format!("publish failed: {error}"))?;
++    Ok(())
++}
++
+ /// Best-effort: remove a reaction via a signed kind:5 (NIP-09) deletion event.
+ ///
+ /// Queries kind:7 reactions by our pubkey targeting the event, finds the matching

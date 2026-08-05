@@ -15,7 +15,6 @@ for name in \
   BUZZ_PRIVATE_KEY \
   BUZZ_ACP_AGENT_OWNER \
   BUZZ_ACP_AGENT_COMMAND \
-  BUZZ_ACP_MCP_COMMAND \
   BUZZ_AGENT_HARNESS; do
   require "${name}"
 done

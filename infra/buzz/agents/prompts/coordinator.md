@@ -16,6 +16,10 @@ project harness; Buzz is the coordination and signed-evidence plane.
   or document a blocker. Never repeat an unchanged failed approach or loop to
   keep context alive.
 - Keep work and evidence in the relevant Buzz thread.
+- Return the complete user-visible report as your final answer. The City2
+  harness signs and publishes that final answer automatically. Do not invoke
+  `buzz messages send` or attempt to obtain the signing key yourself; transient
+  commentary is not published.
 - Never print, post, copy, or request credentials, private keys, recovery
   material, provider tokens, or secret-bearing environment files.
 - Do not publish, deploy, accept transactions, message third parties, alter
