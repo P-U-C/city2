@@ -14,6 +14,11 @@ product work. This is the smallest reliable company shape today.
 ./city2 workstreams --plan trading
 ```
 
+The live `control`, `city2`, and `ops` channels already back the `executive`,
+`city2-build`, and `city2-ops` workstreams. Reuse them; do not create redundant
+channels. The remaining business workstreams stay proposed until Chad creates
+their private forum channels with his human owner identity.
+
 ## Add a workstream channel
 
 1. In Buzz, create the private forum channel named by the manifest.

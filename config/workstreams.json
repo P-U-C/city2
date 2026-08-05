@@ -16,6 +16,15 @@
       "task_sources": ["owner directives", "City2 decision log"]
     },
     {
+      "id": "city2-build",
+      "channel": "city2",
+      "state": "active",
+      "agent": "City2 Coordinator",
+      "agent_mode": "coordinator-session",
+      "purpose": "City2 architecture, implementation, review, and rollout decisions",
+      "task_sources": ["city2", "Company OS specification", "GitHub pull requests"]
+    },
+    {
       "id": "post-fiat",
       "channel": "post-fiat",
       "state": "proposed",
@@ -62,9 +71,9 @@
     },
     {
       "id": "city2-ops",
-      "channel": "city2-ops",
-      "state": "proposed",
-      "agent": "City2 Infrastructure Operator",
+      "channel": "ops",
+      "state": "active",
+      "agent": "City2 Coordinator",
       "agent_mode": "coordinator-session",
       "purpose": "City2 runtime, backups, recovery drills, fleet health, and agent admission",
       "task_sources": ["city2", "RUNBOOK", "fleet manifest"]
