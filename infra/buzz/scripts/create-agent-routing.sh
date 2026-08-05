@@ -10,9 +10,10 @@ Usage:
     <agent-display-name> <channel-uuid> [channel-uuid ...]
 
 Creates a public Buzz ACP routing file. It subscribes only to the declared
-channels and admits exact owner-authored textual @mentions when a mobile client
-omits the structured p tag. The patched harness separately verifies owner
-thread continuations against the coordinator-signed immediate parent.
+channels and admits exact owner-authored textual @mentions when a client omits
+the structured p tag. The patched harness separately accepts an owner thread
+continuation only when that exact channel/thread already contains a valid
+coordinator-signed reply.
 EOF
   exit 2
 }

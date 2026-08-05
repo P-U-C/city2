@@ -74,8 +74,8 @@ index 403512a3..c1edbe61 100644
 +    matches!(std::env::var(name).as_deref(), Ok("1" | "true" | "yes"))
 +}
 +
-+/// Match the literal display-name mention mobile clients leave in message text
-+/// when they omit the structured Nostr `p` tag. The caller still applies the
++/// Match the literal display-name mention clients leave in message text when
++/// they omit the structured Nostr `p` tag. The caller still applies the
 +/// cryptographic owner gate before using this as a trigger.
 +fn textual_agent_mention(content: &str, display_name: &str) -> bool {
 +    let display_name = display_name.trim();
@@ -103,8 +103,8 @@ index 403512a3..c1edbe61 100644
 +    textual_agent_mention(&event.content, &display_name)
 +}
 +
-+/// Fail-closed continuation check for mobile thread replies that omit a `p`
-+/// tag. Buzz mobile flattens replies onto the thread root, so accept only when
++/// Fail-closed continuation check for client thread replies that omit a `p`
++/// tag. Some clients flatten replies onto the thread root, so accept only when
 +/// this agent has a valid signed reply in the same channel and thread.
 +async fn replies_to_agent(
 +    event: &nostr::Event,
