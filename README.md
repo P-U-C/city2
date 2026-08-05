@@ -95,8 +95,10 @@ Design acceptance and implementation are not deployment authorization.
   upstream `014562c0` fixes the issue after that release. Manual exact mention
   remains safe until the next Desktop release. The Desktop **Agents** page lists
   Mac-managed runtimes rather than relay agents, so the external coordinator is
-  correctly absent. Thread continuation is implemented and awaiting one fresh
-  macOS Desktop replay check.
+  correctly absent. Thread continuation passed its
+  [live macOS Desktop proof](docs/COORDINATOR-LIVE-EVIDENCE.md): an owner-signed
+  reply without a mention produced a valid coordinator-signed follow-up in the
+  same channel/thread nine seconds later.
 - Company OS: specification version 0.2.0 is accepted after independent review;
   M0 contracts, M1 ledger, M2 memory/context and the version 0.5.0 M3 offline
   adapters, M4 independent review, M5 encrypted local/Testnet archive boundary
