@@ -28,9 +28,15 @@ value is required through a local file or command substitution.
 
 ## Relay exposure
 
-- Bind the relay to exactly one loopback/Tailscale address.
+- Bind direct relay compatibility access to exactly one Tailscale address and
+  the trusted-TLS backend to loopback only.
 - Require authentication token support and relay membership.
-- Do not add Caddy, a public hostname or public TLS ingress in Phase 1.
+- Use only the certificate-enabled node DNS name through Tailscale Serve for
+  mobile HTTPS/WSS. Never enable Funnel or add a public ingress.
+- Preserve unrelated Serve routes: City2 owns one declared non-default port,
+  refuses conflicts and never issues a global Serve reset.
+- Remove that exact persistent route before stopping or removing its loopback
+  ingress so a later process cannot inherit the tailnet-reachable endpoint.
 - Treat relay administrators and host root as able to access stored content;
   do not put secrets in messages even on a private relay.
 

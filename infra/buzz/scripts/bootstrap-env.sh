@@ -12,7 +12,8 @@ The owner argument is the 64-character PUBLIC Nostr key from Buzz Desktop.
 Never copy the owner's private key to this host or into chat.
 
 bind-ip defaults to this host's Tailscale IPv4 address. relay-host defaults to
-bind-ip. This creates .env with mode 0600 and prints no secret values.
+the node's certificate-enabled Tailscale DNS name, with bind-ip as a local-dev
+fallback. This creates .env with mode 0600 and prints no secret values.
 EOF
   exit 2
 }
@@ -27,7 +28,34 @@ if [[ -z "${bind_ip}" ]] && command -v tailscale >/dev/null 2>&1; then
 fi
 [[ -n "${bind_ip}" ]] || usage
 
-relay_host="${3:-${bind_ip}}"
+relay_host="${3:-}"
+if [[ -z "${relay_host}" ]] && command -v jq >/dev/null 2>&1; then
+  tailscale_status="$(tailscale status --json 2>/dev/null || true)"
+  candidate_host="$(printf '%s' "${tailscale_status}" | jq -r '.Self.DNSName // empty' 2>/dev/null)"
+  candidate_host="${candidate_host%.}"
+  if [[ -n "${candidate_host}" ]] && printf '%s' "${tailscale_status}" | jq -e \
+    --arg host "${candidate_host}" 'any(.CertDomains[]?; . == $host)' >/dev/null 2>&1; then
+    relay_host="${candidate_host}"
+  fi
+  unset tailscale_status candidate_host
+fi
+relay_host="${relay_host:-${bind_ip}}"
+
+tls_port=8443
+tls_backend_port=13000
+if [[ "${relay_host}" == *.ts.net ]]; then
+  tls_host="${relay_host}"
+  relay_url="wss://${relay_host}:${tls_port}"
+  pairing_url="wss://${relay_host}:${tls_port}/pair"
+  media_base_url="https://${relay_host}:${tls_port}/media"
+  cors_origins="https://${relay_host}:${tls_port}"
+else
+  tls_host=""
+  relay_url="ws://${relay_host}:3000"
+  pairing_url="ws://${relay_host}:5000/pair"
+  media_base_url="http://${relay_host}:3000/media"
+  cors_origins="http://${relay_host}:3000"
+fi
 
 if [[ -e "${ENV_FILE}" ]]; then
   echo "Refusing to overwrite ${ENV_FILE}" >&2
@@ -53,12 +81,15 @@ BUZZ_PAIRING_PROXY_IMAGE=nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc
 BUZZ_BIND_IP=${bind_ip}
 BUZZ_HTTP_PORT=3000
 BUZZ_PAIRING_PORT=5000
+BUZZ_TLS_HOST=${tls_host}
+BUZZ_TLS_PORT=${tls_port}
+BUZZ_TLS_BACKEND_PORT=${tls_backend_port}
 BUZZ_DOMAIN=${relay_host}
-RELAY_URL=ws://${relay_host}:3000
-BUZZ_PAIRING_RELAY_URL=ws://${relay_host}:5000/pair
-BUZZ_MEDIA_BASE_URL=http://${relay_host}:3000/media
+RELAY_URL=${relay_url}
+BUZZ_PAIRING_RELAY_URL=${pairing_url}
+BUZZ_MEDIA_BASE_URL=${media_base_url}
 BUZZ_MEDIA_SERVER_DOMAIN=${relay_host}
-BUZZ_CORS_ORIGINS=http://${relay_host}:3000
+BUZZ_CORS_ORIGINS=${cors_origins}
 BUZZ_REQUIRE_AUTH_TOKEN=true
 BUZZ_REQUIRE_RELAY_MEMBERSHIP=true
 BUZZ_ALLOW_NIP_OA_AUTH=true
@@ -80,5 +111,6 @@ EOF
 
 chmod 600 "${ENV_FILE}"
 unset relay_key git_hmac postgres_password redis_password s3_access_key s3_secret_key
+unset tls_host tls_port tls_backend_port relay_url pairing_url media_base_url cors_origins
 echo "Created ${ENV_FILE} with mode 0600; secret values were not printed."
 echo "Back it up through an encrypted path before starting Buzz."

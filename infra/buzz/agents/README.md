@@ -72,7 +72,7 @@ infra/buzz/scripts/create-agent-env.sh \
   "$HOME/.config/city2/agent.env" \
   "City2 Coordinator" \
   <OWNER_PUBLIC_NPUB_OR_HEX> \
-  ws://<RELAY_TAILSCALE_HOST>:3000 \
+  wss://<RELAY_TAILSCALE_DNS>:8443 \
   /srv/city2
 
 infra/buzz/scripts/preflight-agent.sh "$HOME/.config/city2/agent.env"

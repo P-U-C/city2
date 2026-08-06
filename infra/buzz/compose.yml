@@ -106,6 +106,41 @@ services:
     networks:
       - buzz-net
 
+  # Tailscale Serve terminates trusted TLS and forwards only to this loopback-
+  # published ingress. It keeps certificate lifecycle outside the containers
+  # while preserving one pinned, hardened HTTP/WebSocket routing boundary.
+  tls-ingress:
+    image: ${BUZZ_PAIRING_PROXY_IMAGE:-nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752}
+    entrypoint: ["nginx", "-g", "daemon off;"]
+    user: "101:101"
+    ports:
+      - "127.0.0.1:${BUZZ_TLS_BACKEND_PORT:-13000}:8080"
+    volumes:
+      - ./tls-ingress.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      relay:
+        condition: service_healthy
+      pairing-relay:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/_health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    read_only: true
+    tmpfs:
+      - /tmp:uid=101,gid=101,mode=1770
+      - /var/cache/nginx:uid=101,gid=101,mode=0750
+      - /var/run:uid=101,gid=101,mode=0750
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - buzz-net
+
   postgres:
     image: postgres:17-alpine
     environment:

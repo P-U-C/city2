@@ -62,6 +62,14 @@ compose() {
     "$@"
 }
 
+tls_ingress_running=false
+if compose ps --status running --services | grep -Fxq tls-ingress; then
+  tls_ingress_running=true
+elif [[ "${CITY2_BACKUP_ALLOW_MISSING_TLS_INGRESS:-false}" != "true" ]]; then
+  echo "backup: tls-ingress is not running" >&2
+  exit 1
+fi
+
 for service in relay pairing-relay pairing-proxy postgres redis minio; do
   compose ps --status running --services | grep -Fxq "${service}" || {
     echo "backup: ${service} is not running" >&2
@@ -74,13 +82,17 @@ dest="${DEST_ROOT}/${stamp}"
 install -d -m 0700 "${dest}"
 
 restart_required=false
+restart_frontends=(pairing-relay pairing-proxy relay)
+if [[ "${tls_ingress_running}" == "true" ]]; then
+  restart_frontends+=(tls-ingress)
+fi
 restart_services() {
   local status=$?
   local restart_failed=false
   trap - EXIT
   if [[ "${restart_required}" == "true" ]]; then
     compose up -d --wait redis minio >/dev/null 2>&1 || restart_failed=true
-    compose up -d --wait pairing-relay pairing-proxy relay >/dev/null 2>&1 || restart_failed=true
+    compose up -d --wait "${restart_frontends[@]}" >/dev/null 2>&1 || restart_failed=true
   fi
   if [[ "${restart_failed}" == "true" ]]; then
     echo "backup: CRITICAL: service restart failed; run ./city2 buzz start" >&2
@@ -132,7 +144,7 @@ EOF
 chmod 0600 "${dest}"/*
 
 compose up -d --wait redis minio >/dev/null
-compose up -d --wait pairing-relay pairing-proxy relay >/dev/null
+compose up -d --wait "${restart_frontends[@]}" >/dev/null
 restart_required=false
 trap - EXIT
 

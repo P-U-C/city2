@@ -10,3 +10,8 @@ services:
     # stateless pairing relay remains internal to the Compose network.
     ports: !override
       - "${BUZZ_BIND_IP:?set BUZZ_BIND_IP}:${BUZZ_PAIRING_PORT:-5000}:8080"
+  tls-ingress:
+    # Tailscale Serve only supports loopback HTTP reverse-proxy targets. This
+    # port is not reachable from the LAN or tailnet directly.
+    ports: !override
+      - "127.0.0.1:${BUZZ_TLS_BACKEND_PORT:-13000}:8080"

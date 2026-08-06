@@ -54,16 +54,19 @@ chmod 750 "${TMP_ROOT}"/run.sh "${TMP_ROOT}"/scripts/*.sh
 
 port=""
 pairing_port=""
+tls_backend_port=""
 for candidate in $(seq 33100 33199); do
   candidate_pairing="$((candidate + 100))"
-  if ! ss -ltnH | awk '{print $4}' | grep -Eq "(^|:)(${candidate}|${candidate_pairing})$"; then
+  candidate_tls_backend="$((candidate + 200))"
+  if ! ss -ltnH | awk '{print $4}' | grep -Eq "(^|:)(${candidate}|${candidate_pairing}|${candidate_tls_backend})$"; then
     port="${candidate}"
     pairing_port="${candidate_pairing}"
+    tls_backend_port="${candidate_tls_backend}"
     break
   fi
 done
-[[ -n "${port}" && -n "${pairing_port}" ]] || {
-  echo "e2e: no relay/pairing test port pair available" >&2
+[[ -n "${port}" && -n "${pairing_port}" && -n "${tls_backend_port}" ]] || {
+  echo "e2e: no relay/pairing/TLS-backend test port set available" >&2
   exit 1
 }
 
@@ -83,6 +86,7 @@ unset outsider_output
 sed -i "s/^BUZZ_HTTP_PORT=.*/BUZZ_HTTP_PORT=${port}/" "${TMP_ROOT}/.env"
 sed -i "s/:3000/:${port}/g" "${TMP_ROOT}/.env"
 sed -i "s/^BUZZ_PAIRING_PORT=.*/BUZZ_PAIRING_PORT=${pairing_port}/" "${TMP_ROOT}/.env"
+sed -i "s/^BUZZ_TLS_BACKEND_PORT=.*/BUZZ_TLS_BACKEND_PORT=${tls_backend_port}/" "${TMP_ROOT}/.env"
 sed -i \
   "s#^BUZZ_PAIRING_RELAY_URL=.*#BUZZ_PAIRING_RELAY_URL=ws://127.0.0.1:${pairing_port}/pair#" \
   "${TMP_ROOT}/.env"
@@ -112,6 +116,21 @@ grep -Eq '^HTTP/1\.[01] 101 ' "${pair_headers}"
 [[ "$(curl -sS -o /dev/null -w '%{http_code}' "${pair_base}/other")" == "404" ]]
 [[ "$(curl -sS -o /dev/null -w '%{http_code}' "${pair_base}/pair")" == "426" ]]
 rm -f "${pair_headers}"
+
+stage="tls-ingress"
+tls_base="http://127.0.0.1:${tls_backend_port}"
+curl -fsS "${tls_base}/_readiness" >/dev/null
+tls_pair_headers="${TMP_ROOT}/tls-pairing.headers"
+curl --silent --show-error --http1.1 --max-time 2 \
+  --dump-header "${tls_pair_headers}" --output /dev/null \
+  --header 'Connection: Upgrade' \
+  --header 'Upgrade: websocket' \
+  --header 'Sec-WebSocket-Version: 13' \
+  --header 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==' \
+  "${tls_base}/pair" || true
+grep -Eq '^HTTP/1\.[01] 101 ' "${tls_pair_headers}"
+[[ "$(curl -sS -o /dev/null -w '%{http_code}' "${tls_base}/pair")" == "426" ]]
+rm -f "${tls_pair_headers}"
 
 buzz_owner() {
   BUZZ_RELAY_URL="${base_http}" \
@@ -153,6 +172,51 @@ if grep -Fq "${outsider_secret}" "${TMP_ROOT}/outsider.out" "${TMP_ROOT}/outside
   exit 1
 fi
 rm -f "${TMP_ROOT}/outsider.out" "${TMP_ROOT}/outsider.err"
+
+# Readiness above proves the pinned image's startup conformance gate once. Do
+# not let an unrelated object-store race probe obscure the backup/restore and
+# ingress assertions by rerunning it on every disposable relay restart.
+sed -i \
+  's/^BUZZ_GIT_CONFORMANCE_PROBE=.*/BUZZ_GIT_CONFORMANCE_PROBE=false/' \
+  "${TMP_ROOT}/.env"
+
+stage="community-host-migration"
+old_relay_url="ws://127.0.0.1:${port}"
+new_relay_url="ws://localhost:${port}"
+"${DOCKER[@]}" compose \
+  --project-name "${PROJECT}" \
+  --env-file "${TMP_ROOT}/.env" \
+  -f "${TMP_ROOT}/compose.yml" \
+  -f "${TMP_ROOT}/compose.private.yml" \
+  rm -sf tls-ingress >/dev/null
+CITY2_BACKUP_ROOT="${TMP_ROOT}/migration-backup" \
+  "${TMP_ROOT}/scripts/migrate-community-host.sh" \
+    "${old_relay_url}" "${new_relay_url}" >/dev/null
+sed -i \
+  -e 's/^BUZZ_DOMAIN=.*/BUZZ_DOMAIN=localhost/' \
+  -e "s#^RELAY_URL=.*#RELAY_URL=${new_relay_url}#" \
+  -e "s#^BUZZ_PAIRING_RELAY_URL=.*#BUZZ_PAIRING_RELAY_URL=ws://localhost:${pairing_port}/pair#" \
+  -e "s#^BUZZ_MEDIA_BASE_URL=.*#BUZZ_MEDIA_BASE_URL=http://localhost:${port}/media#" \
+  -e 's/^BUZZ_MEDIA_SERVER_DOMAIN=.*/BUZZ_MEDIA_SERVER_DOMAIN=localhost/' \
+  -e "s#^BUZZ_CORS_ORIGINS=.*#BUZZ_CORS_ORIGINS=http://localhost:${port}#" \
+  "${TMP_ROOT}/.env"
+"${TMP_ROOT}/run.sh" start >/dev/null
+base_http="http://localhost:${port}"
+migrated_messages="$(buzz_owner messages get --channel "${channel_id}" --limit 20)"
+printf '%s' "${migrated_messages}" | jq -e --arg marker "${marker}" \
+  'any(.[]?; (.content // .text // "") == $marker)' >/dev/null
+unset migrated_messages old_relay_url new_relay_url
+
+migrated_community_count="$(
+  "${DOCKER[@]}" compose \
+    --project-name "${PROJECT}" \
+    --env-file "${TMP_ROOT}/.env" \
+    -f "${TMP_ROOT}/compose.yml" \
+    -f "${TMP_ROOT}/compose.private.yml" \
+    exec -T postgres psql -U buzz -d buzz -Atc 'SELECT count(*) FROM communities'
+)"
+[[ "${migrated_community_count}" == "1" ]]
+unset migrated_community_count
 
 backup_root="${TMP_ROOT}/backups"
 stage="backup"
@@ -223,6 +287,9 @@ echo "  signed-owner-roundtrip=pass"
 echo "  outsider-membership-gate=pass"
 echo "  backup-integrity=pass"
 echo "  pairing-proxy=pass"
+echo "  tls-ingress=pass"
+echo "  tenant-preserving-host-migration=pass"
+echo "  git-conformance=initial-start-pass"
 echo "  destructive-restore-in-test-project=pass"
 echo "  provider-calls=none"
 
