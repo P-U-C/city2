@@ -90,8 +90,10 @@ The pinned single-relay bundle contains:
 - MinIO/S3 media storage
 - Git storage volume
 
-The only published container port is the relay, bound to one explicit
-loopback/Tailscale address. Caddy and public ports 80/443 are outside this repo.
+Transition-only relay and pairing ports bind to one explicit Tailscale address.
+A second digest-pinned Nginx ingress binds only to loopback; Tailscale Serve
+terminates trusted HTTPS/WSS on a separate tailnet-only port and forwards to
+that ingress. No City2 endpoint uses Funnel or a public ingress.
 
 ## Workspace model
 

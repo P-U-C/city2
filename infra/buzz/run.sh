@@ -56,21 +56,45 @@ case "${1:-help}" in
     ./scripts/preflight.sh
     detect_docker
     compose up -d --wait
+    relay_url="$(sed -n 's/^RELAY_URL=//p' .env)"
+    if [[ "${relay_url}" == wss://* ]]; then
+      ./scripts/tailscale-serve.sh apply
+    fi
+    unset relay_url
     ;;
   stop)
     require_env
     detect_docker
+    relay_url="$(sed -n 's/^RELAY_URL=//p' .env)"
+    if [[ "${relay_url}" == wss://* ]]; then
+      ./scripts/tailscale-serve.sh remove
+    fi
+    unset relay_url
     compose stop
     ;;
   down)
     require_env
     detect_docker
+    relay_url="$(sed -n 's/^RELAY_URL=//p' .env)"
+    if [[ "${relay_url}" == wss://* ]]; then
+      ./scripts/tailscale-serve.sh remove
+    fi
+    unset relay_url
     compose down
     ;;
   status|ps)
     require_env
     detect_docker
     compose ps
+    relay_url="$(sed -n 's/^RELAY_URL=//p' .env)"
+    if [[ "${relay_url}" == wss://* ]]; then
+      if compose ps --status running --services | grep -Fxq tls-ingress; then
+        ./scripts/tailscale-serve.sh status
+      else
+        ./scripts/tailscale-serve.sh absent
+      fi
+    fi
+    unset relay_url
     ;;
   logs)
     require_env
@@ -111,6 +135,12 @@ case "${1:-help}" in
   e2e)
     exec ./scripts/e2e-disposable.sh
     ;;
+  configure-private-tls)
+    exec ./scripts/configure-private-tls.sh
+    ;;
+  private-tls-status)
+    exec ./scripts/tailscale-serve.sh status
+    ;;
   install-agent-tooling)
     exec ./scripts/install-agent-tooling.sh
     ;;
@@ -132,6 +162,8 @@ Usage: ./city2 buzz <command>
   backup [destination]      Create an aligned backup
   verify-backup <path>      Verify backup integrity
   e2e                       Run and destroy a disposable relay proof
+  configure-private-tls     Set trusted Tailscale HTTPS values without printing them
+  private-tls-status        Verify the exact tailnet-only TLS route
   install-agent-tooling     Install tools only; never enable/start a service
 EOF
     ;;

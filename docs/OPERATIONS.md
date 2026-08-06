@@ -140,14 +140,38 @@ behind a digest-pinned, non-root, read-only Nginx proxy on the dedicated private
 pairing port. Only exact `/pair` WebSocket upgrades reach the sidecar; the proxy
 enforces connection limits and HTTP timeouts. The sidecar has no host port or
 Linux capabilities. The main relay advertises the
-proxied URL through NIP-11. Both externally reachable ports bind only to
-`BUZZ_BIND_IP`; keep the Mac and iPhone on the same Tailscale network. In Buzz
-Desktop, **Settings → Mobile** should therefore open a pairing session instead
-of falling back to the main relay's unsupported `/pair` path. Pairing does not
-move the human private key onto this host.
-Existing installations must add `BUZZ_PAIRING_PORT` and
-`BUZZ_PAIRING_RELAY_URL` using `.env.example` before the next stack start;
-preflight fails closed when the advertised URL and private binding differ.
+proxied URL through NIP-11. Mobile release builds also reject imported relay
+credentials unless the URL uses trusted HTTPS. City2 therefore routes both the
+main relay and exact `/pair` through a second loopback-only Nginx ingress, with
+Tailscale Serve terminating HTTPS/WSS on a tailnet-only port. Certificate
+renewal stays with Tailscale; City2 does not enable Funnel and does not replace
+the unrelated Serve route on the default HTTPS port.
+
+Keep the Mac and iPhone connected to the same tailnet. Existing installations
+upgrade once, without printing the private endpoint or any secret:
+
+```bash
+./city2 buzz configure-private-tls
+./city2 buzz start
+./city2 buzz private-tls-status
+```
+
+`configure-private-tls` takes an aligned backup, stops only the relay/TLS
+ingress, removes the exact persistent Serve route before releasing its loopback
+backend, and transactionally moves the existing Buzz community host mapping
+before it rewrites `RELAY_URL`. A failed migration restores the prior services
+and any previously present exact route. It refuses an existing destination community
+instead of creating an empty parallel workspace. If a previously interrupted
+upgrade left only Buzz's bootstrap rows at the destination, the explicit
+`migrate-community-host.sh --repair-empty-target` recovery path validates and
+removes only that exact bootstrap shape. Routine upgrades never use repair mode.
+
+Then reconnect Buzz Desktop to the HTTPS/WSS community endpoint before opening
+**Settings → Mobile**. Desktop transfers its active workspace URL in the
+encrypted pairing payload; a workspace still opened through the transition
+`ws://` address will keep transferring an HTTP URL even though `/pair` itself
+uses WSS. Pairing transfers the Desktop identity directly to the phone and does
+not move the human private key onto this host.
 
 ## Start/stop
 
@@ -162,6 +186,14 @@ These are explicit runtime changes:
 
 `down` removes containers/network but preserves named volumes. It is not used
 for normal stops.
+
+`start` verifies the declared Tailscale DNS/certificate state, starts the
+loopback ingress, and idempotently converges only City2's exact Serve port.
+It refuses an existing conflicting route rather than overwriting it.
+`stop` and `down` remove that exact route before releasing the loopback backend;
+they fail closed rather than removing a conflicting route owned elsewhere.
+`status` requires the exact route while the ingress is running and verifies its
+absence when the stack is stopped.
 
 ## Backups
 
@@ -180,6 +212,12 @@ now requires the configured `BUZZ_BIND_IP` to be assigned locally; otherwise it
 fails closed and leaves every service running. This prevents a logged-out
 overlay network from turning a backup into an unrestartable relay. Run
 `./city2 buzz preflight` first when network state is uncertain.
+
+The pinned relay's Git object-store conformance probe is an initial storage
+admission gate, not a required check on every restart. After a successful first
+start and disposable E2E, production may set
+`BUZZ_GIT_CONFORMANCE_PROBE=false`; this avoids an upstream race retry delaying
+routine backup recovery while preserving the recorded initial proof.
 
 ## Coordinator runtime authentication
 
@@ -248,7 +286,8 @@ missing or duplicate name without replacing the last known-good routing file.
 ./city2 buzz e2e
 ```
 
-This uses a random Compose project and loopback port, verifies a signed private
+This uses a random Compose project and loopback ports, verifies both private
+ingress paths, a signed private
 message and outsider rejection, backs up, destroys all test state, restores it,
 verifies the message and removes the disposable state. It makes no model call.
 

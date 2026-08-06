@@ -36,6 +36,7 @@ required=(
   docs/PRODUCER-SHADOW-EVIDENCE.md
   docs/EXPANSION.md
   docs/M7-DEMOTION-EVIDENCE.md
+  docs/MOBILE-TLS-EVIDENCE.md
   docs/MIGRATION.md
   docs/PFTERMINAL.md
   docs/SECURITY.md
@@ -75,6 +76,10 @@ required=(
   infra/buzz/compose.yml
   infra/buzz/compose.private.yml
   infra/buzz/pairing-proxy.conf
+  infra/buzz/tls-ingress.conf
+  infra/buzz/scripts/configure-private-tls.sh
+  infra/buzz/scripts/migrate-community-host.sh
+  infra/buzz/scripts/tailscale-serve.sh
   infra/buzz/.env.example
   infra/buzz/agents/codex-acp/package.json
   infra/buzz/agents/codex-acp/package-lock.json
@@ -130,13 +135,16 @@ fi
 if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
   tmp="$(mktemp -d /tmp/city2-compose.XXXXXX)"
   cp infra/buzz/compose.yml infra/buzz/compose.private.yml \
-    infra/buzz/pairing-proxy.conf "${tmp}/"
+    infra/buzz/pairing-proxy.conf infra/buzz/tls-ingress.conf "${tmp}/"
   cat >"${tmp}/.env" <<'EOF'
 BUZZ_IMAGE=ghcr.io/block/buzz@sha256:a2b59030b29242adb0783a05cbabd63f51518fdfe7b724845a68f77adab7e1f9
 BUZZ_PAIRING_PROXY_IMAGE=nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
 BUZZ_BIND_IP=127.0.0.1
 BUZZ_HTTP_PORT=3000
 BUZZ_PAIRING_PORT=5000
+BUZZ_TLS_HOST=
+BUZZ_TLS_PORT=8443
+BUZZ_TLS_BACKEND_PORT=13000
 BUZZ_DOMAIN=127.0.0.1
 RELAY_URL=ws://127.0.0.1:3000
 BUZZ_PAIRING_RELAY_URL=ws://127.0.0.1:5000/pair

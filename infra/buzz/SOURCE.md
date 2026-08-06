@@ -13,13 +13,23 @@
 
 `compose.yml` is the upstream `deploy/compose/compose.yml` at that commit.
 `compose.private.yml` replaces the relay's all-interface port publication with
-one explicit loopback/Tailscale binding.
+one explicit Tailscale binding and publishes the trusted-TLS backend only on
+loopback.
 
 The pairing extension runs the Buzz image's `buzz-pair-relay` binary only on
 the internal Compose network. The separately pinned official Nginx image is a
 non-root, read-only path and timeout boundary; only its private host binding is
 advertised to clients. Updating either image digest requires source review and
 the disposable E2E.
+
+The same pinned Nginx image provides a second loopback-only ingress for the main
+relay plus exact `/pair`. Host-managed Tailscale Serve terminates a publicly
+trusted certificate on a non-public tailnet port and proxies only to that
+loopback ingress. City2 never invokes Funnel, never resets unrelated Serve
+routes and refuses a conflicting route instead of replacing it.
+Existing deployments migrate the durable community host in one locked database
+transaction before starting under the new authority; the disposable E2E proves
+that signed content survives and no parallel tenant is created.
 
 `scripts/build-buzz-tools.sh` clones this exact commit and builds `buzz`,
 `buzz-acp`, `buzz-agent`, `buzz-dev-mcp` and `buzz-admin` with `cargo --locked`.
